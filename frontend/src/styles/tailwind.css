@@ -1,3 +1,71 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    /* Primary Brand Colors */
+    --primary-orange: #ff6600;
+    --primary-orange-dark: #ff531a;
+    --primary-red: #dd3c3c;
+
+    /* Text Colors */
+    --text-primary: #000000;
+    --text-secondary: #2a2622;
+    --text-muted: #928c87;
+    --text-white: #ffffff;
+    --text-white-85: #ffffffe5;
+
+    /* Background Colors */
+    --bg-white: #ffffff;
+    --bg-white-87: #ffffff87;
+    --bg-white-99: #ffffff99;
+    --bg-overlay-dark: #0000007f;
+    --bg-overlay-gray: #1e1e1eb2;
+    --bg-light-cream: #f8f7f74c;
+
+    /* Border Colors */
+    --border-light: #e8e6e3;
+    --border-light-87: #e8e6e387;
+    --border-white: #ffffff;
+
+    /* Typography Variables */
+    --font-size-xs: 11px;
+    --font-size-sm: 12px;
+    --font-size-base: 13px;
+    --font-size-md: 15px;
+    --font-size-lg: 16px;
+    --font-size-xl: 17px;
+    --font-size-2xl: 18px;
+    --font-size-3xl: 21px;
+    --font-size-4xl: 22px;
+    --font-size-5xl: 35px;
+    --font-size-6xl: 59px;
+
+    /* Font Weight Variables */
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-bold: 700;
+
+    /* Spacing Variables */
+    --spacing-xs: 6px;
+    --spacing-sm: 8px;
+    --spacing-md: 12px;
+    --spacing-lg: 16px;
+    --spacing-xl: 24px;
+    --spacing-2xl: 32px;
+    --spacing-3xl: 48px;
+
+    /* Border Radius Variables */
+    --radius-sm: 5px;
+    --radius-md: 10px;
+    --radius-lg: 12px;
+
+    /* Component Specific Variables */
+    --header-bg: var(--bg-white-99);
+    --button-primary-bg: var(--primary-orange);
+    --button-secondary-bg: var(--bg-white);
+    --quantity-input-bg: var(--bg-white);
+    --quantity-input-border: var(--border-light);
+  }
+}
