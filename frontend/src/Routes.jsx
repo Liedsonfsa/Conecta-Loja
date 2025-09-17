@@ -1,9 +1,9 @@
 import React from "react";
-import { BrowserRouter, Routes as RouterRoutes, Route } from "react-router-dom";
-import ScrollToTop from "components/ScrollToTop";
-import ErrorBoundary from "components/ErrorBoundary";
-import CustomerStorefront from './pages/customer-storefront';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
+// Import page components
+import HomePage from './pages/Home';
+import MenuPage from './pages/Menu';
 /**
  * Routes - Componente principal de configuração de roteamento da aplicação
  *
@@ -19,18 +19,15 @@ import CustomerStorefront from './pages/customer-storefront';
  * // Renderizado no App.jsx
  * <Routes />
  */
-const Routes = () => {
+const AppRoutes = () => {
   return (
-    <BrowserRouter>
-      <ErrorBoundary>
-      <ScrollToTop />
-      <RouterRoutes>
-        {/* Define your route here */}
-        <Route path="/" element={<CustomerStorefront />} />
-      </RouterRoutes>
-      </ErrorBoundary>
-    </BrowserRouter>
+    <Router>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/menu" element={<MenuPage />} />
+      </Routes>
+    </Router>
   );
 };
 
-export default Routes;
+export default AppRoutes;
