@@ -74,15 +74,7 @@ const HeroSection = () => {
               />
             </div>
           </div>
-
-          {/* Scroll Down Icon */}
-          <div className="mt-12">
-            <img 
-              src="/images/img_component_2_white_a700_24x24.svg" 
-              alt="Scroll down" 
-              className="w-6 h-6"
-            />
-          </div>
+          
         </div>
       </div>
     </section>
