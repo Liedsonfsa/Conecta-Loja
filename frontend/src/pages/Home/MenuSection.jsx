@@ -79,7 +79,7 @@ const MenuSection = () => {
     <section className="w-full bg-[#f8f7f74c]">
       <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-[60px]">
         {/* Section Header */}
-        <div className="flex flex-col gap-[6px] items-center mb-11 w-full sm:w-[80%] md:w-[60%] lg:w-[34%] mx-auto">
+        <div className="flex flex-col gap-[8px] items-center mb-11 w-full sm:w-[90%] md:w-[70%] lg:w-[50%] mx-auto">
           <h2 className="text-[24px] sm:text-[28px] md:text-[32px] lg:text-[35px] font-bold leading-[28px] sm:leading-[32px] md:leading-[38px] lg:leading-[44px] text-center text-[#2a2622] font-['Inter']">
             <span>Nosso </span>
             <span 
@@ -89,15 +89,13 @@ const MenuSection = () => {
               Cardápio
             </span>
           </h2>
-          <p className="text-[16px] font-normal leading-[28px] text-center text-[#928c87] font-['Inter']">
-            Escolha entre nossos deliciosos pratos preparados com ingredientes frescos e
-            <br />
-            muito amor
+          <p className="text-[16px] font-normal leading-[28px] text-center text-[#928c87] font-['Inter'] max-w-none">
+            Escolha entre nossos deliciosos pratos preparados com ingredientes frescos e muito amor
           </p>
         </div>
 
         {/* Category Filter Buttons */}
-        <div className="flex flex-wrap justify-center items-center gap-2 mb-20 w-full sm:w-[80%] md:w-[60%] lg:w-[24%] mx-auto">
+        <div className="flex flex-wrap justify-center items-center gap-4 mb-20 w-full max-w-none mx-auto">
           {categories?.map((category) => (
             <Button
               key={category}
@@ -113,7 +111,7 @@ const MenuSection = () => {
               border_border={selectedCategory === category ? "none" : "1px solid #e8e6e3"}
               border_border_radius="10px"
               effect_box_shadow={selectedCategory === category ? "0px 2px 8px #2a262219" : "none"}
-              padding="10px 16px"
+              padding="12px 24px"
               layout_width="auto"
               layout_gap="0"
               position="relative"
