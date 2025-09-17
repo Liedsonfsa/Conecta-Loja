@@ -8,7 +8,7 @@ export const creteUser = async (data: {
     password: string,
     contact: string
 }) => {
-    return await prisma.users.create({
+    return await prisma.usuario.create({
         data: {
             name: data.name,
             email: data.email,

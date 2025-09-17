@@ -14,11 +14,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model users {
-  id              Int   @id @default(autoincrement())
-  name            String
-  email           String
-  password        String
-  contact         String
+model usuario {
+  id      Int    @id @default(autoincrement())
+  name    String
+  email   String
+  password String
+  contact String
 }
 
+model funcionario {
+  id       Int    @id @default(autoincrement())
+  name     String
+  email    String
+  password String
+  role     String
+
+  lojaId   Int
+  loja     store @relation(fields: [lojaId], references: [id])
+}
+
+model store {
+  id            Int           @id @default(autoincrement())
+  name          String
+  contact       String
+  email         String
+  description   String
+  image         String?
+
+  funcionarios  funcionario[] // UMA loja pode ter VÁRIOS funcionários
+}
