@@ -1,6 +1,29 @@
 import React from "react";
 import Icon from "./AppIcon";
 
+/**
+ * ErrorBoundary - Componente para capturar e tratar erros JavaScript em componentes filhos
+ *
+ * Este componente previne que erros em componentes filhos quebrem toda a aplicação,
+ * mostrando uma interface de erro amigável ao usuário.
+ *
+ * @class
+ * @extends {React.Component}
+ *
+ * @example
+ * // Uso básico envolvendo componentes que podem falhar
+ * <ErrorBoundary>
+ *   <MeuComponenteQuePodeFalhar />
+ * </ErrorBoundary>
+ *
+ * @example
+ * // Uso com múltiplos componentes
+ * <ErrorBoundary>
+ *   <Cabecalho />
+ *   <ConteudoPrincipal />
+ *   <Rodape />
+ * </ErrorBoundary>
+ */
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);

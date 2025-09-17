@@ -1,3 +1,12 @@
+/**
+ * Configuração do Vite para o projeto Conecta-Loja
+ *
+ * Esta configuração define:
+ * - Plugins: React, TypeScript paths e component tagger
+ * - Build: diretório de saída 'build' e limite de chunk
+ * - Server: porta 4028, host 0.0.0.0, porta estrita
+ */
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tsconfigPaths from "vite-tsconfig-paths";
@@ -16,5 +25,5 @@ export default defineConfig({
     port: "4028",
     host: "0.0.0.0",
     strictPort: true,
-  }
+  },
 });
