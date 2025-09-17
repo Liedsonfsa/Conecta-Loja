@@ -1,0 +1,61 @@
+:root {
+  --color-border: rgba(0, 0, 0, 0.1);
+  --color-input: #ffffff;
+  --color-ring: #2563eb;
+  --color-background: #f9fafb;
+  --color-foreground: #1f2937;
+  --color-primary: #2563eb;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #059669;
+  --color-secondary-foreground: #ffffff;
+  --color-destructive: #dc2626;
+  --color-destructive-foreground: #ffffff;
+  --color-muted: #f3f4f6;
+  --color-muted-foreground: #6b7280;
+  --color-accent: #f3f4f6;
+  --color-accent-foreground: #1f2937;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #1f2937;
+  --color-card: #ffffff;
+  --color-card-foreground: #1f2937;
+  --color-success: #10b981;
+  --color-success-foreground: #ffffff;
+  --color-warning: #f59e0b;
+  --color-warning-foreground: #ffffff;
+  --color-error: #ef4444;
+  --color-error-foreground: #ffffff;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Inter;
+}
+  
+* {
+    box-sizing: border-box;
+    line-height: normal;
+    font-family: inherit;
+    margin: unset;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: #0f172a;
+    --color-foreground: #f1f5f9;
+    --color-border: rgba(255, 255, 255, 0.1);
+    --color-input: #1e293b;
+    --color-ring: #3b82f6;
+    --color-primary: #3b82f6;
+    --color-secondary: #10b981;
+    --color-destructive: #ef4444;
+    --color-muted: #1e293b;
+    --color-muted-foreground: #94a3b8;
+    --color-accent: #1e293b;
+    --color-accent-foreground: #f1f5f9;
+    --color-popover: #1e293b;
+    --color-popover-foreground: #f1f5f9;
+    --color-card: #1e293b;
+    --color-card-foreground: #f1f5f9;
+  }
+}
