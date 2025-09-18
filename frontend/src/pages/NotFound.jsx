@@ -3,10 +3,23 @@
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 
-// Mudei o nome para NotFoundPage para consistência
+/**
+ * Componente de página 404 - Not Found
+ *
+ * Este componente é renderizado quando o usuário tenta acessar uma rota que não existe.
+ * Exibe uma mensagem de erro amigável e um link para voltar à página inicial.
+ *
+ * @returns {JSX.Element} Componente React que renderiza a página 404
+ */
 const NotFoundPage = () => {
     const location = useLocation();
 
+    /**
+     * Hook useEffect para logging de erros 404
+     *
+     * Registra no console um erro sempre que o usuário acessa uma rota inexistente,
+     * incluindo o caminho que foi tentado acessar. Útil para debugging e monitoramento.
+     */
     useEffect(() => {
         console.error("404 Error: User attempted to access non-existent route:", location.pathname);
     }, [location.pathname]);
