@@ -2,6 +2,62 @@ import React from 'react';
 import { cva } from 'class-variance-authority';
 import { twMerge } from 'tailwind-merge';
 
+/**
+ * Button - Componente de botão reutilizável e altamente customizável
+ *
+ * Componente versátil que suporta múltiplas variantes, tamanhos e estilos,
+ * utilizando class-variance-authority (CVA) para gerenciamento de variantes
+ * e Tailwind CSS para estilização.
+ *
+ * @param {Object} props - Propriedades do componente
+ * @param {string} [props.text="Adicionar ao Carrinho"] - Texto do botão
+ * @param {string} [props.variant="primary"] - Variante visual: "primary" | "secondary" | "outline"
+ * @param {string} [props.size="medium"] - Tamanho do botão: "small" | "medium" | "large"
+ * @param {boolean} [props.disabled=false] - Se o botão está desabilitado
+ * @param {Function} [props.onClick] - Função chamada ao clicar no botão
+ * @param {string} [props.className] - Classes CSS adicionais
+ * @param {Object} [props.leftImage] - Imagem à esquerda com propriedades src, width, height
+ * @param {string} [props.type="button"] - Tipo do botão HTML
+ *
+ * @param {Object} [props.text_font_size] - Tamanho da fonte do texto (inline style)
+ * @param {string} [props.text_font_family] - Família da fonte
+ * @param {string} [props.text_font_weight] - Peso da fonte
+ * @param {string} [props.text_line_height] - Altura da linha
+ * @param {string} [props.text_text_align] - Alinhamento do texto
+ * @param {string} [props.text_color] - Cor do texto
+ * @param {string} [props.fill_background] - Cor de fundo (inline style)
+ * @param {string} [props.fill_background_color] - Cor de fundo alternativa
+ * @param {string} [props.border_border] - Estilo da borda
+ * @param {string} [props.border_border_radius] - Raio da borda
+ * @param {string} [props.effect_box_shadow] - Sombra do botão
+ * @param {string} [props.layout_width] - Largura do layout
+ * @param {string} [props.padding] - Padding interno
+ * @param {string} [props.position] - Posicionamento CSS
+ * @param {string} [props.layout_gap] - Espaçamento entre elementos
+ *
+ * @returns {JSX.Element} Elemento button renderizado
+ *
+ * @example
+ * // Botão primário simples
+ * <Button text="Clique aqui" variant="primary" onClick={handleClick} />
+ *
+ * // Botão com imagem à esquerda
+ * <Button
+ *   text="Adicionar ao Carrinho"
+ *   leftImage={{ src: "/cart-icon.png", width: 20, height: 20 }}
+ *   variant="primary"
+ * />
+ *
+ * // Botão outline customizado
+ * <Button
+ *   text="Cancelar"
+ *   variant="outline"
+ *   size="large"
+ *   text_color="#666"
+ *   border_border="2px solid #ccc"
+ * />
+ */
+
 const buttonClasses = cva(
   'inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed',
   {

@@ -4,6 +4,20 @@ import Header from '../../components/common/Header';
 import HeroSection from './HeroSection';
 import MenuSection from './MenuSection';
 
+/**
+ * Home - Página inicial da aplicação Conecta-Loja
+ *
+ * Página principal que apresenta a landing page da aplicação,
+ * contendo todas as seções principais para atrair e engajar os usuários.
+ * Inclui metadados SEO para otimização de motores de busca.
+ *
+ * @returns {JSX.Element} Página inicial completa com todas as seções
+ *
+ * @example
+ * // Renderizada automaticamente pelo sistema de roteamento
+ * <Route path="/" element={<Home />} />
+ */
+
 const Home = () => {
   return (
     <>

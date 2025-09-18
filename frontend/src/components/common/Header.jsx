@@ -2,6 +2,23 @@ import React, { useState } from "react";
 import Button from "../ui/Button";
 import { FiPhone, FiMapPin, FiUser, FiMenu, FiX } from "react-icons/fi";
 
+/**
+ * Header - Componente de cabeçalho principal da aplicação
+ *
+ * Exibe o cabeçalho responsivo da aplicação Conecta-Loja contendo:
+ * - Logo da empresa
+ * - Menu de navegação para desktop
+ * - Informações de contato (telefone e localização)
+ * - Botões de ação (entrar e carrinho)
+ * - Menu mobile responsivo
+ *
+ * @returns {JSX.Element} Componente de cabeçalho renderizado
+ *
+ * @example
+ * // Uso em uma página
+ * <Header />
+ */
+
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 

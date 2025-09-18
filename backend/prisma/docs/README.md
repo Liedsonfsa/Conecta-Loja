@@ -1,6 +1,6 @@
 # Guia de Configuração do Banco de Dados - Conecta-Loja
 
-Este documento explica como configurar e trabalhar com o banco de dados PostgreSQL hospedado no Render quando você clona este projeto.
+Este documento explica como configurar e trabalhar com o banco de dados PostgreSQL hospedado no Neon quando você clona este projeto.
 
 ## 📋 Pré-requisitos
 
@@ -8,7 +8,7 @@ Antes de começar, certifique-se de ter instalado:
 
 - Node.js (versão 18 ou superior)
 - npm ou yarn
-- Conta no Render (para acessar o banco de dados)
+- Conta no Neon (para acessar o banco de dados)
 
 ## 🔧 Configuração Inicial
 
@@ -25,13 +25,13 @@ npm install
 
 ### 2. Configuração das Variáveis de Ambiente
 
-Crie um arquivo `.env` na raiz do diretório `backend` com a URL de conexão do banco de dados hospedado no Render:
+Crie um arquivo `.env` na raiz do diretório `backend` com a URL de conexão do banco de dados hospedado no Neon:
 
 ```env
 DATABASE_URL="postgresql://usuario:senha@host:porta/database?sslmode=require"
 ```
 
-**⚠️ Importante:** A URL do banco de dados deve ser obtida no painel do Render. Ela terá o formato acima, mas com suas credenciais específicas.
+**⚠️ Importante:** A URL do banco de dados deve ser obtida no painel do Neon. Ela terá o formato acima, mas com suas credenciais específicas.
 
 ### 3. Verificação da Conexão
 
@@ -102,7 +102,7 @@ npx prisma migrate deploy
    git clone <url-do-repositorio>
    cd conecta-loja/backend
    npm install
-   cp .env.example .env  # Configure a DATABASE_URL
+   cp .env.example .env  # Configure a DATABASE_URL do Neon
    ```
 
 2. **Aplique as migrations existentes:**
@@ -181,8 +181,8 @@ npx prisma db execute --file <sql-file>
 ### Erro de Conexão
 
 - Verifique se a `DATABASE_URL` está correta
-- Confirme se o banco no Render está ativo
-- Verifique se não há restrições de IP no Render
+- Confirme se o banco no Neon está ativo
+- Verifique se não há restrições de IP no Neon
 
 ### Migration Pendente
 
@@ -209,7 +209,7 @@ npx prisma generate
 
 - [Documentação do Prisma](https://www.prisma.io/docs)
 - [Guia de Migrations](https://www.prisma.io/docs/concepts/components/prisma-migrate)
-- [Render Database Docs](https://docs.render.com/databases)
+- [Neon Database Docs](https://neon.tech/docs/)
 
 ---
 

@@ -1,6 +1,21 @@
 import React, { useState } from 'react';
 import Button from '../../components/ui/Button';
 
+/**
+ * MenuSection - Seção de apresentação do cardápio na página inicial
+ *
+ * Exibe uma prévia do cardápio com filtros por categoria,
+ * mostrando itens organizados em grid responsivo. Permite
+ * ao usuário explorar diferentes categorias de produtos
+ * antes de acessar a página completa do menu.
+ *
+ * @returns {JSX.Element} Seção de menu com filtros e grid de produtos
+ *
+ * @example
+ * // Usado na página inicial após a seção hero
+ * <MenuSection />
+ */
+
 const MenuSection = () => {
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [quantities, setQuantities] = useState({});
