@@ -1,4 +1,5 @@
 import express from "express";
+import routes from './routes';
 
 const app = express();
 
@@ -13,5 +14,7 @@ app.get("/", (req, res) => {
 app.get("/health", (req, res) => {
   res.json({ status: "ok", message: "Servidor rodando corretamente" });
 });
+
+app.use('/api', routes);
 
 export default app;
