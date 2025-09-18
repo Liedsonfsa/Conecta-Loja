@@ -1,6 +1,20 @@
 import React from 'react';
 import Button from '../../components/ui/Button';
 
+/**
+ * HeroSection - Seção principal/hero da página inicial
+ *
+ * Apresenta a mensagem principal da aplicação com fundo atrativo,
+ * título chamativo, descrição e botões de ação para direcionar
+ * o usuário para as funcionalidades principais (ver cardápio e fazer pedido).
+ *
+ * @returns {JSX.Element} Seção hero com fundo, título, descrição e botões
+ *
+ * @example
+ * // Usado na página inicial
+ * <HeroSection />
+ */
+
 const HeroSection = () => {
   return (
     <section 

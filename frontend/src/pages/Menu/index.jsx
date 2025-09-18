@@ -2,6 +2,21 @@ import React from 'react';
 import { Helmet } from 'react-helmet';
 import MenuGrid from './MenuGrid';
 
+/**
+ * Menu - Página completa do cardápio da aplicação
+ *
+ * Página dedicada à apresentação completa do cardápio com
+ * todos os itens organizados em grid, incluindo controles
+ * de quantidade e seleção de produtos. Otimizada para SEO
+ * com metadados específicos para motores de busca.
+ *
+ * @returns {JSX.Element} Página completa do menu com grid de produtos
+ *
+ * @example
+ * // Acessada via rota /menu
+ * <Route path="/menu" element={<Menu />} />
+ */
+
 const Menu = () => {
   return (
     <>

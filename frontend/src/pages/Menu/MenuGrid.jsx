@@ -1,6 +1,21 @@
 import React, { useState } from 'react';
 import Button from '../../components/ui/Button';
 
+/**
+ * MenuGrid - Componente de grade para exibição completa do cardápio
+ *
+ * Exibe todos os itens do menu em formato de grid responsivo,
+ * com controles de quantidade individuais para cada item,
+ * estados de seleção e disponibilidade. Inclui componentes
+ * auxiliares para controle de quantidade e cards de produto.
+ *
+ * @returns {JSX.Element} Grade completa do menu com controles interativos
+ *
+ * @example
+ * // Usado na página de menu
+ * <MenuGrid />
+ */
+
 const MenuGrid = () => {
   const [quantities, setQuantities] = useState({});
 
