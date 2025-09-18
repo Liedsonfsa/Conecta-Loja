@@ -6,9 +6,11 @@
  */
 import { Router } from 'express';
 import userRoutes from './user';
+import employeeRoutes from './employee';
 
 const router = Router();
 
 router.use('/user', userRoutes);
+router.use('/employee', employeeRoutes);
 
 export default router;
