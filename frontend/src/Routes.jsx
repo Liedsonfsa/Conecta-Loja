@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 // Import page components
 import HomePage from './pages/Home';
 import MenuPage from './pages/Menu';
+import NotFoundPage from './pages/NotFound';
 /**
  * Routes - Componente principal de configuração de roteamento da aplicação
  *
@@ -20,14 +21,15 @@ import MenuPage from './pages/Menu';
  * <Routes />
  */
 const AppRoutes = () => {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/menu" element={<MenuPage />} />
-      </Routes>
-    </Router>
-  );
+    return (
+        <Router>
+            <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/menu" element={<MenuPage />} />
+                <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+        </Router>
+    );
 };
 
 export default AppRoutes;
