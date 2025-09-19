@@ -43,3 +43,42 @@ model store {
 
   funcionarios  funcionario[] // UMA loja pode ter VÁRIOS funcionários
 }
+
+// Enum for discount type
+enum DiscountType {
+  PERCENTAGE
+  FIXED_VALUE
+}
+
+// Product category model
+model category {
+  id              Int       @id @default(autoincrement())
+  name            String    @unique
+  activeProducts  Int       @default(0)  // Active products counter
+  totalValue      Decimal   @default(0)  @db.Decimal(10, 2) // Total value of products in stock
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  products        product[] // One category can have MANY products
+
+  @@map("categoria")
+}
+
+// Product model
+model product {
+  id              Int           @id @default(autoincrement())
+  name            String
+  description     String
+  price           Decimal       @db.Decimal(10, 2) // Unit price
+  categoryId      Int
+  available       Boolean       @default(true) // Flag if product is available
+  image           String?       // Image URL or path
+  discount        Decimal?      @db.Decimal(10, 2) // Discount value
+  discountType    DiscountType? // Applied discount type
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  category        category      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@map("produto")
+}
