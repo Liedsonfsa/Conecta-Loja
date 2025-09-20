@@ -47,7 +47,7 @@ const Header = () => {
             <div className="flex items-center space-x-6 text-sm text-gray-500">
               <div className="flex items-center space-x-1">
                 <FiPhone className="w-4 h-4" />
-                <span>(85) 99999-9999</span>
+                <span>(89) 99999-9999</span>
               </div>
               <div className="flex items-center space-x-1">
                 <FiMapPin className="w-4 h-4" />
