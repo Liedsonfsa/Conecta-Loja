@@ -2,6 +2,9 @@ import { PrismaClient } from "../generated/prisma";
 
 const prisma = new PrismaClient();
 
+/**
+ * Repositório responsável pelas operações de banco de dados relacionadas aos funcionários
+ */
 export class EmployeeRepository {
     /**
    * Cria um novo funcionário no banco de dados
