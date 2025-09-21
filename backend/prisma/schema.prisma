@@ -15,11 +15,15 @@ datasource db {
 }
 
 model usuario {
-  id      Int    @id @default(autoincrement())
-  name    String
-  email   String
-  password String
-  contact String
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(100) // Limite de 100 caracteres
+  email     String   @unique @db.VarChar(255) // Email único e limite de 255 caracteres
+  password  String   @db.VarChar(255) // Hash da senha (bcrypt)
+  contact   String   @db.VarChar(20) // Contato/telefone com limite de 20 caracteres
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("usuarios")
 }
 
 model funcionario {
