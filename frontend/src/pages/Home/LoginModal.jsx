@@ -6,53 +6,108 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User, Mail, Lock, Phone, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { authService } from "@/api/auth";
 
 const LoginModal = ({ children, onLogin }) => {
   const [open, setOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const email = formData.get('email');
-    
-    // Simulação de login
-    const mockUser = {
-      id: '1',
-      name: 'João Silva',
-      email: email,
-      phone: '(11) 99999-9999',
-      address: 'Rua das Flores, 123 - São Paulo, SP'
-    };
-    
-    onLogin(mockUser);
-    setOpen(false);
-    toast({
-      title: "Login realizado!",
-      description: `Bem-vindo, ${mockUser.name}!`,
-    });
+    setIsLoading(true);
+
+    try {
+      const formData = new FormData(e.target);
+      const email = formData.get('email');
+      const password = formData.get('password');
+
+      const response = await authService.login(email, password);
+
+      // Armazenar o token no localStorage
+      if (response.data && response.data.token) {
+        console.log('💾 Salvando token no localStorage:', response.data.token.substring(0, 20) + '...');
+        localStorage.setItem('authToken', response.data.token);
+      } else {
+        console.log('⚠️ Nenhum token recebido na resposta do login');
+      }
+
+      // Chamar onLogin com os dados do usuário
+      if (response.data && response.data.user) {
+        onLogin(response.data.user);
+      }
+
+      setOpen(false);
+      toast({
+        title: "Login realizado!",
+        description: `Bem-vindo, ${response.data.user.name}!`,
+      });
+    } catch (error) {
+      console.error('Erro no login:', error);
+      toast({
+        title: "Erro no login",
+        description: error.message || "Email ou senha incorretos",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const name = formData.get('name');
-    
-    // Simulação de cadastro
-    const mockUser = {
-      id: '1',
-      name: name,
-      email: formData.get('email'),
-      phone: formData.get('phone'),
-      address: 'Não informado'
-    };
-    
-    onLogin(mockUser);
-    setOpen(false);
-    toast({
-      title: "Cadastro realizado!",
-      description: `Bem-vindo, ${mockUser.name}!`,
-    });
+    setIsLoading(true);
+
+    try {
+      const formData = new FormData(e.target);
+      const userData = {
+        name: formData.get('name'),
+        email: formData.get('email'),
+        password: formData.get('password'),
+        contact: formData.get('phone'), // O backend espera 'contact' para telefone
+      };
+
+      // Debug: log dos dados sendo enviados
+      console.log('Dados sendo enviados para cadastro:', userData);
+
+      // Verificar se todos os campos estão preenchidos
+      if (!userData.name || !userData.email || !userData.password || !userData.contact) {
+        throw new Error('Todos os campos são obrigatórios');
+      }
+
+      const response = await authService.register(userData);
+
+      // Após cadastro bem-sucedido, fazer login automático
+      const loginResponse = await authService.login(userData.email, userData.password);
+
+      // Armazenar o token no localStorage
+      if (loginResponse.data && loginResponse.data.token) {
+        console.log('💾 Salvando token no localStorage (cadastro):', loginResponse.data.token.substring(0, 20) + '...');
+        localStorage.setItem('authToken', loginResponse.data.token);
+      } else {
+        console.log('⚠️ Nenhum token recebido na resposta do login automático após cadastro');
+      }
+
+      // Chamar onLogin com os dados do usuário
+      if (loginResponse.data && loginResponse.data.user) {
+        onLogin(loginResponse.data.user);
+      }
+
+      setOpen(false);
+      toast({
+        title: "Cadastro realizado!",
+        description: `Bem-vindo, ${response.user.name}!`,
+      });
+    } catch (error) {
+      console.error('Erro no cadastro:', error);
+      toast({
+        title: "Erro no cadastro",
+        description: error.message || "Erro ao criar conta. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -103,8 +158,8 @@ const LoginModal = ({ children, onLogin }) => {
                 </div>
               </div>
               
-              <Button type="submit" className="w-full">
-                Entrar
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Entrando..." : "Entrar"}
               </Button>
             </form>
           </TabsContent>
@@ -169,8 +224,8 @@ const LoginModal = ({ children, onLogin }) => {
                 </div>
               </div>
               
-              <Button type="submit" className="w-full">
-                Criar conta
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? "Criando conta..." : "Criar conta"}
               </Button>
             </form>
           </TabsContent>
