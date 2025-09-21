@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Button from "../ui/Button";
 import LoginModal from "../../pages/Home/LoginModal";
 import { FiPhone, FiMapPin, FiUser, FiMenu, FiX } from "react-icons/fi";
+import { authService } from "../../api/auth";
 
 /**
  * Header - Componente de cabeçalho principal da aplicação
@@ -23,6 +24,54 @@ import { FiPhone, FiMapPin, FiUser, FiMenu, FiX } from "react-icons/fi";
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [apiOffline, setApiOffline] = useState(false);
+
+  // Verificar se há token válido quando o componente monta
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      const token = localStorage.getItem('authToken');
+      console.log('🔍 Verificando token no localStorage:', token ? 'Token encontrado' : 'Nenhum token');
+
+      if (token) {
+        try {
+          console.log('📡 Verificando validade do token na API...');
+          setApiOffline(false); // Reset offline status
+          const response = await authService.verifyToken();
+          console.log('✅ Resposta da verificação:', response);
+
+          if (response.user) {
+            console.log('👤 Usuário válido, definindo estado:', response.user);
+            setUser(response.user);
+          } else {
+            console.log('⚠️ Token válido mas sem dados do usuário');
+          }
+        } catch (error) {
+          console.log('❌ Erro na verificação do token:', error.message);
+
+          // Só remover token se for erro de autenticação (401), não erro de conexão
+          if (error.message.includes('Sessão expirada') || error.message.includes('Token inválido')) {
+            console.log('🗑️ Token inválido/expirado, removendo do localStorage');
+            localStorage.removeItem('authToken');
+            setApiOffline(false);
+          } else if (error.message.includes('Erro de conexão') || error.message.includes('Verifique sua internet')) {
+            console.log('🔄 API offline - mantendo token para tentar novamente quando API estiver disponível');
+            console.log('⚠️ Modo offline ativado - usuário pode fazer login quando API voltar');
+            setApiOffline(true);
+            // Mantém o token salvo mas usuário fica null
+          } else {
+            console.log('❓ Erro desconhecido, removendo token por segurança');
+            localStorage.removeItem('authToken');
+            setApiOffline(false);
+          }
+        }
+      } else {
+        console.log('ℹ️ Nenhum token encontrado, usuário permanece deslogado');
+        setApiOffline(false);
+      }
+    };
+
+    checkAuthStatus();
+  }, []);
 
   const handleLogin = (userData) => {
     setUser(userData);
@@ -30,6 +79,26 @@ const Header = () => {
 
   const handleLogout = () => {
     setUser(null);
+    setApiOffline(false);
+    localStorage.removeItem('authToken');
+  };
+
+  // Função para tentar reconectar quando API volta
+  const tryReconnect = async () => {
+    const token = localStorage.getItem('authToken');
+    if (token && apiOffline) {
+      try {
+        console.log('🔄 Tentando reconectar...');
+        const response = await authService.verifyToken();
+        if (response.user) {
+          console.log('✅ Reconexão bem-sucedida!');
+          setUser(response.user);
+          setApiOffline(false);
+        }
+      } catch (error) {
+        console.log('❌ Reconexão falhou:', error.message);
+      }
+    }
   };
 
   return (
@@ -77,6 +146,15 @@ const Header = () => {
                     Sair
                   </button>
                 </div>
+              ) : apiOffline ? (
+                <button
+                  onClick={tryReconnect}
+                  className="flex items-center space-x-2 px-3 py-2 hover:bg-gray-50 rounded-lg transition-colors"
+                  title="Clique para tentar reconectar"
+                >
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm text-gray-500">Conectando...</span>
+                </button>
               ) : (
                 <LoginModal onLogin={handleLogin}>
                   <button className="flex items-center space-x-1 px-3 py-2 text-gray-700 hover:text-orange-500 transition-colors">
@@ -155,6 +233,15 @@ const Header = () => {
                       Sair
                     </button>
                   </div>
+                ) : apiOffline ? (
+                  <button
+                    onClick={tryReconnect}
+                    className="flex items-center space-x-2 hover:bg-gray-50 rounded-lg transition-colors px-2 py-1"
+                    title="Clique para tentar reconectar"
+                  >
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                    <span className="text-sm text-gray-500">Conectando...</span>
+                  </button>
                 ) : (
                   <LoginModal onLogin={handleLogin}>
                     <button className="flex items-center space-x-2 text-gray-700 hover:text-orange-500 transition-colors">
