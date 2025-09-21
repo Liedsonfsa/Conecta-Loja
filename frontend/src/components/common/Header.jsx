@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import Button from "../ui/Button";
-import LoginModal from "../LoginModal";
-
+import LoginModal from "../../pages/Home/LoginModal";
 import { FiPhone, FiMapPin, FiUser, FiMenu, FiX } from "react-icons/fi";
 
 /**
@@ -32,7 +31,6 @@ const Header = () => {
   const handleLogout = () => {
     setUser(null);
   };
-
 
   return (
     <header className="w-full bg-white shadow-md">
@@ -72,7 +70,7 @@ const Header = () => {
               {user ? (
                 <div className="flex items-center space-x-3">
                   <span className="text-gray-700">Olá, {user.name}</span>
-                  <button 
+                  <button
                     onClick={handleLogout}
                     className="text-gray-700 hover:text-orange-500 transition-colors"
                   >
@@ -150,7 +148,7 @@ const Header = () => {
                 {user ? (
                   <div className="flex flex-col space-y-2">
                     <span className="text-gray-700">Olá, {user.name}</span>
-                    <button 
+                    <button
                       onClick={handleLogout}
                       className="text-left text-gray-700 hover:text-orange-500 transition-colors"
                     >

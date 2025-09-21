@@ -3,6 +3,13 @@ import * as React from "react";
 const TOAST_LIMIT = 1;
 const TOAST_REMOVE_DELAY = 1000000;
 
+const ToasterToast = {
+  id: "",
+  title: null,
+  description: null,
+  action: null,
+};
+
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
   UPDATE_TOAST: "UPDATE_TOAST",
@@ -13,9 +20,15 @@ const actionTypes = {
 let count = 0;
 
 function genId() {
-  count = (count + 1) % Number.MAX_VALUE;
+  count = (count + 1) % Number.MAX_SAFE_INTEGER;
   return count.toString();
 }
+
+const ActionType = actionTypes;
+
+const State = {
+  toasts: [],
+};
 
 const toastTimeouts = new Map();
 
@@ -54,6 +67,8 @@ export const reducer = (state, action) => {
     case "DISMISS_TOAST": {
       const { toastId } = action;
 
+      // ! Side effects ! - This could be extracted into a dismissToast() action,
+      // but I'll keep it here for simplicity
       if (toastId) {
         addToRemoveQueue(toastId);
       } else {

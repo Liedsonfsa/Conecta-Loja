@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import Header from '../../components/common/Header';
+import Header from '../../components/ui/Header';
 import Sidebar from '../../components/ui/Sidebar';
-import MetricsCard from '../../components/MetricsCard';
-import AnalyticsChart from '../../components/AnalyticsChart';
-import QuickActionTiles from '../../components/QuickActionTiles';
+import MetricsCard from './components/MetricsCard';
+import AnalyticsChart from './components/AnalyticsChart';
+import QuickActionTiles from './components/QuickActionTiles';
 import Icon from '../../components/AppIcon';
-import Button from '../../components/ui/Button';
+import Button from '../../components/ui/ButtonDash';
 
 const Dashboard = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -28,16 +28,16 @@ const Dashboard = () => {
   const metricsData = [
     {
       title: "Vendas Hoje",
-      value: "R$ 0,00",
-      change: "0%",
+      value: "R$ 2.847,50",
+      change: "+12,5%",
       changeType: "positive",
       icon: "TrendingUp",
       color: "success"
     },
     {
       title: "Pedidos Pendentes",
-      value: "0",
-      change: "0",
+      value: "8",
+      change: "+3",
       changeType: "positive",
       icon: "Clock",
       color: "warning"
@@ -45,15 +45,15 @@ const Dashboard = () => {
     {
       title: "Produtos Populares",
       value: "Pizza Margherita",
-      change: "0% das vendas",
+      change: "35% das vendas",
       changeType: "neutral",
       icon: "Star",
       color: "primary"
     },
     {
       title: "Fluxo de Caixa",
-      value: "R$ 0,00",
-      change: "0%",
+      value: "R$ 12.450,00",
+      change: "+8,2%",
       changeType: "positive",
       icon: "DollarSign",
       color: "success"

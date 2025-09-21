@@ -1,71 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Primary Brand Colors */
-    --primary-orange: #ff6600;
-    --primary-orange-dark: #ff531a;
-    --primary-red: #dd3c3c;
+    /* Core Colors */
+    --color-background: #FAFAFA; /* gray-50 */
+    --color-foreground: #1F2937; /* gray-800 */
+    --color-border: rgba(0, 0, 0, 0.1); /* black with opacity */
+    --color-input: #FFFFFF; /* white */
+    --color-ring: #2563EB; /* blue-600 */
+    
+    /* Card Colors */
+    --color-card: #FFFFFF; /* white */
+    --color-card-foreground: #1F2937; /* gray-800 */
+    --color-popover: #FFFFFF; /* white */
+    --color-popover-foreground: #1F2937; /* gray-800 */
+    
+    /* Muted Colors */
+    --color-muted: #F3F4F6; /* gray-100 */
+    --color-muted-foreground: #6B7280; /* gray-500 */
+    
+    /* Primary Colors */
+    --color-primary: #2563EB; /* blue-600 */
+    --color-primary-foreground: #FFFFFF; /* white */
+    
+    /* Secondary Colors */
+    --color-secondary: #059669; /* emerald-600 */
+    --color-secondary-foreground: #FFFFFF; /* white */
+    
+    /* Destructive Colors */
+    --color-destructive: #DC2626; /* red-600 */
+    --color-destructive-foreground: #FFFFFF; /* white */
+    
+    /* Accent Colors */
+    --color-accent: #F3F4F6; /* gray-100 */
+    --color-accent-foreground: #1F2937; /* gray-800 */
+    
+    /* Success Colors */
+    --color-success: #10B981; /* emerald-500 */
+    --color-success-foreground: #FFFFFF; /* white */
+    
+    /* Warning Colors */
+    --color-warning: #F59E0B; /* amber-500 */
+    --color-warning-foreground: #FFFFFF; /* white */
+    
+    /* Error Colors */
+    --color-error: #EF4444; /* red-500 */
+    --color-error-foreground: #FFFFFF; /* white */
+  }
 
-    /* Text Colors */
-    --text-primary: #000000;
-    --text-secondary: #2a2622;
-    --text-muted: #928c87;
-    --text-white: #ffffff;
-    --text-white-85: #ffffffe5;
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
 
-    /* Background Colors */
-    --bg-white: #ffffff;
-    --bg-white-87: #ffffff87;
-    --bg-white-99: #ffffff99;
-    --bg-overlay-dark: #0000007f;
-    --bg-overlay-gray: #1e1e1eb2;
-    --bg-light-cream: #f8f7f74c;
+@layer components {
+  .shadow-elevation-1 {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+  }
+  
+  .shadow-elevation-2 {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  .shadow-elevation-3 {
+    box-shadow: 0 20px 25px rgba(0, 0, 0, 0.1);
+  }
+  
+  .transition-micro {
+    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .transition-layout {
+    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .hover-scale {
+    transform: scale(1);
+  }
+  
+  .hover-scale:hover {
+    transform: scale(0.98);
+  }
+  
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
 
-    /* Border Colors */
-    --border-light: #e8e6e3;
-    --border-light-87: #e8e6e387;
-    --border-white: #ffffff;
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
 
-    /* Typography Variables */
-    --font-size-xs: 11px;
-    --font-size-sm: 12px;
-    --font-size-base: 13px;
-    --font-size-md: 15px;
-    --font-size-lg: 16px;
-    --font-size-xl: 17px;
-    --font-size-2xl: 18px;
-    --font-size-3xl: 21px;
-    --font-size-4xl: 22px;
-    --font-size-5xl: 35px;
-    --font-size-6xl: 59px;
-
-    /* Font Weight Variables */
-    --font-weight-light: 300;
-    --font-weight-normal: 400;
-    --font-weight-bold: 700;
-
-    /* Spacing Variables */
-    --spacing-xs: 6px;
-    --spacing-sm: 8px;
-    --spacing-md: 12px;
-    --spacing-lg: 16px;
-    --spacing-xl: 24px;
-    --spacing-2xl: 32px;
-    --spacing-3xl: 48px;
-
-    /* Border Radius Variables */
-    --radius-sm: 5px;
-    --radius-md: 10px;
-    --radius-lg: 12px;
-
-    /* Component Specific Variables */
-    --header-bg: var(--bg-white-99);
-    --button-primary-bg: var(--primary-orange);
-    --button-secondary-bg: var(--bg-white);
-    --quantity-input-bg: var(--bg-white);
-    --quantity-input-border: var(--border-light);
+@media (prefers-reduced-motion: reduce) {
+  .transition-micro,
+  .transition-layout {
+    transition: none;
   }
 }
