@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import Button from "../ui/Button";
+import LoginModal from "../LoginModal";
+
 import { FiPhone, FiMapPin, FiUser, FiMenu, FiX } from "react-icons/fi";
 
 /**
@@ -21,6 +23,16 @@ import { FiPhone, FiMapPin, FiUser, FiMenu, FiX } from "react-icons/fi";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
+
+  const handleLogin = (userData) => {
+    setUser(userData);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+  };
+
 
   return (
     <header className="w-full bg-white shadow-md">
@@ -57,10 +69,24 @@ const Header = () => {
 
             {/* Action Buttons */}
             <div className="flex items-center space-x-3">
-              <button className="flex items-center space-x-1 px-3 py-2 text-gray-700 hover:text-orange-500 transition-colors">
-                <FiUser className="w-4 h-4" />
-                <span>Entrar</span>
-              </button>
+              {user ? (
+                <div className="flex items-center space-x-3">
+                  <span className="text-gray-700">Olá, {user.name}</span>
+                  <button 
+                    onClick={handleLogout}
+                    className="text-gray-700 hover:text-orange-500 transition-colors"
+                  >
+                    Sair
+                  </button>
+                </div>
+              ) : (
+                <LoginModal onLogin={handleLogin}>
+                  <button className="flex items-center space-x-1 px-3 py-2 text-gray-700 hover:text-orange-500 transition-colors">
+                    <FiUser className="w-4 h-4" />
+                    <span>Entrar</span>
+                  </button>
+                </LoginModal>
+              )}
 
               <Button
                 text="Carrinho"
@@ -121,10 +147,24 @@ const Header = () => {
 
               {/* Action Buttons */}
               <div className="flex flex-col space-y-3 pt-3 border-t border-gray-100">
-                <button className="flex items-center space-x-2 text-gray-700 hover:text-orange-500 transition-colors">
-                  <FiUser className="w-4 h-4" />
-                  <span>Entrar</span>
-                </button>
+                {user ? (
+                  <div className="flex flex-col space-y-2">
+                    <span className="text-gray-700">Olá, {user.name}</span>
+                    <button 
+                      onClick={handleLogout}
+                      className="text-left text-gray-700 hover:text-orange-500 transition-colors"
+                    >
+                      Sair
+                    </button>
+                  </div>
+                ) : (
+                  <LoginModal onLogin={handleLogin}>
+                    <button className="flex items-center space-x-2 text-gray-700 hover:text-orange-500 transition-colors">
+                      <FiUser className="w-4 h-4" />
+                      <span>Entrar</span>
+                    </button>
+                  </LoginModal>
+                )}
 
                 <Button
                   text="Carrinho"
