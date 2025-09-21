@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Icon from '../AppIcon';
-import Button from './Button';
+import Button from './ButtonDash';
 
 const Sidebar = ({ isCollapsed = false, onToggle, className = '' }) => {
   const location = useLocation();
@@ -79,72 +79,70 @@ const Sidebar = ({ isCollapsed = false, onToggle, className = '' }) => {
   }, []);
 
   const renderNavigationItem = (item, isChild = false) => {
-  const isActive = isActivePath(item?.path);
-  const notificationCount = getNotificationCount(item?.path);
+    const isActive = isActivePath(item?.path);
+    const notificationCount = getNotificationCount(item?.path);
 
-  return (
-    <div key={item?.path} className={isChild && !isCollapsed ? 'ml-6' : ''}>
-      <Button
-        variant={isActive ? "default" : "ghost"}
-        onClick={() => handleNavigation(item?.path)}
-        aria-current={isActive ? "page" : undefined}
-        aria-label={item?.label}
-        className={`w-full flex items-center transition-all duration-200 ease-in-out
-          ${isCollapsed ? 'justify-center h-14 px-0' : 'justify-start h-14 px-4'} 
-          mb-2 rounded-lg 
-          ${isActive ? 'bg-primary text-primary-foreground shadow' : 'hover:bg-muted'}`}
-        title={isCollapsed ? `${item?.label} - ${item?.description}` : ''}
-      >
-        <div className="relative flex items-center">
-          <Icon
-            name={item?.icon}
-            size={24}
-            className={`transition-colors duration-200 
-              ${isActive ? 'text-primary-foreground' : 'text-muted-foreground group-hover:text-primary-foreground'}`}
-          />
-
-          {/* Badge quando colapsado */}
-          {isCollapsed && notificationCount > 0 && (
-            <span className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground text-xs w-5 h-5 rounded-full flex items-center justify-center animate-bounce">
-              {notificationCount > 9 ? '9+' : notificationCount}
-            </span>
-          )}
-        </div>
-
-        {/* Conteúdo expandido */}
-        {!isCollapsed && (
-          <div className="flex-1 flex justify-between items-center ml-3">
-            <div className="flex flex-col">
-              <span className="font-medium text-sm text-foreground">{item?.label}</span>
-              <span className="text-xs text-muted-foreground truncate">{item?.description}</span>
-            </div>
-            {notificationCount > 0 && (
-              <span className="bg-destructive text-destructive-foreground text-xs px-2 py-1 rounded-full min-w-[20px] text-center animate-pulse">
-                {notificationCount > 99 ? '99+' : notificationCount}
+    return (
+      <div key={item?.path} className={isChild ? 'ml-4' : ''}>
+        <Button
+          variant={isActive ? "default" : "ghost"}
+          onClick={() => handleNavigation(item?.path)}
+          className={`w-full justify-start h-12 px-3 mb-1 relative group ${
+            isCollapsed ? 'px-2' : ''
+          }`}
+          title={isCollapsed ? `${item?.label} - ${item?.description}` : ''}
+        >
+          <div className="flex items-center space-x-3 w-full">
+            <Icon 
+              name={item?.icon} 
+              size={20} 
+              className={`flex-shrink-0 ${isActive ? 'text-primary-foreground' : ''}`}
+            />
+            
+            {!isCollapsed && (
+              <>
+                <div className="flex-1 text-left">
+                  <div className="font-medium text-sm">{item?.label}</div>
+                  <div className="text-xs opacity-70 truncate">
+                    {item?.description}
+                  </div>
+                </div>
+                
+                {notificationCount > 0 && (
+                  <span className="bg-destructive text-destructive-foreground text-xs px-2 py-1 rounded-full min-w-[20px] text-center z-1001">
+                    {notificationCount > 99 ? '99+' : notificationCount}
+                  </span>
+                )}
+              </>
+            )}
+            
+            {isCollapsed && notificationCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs w-5 h-5 rounded-full flex items-center justify-center z-1001">
+                {notificationCount > 9 ? '9+' : notificationCount}
               </span>
             )}
           </div>
-        )}
-      </Button>
-    </div>
-  );
-};
-
-  const renderNavigationGroup = (group) => (
-    <div key={group?.label} className="mb-4">
-      {!isCollapsed && (
-        <div className="px-4 mb-2">
-          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            {group?.label}
-          </h3>
-        </div>
-      )}
-      <div className="space-y-1">
-        {group?.children?.map(item => renderNavigationItem(item, true))}
+        </Button>
       </div>
-    </div>
-  );
+    );
+  };
 
+  const renderNavigationGroup = (group) => {
+    return (
+      <div key={group?.label} className="mb-4">
+        {!isCollapsed && (
+          <div className="px-3 mb-2">
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              {group?.label}
+            </h3>
+          </div>
+        )}
+        <div className="space-y-1">
+          {group?.children?.map(item => renderNavigationItem(item, true))}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -155,28 +153,15 @@ const Sidebar = ({ isCollapsed = false, onToggle, className = '' }) => {
           onClick={onToggle}
         />
       )}
-      {/* Floating toggle button (mobile only) */}
-      <button
-        onClick={onToggle}
-        className="
-          fixed top-1/2 left-2 -translate-y-1/2 
-          bg-primary text-primary-foreground 
-          rounded-full p-3 shadow-lg z-[1050] 
-          lg:hidden
-        "
-      >
-        <Icon name="Menu" size={20} />
-      </button>
       {/* Sidebar */}
-        <aside 
-          className={`
-            fixed top-0 left-0 h-full bg-card border-r border-border z-1020
-            transition-transform duration-300 ease-in-out
-            ${isCollapsed ? '-translate-x-full lg:w-16 lg:translate-x-0' : 'translate-x-0 lg:w-60'}
-            ${className}
-          `}
-        >
-
+      <aside 
+        className={`
+          fixed left-0 top-0 h-full bg-card border-r border-border z-1020
+          transition-all duration-300 ease-in-out
+          ${isCollapsed ? 'w-16' : 'w-60'}
+          ${className}
+        `}
+      >
         {/* Header */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-border">
           {!isCollapsed && (
@@ -221,7 +206,6 @@ const Sidebar = ({ isCollapsed = false, onToggle, className = '' }) => {
             </div>
           )}
           
-          {/* Toggle button only visible on desktop */}
           <Button
             variant="ghost"
             size="icon"
@@ -234,7 +218,7 @@ const Sidebar = ({ isCollapsed = false, onToggle, className = '' }) => {
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto p-4">
-          <div className="space-y-4">
+          <div className="space-y-2">
             {navigationItems?.map(item => {
               if (item?.type === 'group') {
                 return renderNavigationGroup(item);

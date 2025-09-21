@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Icon from '../AppIcon';
-import Button from './Button';
+import Button from './ButtonDash';
 
 const Header = ({ onMenuToggle, isSidebarCollapsed = false }) => {
   const location = useLocation();

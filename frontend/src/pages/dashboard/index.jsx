@@ -5,7 +5,7 @@ import MetricsCard from './components/MetricsCard';
 import AnalyticsChart from './components/AnalyticsChart';
 import QuickActionTiles from './components/QuickActionTiles';
 import Icon from '../../components/AppIcon';
-import Button from '../../components/ui/Button';
+import Button from '../../components/ui/ButtonDash';
 
 const Dashboard = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);

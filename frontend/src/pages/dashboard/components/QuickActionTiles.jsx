@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../../../components/AppIcon';
-import Button from '../../../components/ui/Button';
+import Button from '../../../components/ui/ButtonDash';
 
 const QuickActionTiles = () => {
   const navigate = useNavigate();
