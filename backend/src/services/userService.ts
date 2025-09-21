@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import { UserRepository } from '../repositories/userRepository';
 
 /**
@@ -58,5 +59,52 @@ export class UserService {
    */
   static async verifyPassword(plainPassword: string, hashedPassword: string): Promise<boolean> {
     return await bcrypt.compare(plainPassword, hashedPassword);
+  }
+
+  /**
+   * Realiza login do usuário com email e senha
+   *
+   * @param email - Email do usuário
+   * @param password - Senha em texto plano
+   * @returns Promise com token JWT e dados do usuário
+   */
+  static async login(email: string, password: string) {
+    try {
+      // Buscar usuário por email
+      const user = await UserRepository.findUserByEmail(email);
+      if (!user) {
+        throw new Error('Email ou senha incorretos');
+      }
+
+      // Verificar senha
+      const isPasswordValid = await this.verifyPassword(password, user.password);
+      if (!isPasswordValid) {
+        throw new Error('Email ou senha incorretos');
+      }
+
+      // Gerar token JWT (24 horas)
+      const secret = process.env.JWT_SECRET || 'fallback-secret-change-in-production';
+      const token = jwt.sign(
+        {
+          id: user.id,
+          email: user.email,
+          name: user.name
+        },
+        secret,
+        { expiresIn: '24h' }
+      );
+
+      // Retornar token e dados do usuário (sem senha)
+      const { password: _, ...userWithoutPassword } = user;
+
+      return {
+        token,
+        user: userWithoutPassword,
+        expiresIn: '24h'
+      };
+    } catch (error) {
+      // Re-throw para manter o tipo de erro
+      throw error;
+    }
   }
 }

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateCreateUser = void 0;
+exports.validateLogin = exports.validateCreateUser = void 0;
 const express_validator_1 = require("express-validator");
 /**
  * Middleware para validar dados de criação de usuário
@@ -42,6 +42,36 @@ exports.validateCreateUser = [
                     field: err.path || err.param || 'unknown',
                     message: err.msg
                 }))
+            });
+        }
+        next();
+    }
+];
+/**
+ * Middleware para validar dados de login
+ */
+exports.validateLogin = [
+    // Validação do email
+    (0, express_validator_1.body)('email')
+        .isEmail()
+        .normalizeEmail()
+        .withMessage('Email deve ter um formato válido'),
+    // Validação da senha
+    (0, express_validator_1.body)('password')
+        .notEmpty()
+        .withMessage('Senha é obrigatória'),
+    // Middleware para verificar se há erros de validação
+    (req, res, next) => {
+        const errors = (0, express_validator_1.validationResult)(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                success: false,
+                error: 'Dados de entrada inválidos',
+                details: errors.array().map(err => ({
+                    field: err.path || err.param || 'unknown',
+                    message: err.msg
+                })),
+                code: 'VALIDATION_ERROR'
             });
         }
         next();
