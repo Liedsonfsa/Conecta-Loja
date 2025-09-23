@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import * as employeeService from '../services/employeeService';
+import {EmployeeService} from '../services/employeeService';
 
 /**
  * Controller para criação de funcionário
@@ -12,7 +12,7 @@ import * as employeeService from '../services/employeeService';
  */
 export const createEmployee = async (req: Request, res: Response) => {
     try {
-        const employee = await employeeService.createEmployee(req.body);
+        const employee = await EmployeeService.createEmployee(req.body);
         res.status(201).json({ employee: employee});
     } catch (error) {
         res.status(400).json({ error: (error as Error).message });
