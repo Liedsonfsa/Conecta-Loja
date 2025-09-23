@@ -7,9 +7,16 @@
  * - Rotas da API agrupadas em /api
  */
 import express from "express";
+import cors from "cors";
 import routes from './routes';
 
 const app = express();
+
+// Configuração do CORS para permitir requisições do frontend
+app.use(cors({
+  origin: "http://localhost:4028", // URL padrão do Vite em desenvolvimento
+  credentials: true
+}));
 
 app.use(express.json());
 
