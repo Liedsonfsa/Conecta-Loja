@@ -23,7 +23,29 @@ model usuario {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  enderecos endereco[] // UM usuário pode ter VÁRIOS endereços
+
   @@map("usuarios")
+}
+
+model endereco {
+  id                   Int      @id @default(autoincrement())
+  cep                  String   @db.VarChar(10)  // CEP (XXXXX-XXX)
+  logradouro           String   @db.VarChar(255) // Nome da rua/avenida
+  numero               String   @db.VarChar(10)  // Número do endereço
+  complemento          String?  @db.VarChar(100) // Complemento (opcional)
+  informacoes_adicionais String? @db.VarChar(255) // Informações adicionais (opcional)
+  bairro               String   @db.VarChar(100) // Bairro/distrito
+  cidade               String   @db.VarChar(100) // Cidade
+  estado               String   @db.VarChar(2)   // Estado (UF - 2 letras)
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  // Foreign Key para usuário
+  usuarioId Int
+  usuario   usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@map("enderecos")
 }
 
 model funcionario {
