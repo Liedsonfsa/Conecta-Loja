@@ -24,6 +24,7 @@ model usuario {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   enderecos endereco[] // UM usuário pode ter VÁRIOS endereços
+  pedidos   pedido[]   // UM usuário pode ter VÁRIOS pedidos
 
   @@map("usuarios")
 }
@@ -46,6 +47,43 @@ model endereco {
   usuario   usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
 
   @@map("enderecos")
+}
+
+// Order model
+model pedido {
+  id            Int         @id @default(autoincrement())
+  precoTotal    Decimal     @db.Decimal(10, 2)     // Preço total do pedido
+  status        OrderStatus @default(RECEBIDO)    // Status atual do pedido
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  // Foreign Keys
+  usuarioId     Int         // ID do usuário que fez o pedido
+  cupomId       Int?        // ID do cupom usado (opcional)
+
+  // Relations
+  usuario       usuario     @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  cupom         cupom?      @relation(fields: [cupomId], references: [id])
+  produtos      pedido_produto[] // UM pedido pode ter VÁRIOS produtos
+
+  @@map("pedidos")
+}
+
+// Junction table for order-product relationship (N:M)
+model pedido_produto {
+  id        Int     @id @default(autoincrement())
+  quantidade Int    @default(1) // Quantidade do produto no pedido
+
+  // Foreign Keys
+  pedidoId  Int
+  produtoId Int
+
+  // Relations
+  pedido    pedido  @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  produto   product @relation(fields: [produtoId], references: [id])
+
+  @@unique([pedidoId, produtoId]) // Um produto pode aparecer apenas uma vez por pedido
+  @@map("pedido_produto")
 }
 
 model funcionario {
@@ -74,6 +112,39 @@ model store {
 enum DiscountType {
   PERCENTAGE
   FIXED_VALUE
+}
+
+// Enum for order status
+enum OrderStatus {
+  RECEBIDO                    // Pedido recebido
+  AGUARDANDO_PAGAMENTO        // Aguardando pagamento
+  PAGAMENTO_APROVADO         // Pagamento aprovado
+  PREPARO                    // Em preparo
+  ENVIADO_PARA_ENTREGA       // Enviado para entrega
+  ENTREGUE                   // Entregue
+  CANCELADO                  // Cancelado
+  TENTATIVA_ENTREGA_FALHADA  // Tentativa de entrega não realizada
+}
+
+// Enum for coupon status
+enum CouponStatus {
+  ATIVO
+  INATIVO
+}
+
+// Coupon model
+model cupom {
+  id          Int          @id @default(autoincrement())
+  codigo      String       @unique @db.VarChar(50)  // Código único do cupom
+  valor       Decimal      @db.Decimal(10, 2)       // Valor do desconto
+  status      CouponStatus @default(ATIVO)         // Status do cupom
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  // Relations
+  pedidos     pedido[]     // UM cupom pode ser usado em VÁRIOS pedidos
+
+  @@map("cupons")
 }
 
 // Product category model
@@ -105,6 +176,7 @@ model product {
   updatedAt       DateTime      @updatedAt
 
   category        category      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  pedidos         pedido_produto[] // UM produto pode estar em VÁRIOS pedidos
 
   @@map("produto")
 }
