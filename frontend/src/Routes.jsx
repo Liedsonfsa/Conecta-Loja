@@ -2,10 +2,12 @@ import React from "react";
 import { BrowserRouter, Routes as RouterRoutes, Route } from "react-router-dom";
 import ScrollToTop from "@/components/ScrollToTop";
 import ErrorBoundary from "@/components/ErrorBoundary";
+
 // Import page components
 import HomePage from './pages/Home';
 import Dashboard from './pages/dashboard';
 import NotFoundPage from './pages/NotFound';
+import OrderManagement from './pages/OrderManagement';
 /**
  * Routes - Componente principal de configuração de roteamento da aplicação
  *
@@ -27,8 +29,10 @@ const AppRoutes = () => {
     <ErrorBoundary>
     <ScrollToTop />
       <RouterRoutes>
+
         <Route path="/" element={<HomePage />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/pedidos" element={<OrderManagement />} />
         <Route path="*" element={<NotFoundPage />} />
       </RouterRoutes>
     </ErrorBoundary>
