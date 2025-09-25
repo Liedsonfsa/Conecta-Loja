@@ -1,10 +1,35 @@
+/**
+ * Componentes Tabs - Sistema de navegação por abas
+ *
+ * Conjunto de componentes para criar interfaces com abas baseadas no Radix UI Tabs.
+ * Permite alternar entre diferentes conteúdos através de botões de navegação.
+ *
+ * Componentes incluídos:
+ * - Tabs: Container raiz das abas
+ * - TabsList: Container para os botões das abas
+ * - TabsTrigger: Botão individual de aba
+ * - TabsContent: Conteúdo associado a uma aba
+ *
+ * @module tabs
+ */
+
 import * as React from "react";
 import * as TabsPrimitive from "@radix-ui/react-tabs";
 
 import { cn } from "@/utils/utils";
 
+/**
+ * Container raiz das abas. Gerencia o estado ativo.
+ * @type {React.Component}
+ */
 const Tabs = TabsPrimitive.Root;
 
+/**
+ * Container para os botões das abas.
+ * @param {Object} props - Propriedades do componente
+ * @param {string} [props.className] - Classes CSS adicionais
+ * @param {React.Ref} ref - Referência para o elemento lista
+ */
 const TabsList = React.forwardRef(({ className, ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
@@ -17,6 +42,12 @@ const TabsList = React.forwardRef(({ className, ...props }, ref) => (
 ));
 TabsList.displayName = TabsPrimitive.List.displayName;
 
+/**
+ * Botão individual para uma aba.
+ * @param {Object} props - Propriedades do componente
+ * @param {string} [props.className] - Classes CSS adicionais
+ * @param {React.Ref} ref - Referência para o elemento trigger
+ */
 const TabsTrigger = React.forwardRef(({ className, ...props }, ref) => (
   <TabsPrimitive.Trigger
     ref={ref}
@@ -29,6 +60,12 @@ const TabsTrigger = React.forwardRef(({ className, ...props }, ref) => (
 ));
 TabsTrigger.displayName = TabsPrimitive.Trigger.displayName;
 
+/**
+ * Conteúdo associado a uma aba específica.
+ * @param {Object} props - Propriedades do componente
+ * @param {string} [props.className] - Classes CSS adicionais
+ * @param {React.Ref} ref - Referência para o elemento conteúdo
+ */
 const TabsContent = React.forwardRef(({ className, ...props }, ref) => (
   <TabsPrimitive.Content
     ref={ref}

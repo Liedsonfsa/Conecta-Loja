@@ -1,3 +1,24 @@
+/**
+ * ButtonDash - Componente de botão customizável para dashboard
+ *
+ * Botão altamente customizável com suporte a ícones, variantes de cor,
+ * tamanhos e estados. Utiliza class-variance-authority para gerenciamento
+ * de variantes e inclui integração com sistema de ícones.
+ *
+ * @param {Object} props - Propriedades do componente
+ * @param {string} [props.variant="default"] - Variante visual do botão
+ * @param {string} [props.size="default"] - Tamanho do botão
+ * @param {string} [props.iconName] - Nome do ícone a ser exibido
+ * @param {string} [props.iconPosition="left"] - Posição do ícone
+ * @param {React.Component} [props.asChild] - Se deve renderizar como elemento filho
+ *
+ * @returns {JSX.Element} Botão renderizado
+ *
+ * @example
+ * <ButtonDash variant="outline" iconName="Download" iconPosition="left">
+ *   Exportar Relatório
+ * </ButtonDash>
+ */
 import React from 'react';
 import { Slot } from "@radix-ui/react-slot";
 import { cva } from "class-variance-authority";
@@ -63,7 +84,10 @@ const Button = React.forwardRef(({
 
     const calculatedIconSize = iconSize || iconSizeMap?.[size] || 16;
 
-    // Loading spinner
+    /**
+     * Renderiza um spinner de carregamento animado
+     * @returns {JSX.Element} Elemento SVG do spinner
+     */
     const LoadingSpinner = () => (
         <svg className="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -71,6 +95,10 @@ const Button = React.forwardRef(({
         </svg>
     );
 
+    /**
+     * Renderiza o ícone do botão baseado no nome fornecido
+     * @returns {JSX.Element|null} Elemento do ícone ou null se não encontrado
+     */
     const renderIcon = () => {
         if (!iconName) return null;
         try {
@@ -89,6 +117,10 @@ const Button = React.forwardRef(({
         }
     };
 
+    /**
+     * Renderiza o botão padrão quando não há elemento filho customizado
+     * @returns {JSX.Element} Elemento button padrão
+     */
     const renderFallbackButton = () => (
         <button
             className={cn(

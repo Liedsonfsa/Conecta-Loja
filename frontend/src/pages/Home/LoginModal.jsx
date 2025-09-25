@@ -1,3 +1,37 @@
+/**
+ * LoginModal - Modal de autenticação para a página inicial
+ *
+ * Modal completo para autenticação de usuários na página inicial,
+ * com integração real ao backend. Permite login e cadastro de usuários
+ * com validação de formulários e feedback visual através de toasts.
+ *
+ * Funcionalidades:
+ * - Login com email e senha
+ * - Cadastro de novos usuários
+ * - Validação de formulários
+ * - Integração com API de autenticação
+ * - Gerenciamento de estado de loading
+ * - Feedback visual com notificações
+ *
+ * @param {Object} props - Propriedades do componente
+ * @param {React.ReactNode} props.children - Elemento trigger para abrir o modal
+ * @param {Function} props.onLogin - Callback chamado após login/cadastro bem-sucedido
+ * @param {Object} props.onLogin.user - Dados do usuário autenticado
+ * @param {string} props.onLogin.user.id - ID único do usuário
+ * @param {string} props.onLogin.user.name - Nome completo do usuário
+ * @param {string} props.onLogin.user.email - Email do usuário
+ * @param {string} props.onLogin.user.phone - Telefone do usuário
+ * @param {string} props.onLogin.user.address - Endereço do usuário
+ *
+ * @returns {JSX.Element} Modal de autenticação renderizado
+ *
+ * @example
+ * // Uso na página inicial
+ * <LoginModal onLogin={handleUserAuthentication}>
+ *   <Button>Entrar</Button>
+ * </LoginModal>
+ */
+
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import Button from "@/components/ui/Button";
@@ -13,6 +47,10 @@ const LoginModal = ({ children, onLogin }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  /**
+   * Manipula o processo de login do usuário
+   * @param {Event} e - Evento de submit do formulário
+   */
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -54,6 +92,10 @@ const LoginModal = ({ children, onLogin }) => {
     }
   };
 
+  /**
+   * Manipula o processo de cadastro de novo usuário
+   * @param {Event} e - Evento de submit do formulário
+   */
   const handleRegister = async (e) => {
     e.preventDefault();
     setIsLoading(true);

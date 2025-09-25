@@ -1,3 +1,24 @@
+/**
+ * Dashboard - Página principal do painel administrativo
+ *
+ * Página central do sistema de administração da Conecta-Loja, exibindo
+ * métricas de performance, gráficos analíticos e ações rápidas para
+ * gerenciamento eficiente do negócio.
+ *
+ * Funcionalidades principais:
+ * - Layout responsivo com sidebar recolhível
+ * - Métricas em tempo real (vendas, pedidos, produtos)
+ * - Gráficos de análise de performance
+ * - Ações rápidas para operações comuns
+ * - Relatórios exportáveis
+ * - Informações de versão e copyright
+ *
+ * @returns {JSX.Element} Página completa do dashboard renderizada
+ *
+ * @example
+ * // Rota configurada em Routes.jsx
+ * <Route path="/dashboard" element={<Dashboard />} />
+ */
 import React, { useState, useEffect } from 'react';
 import Header from '../../components/ui/Header';
 import Sidebar from '../../components/ui/Sidebar';
@@ -20,6 +41,9 @@ const Dashboard = () => {
     return () => clearInterval(timer);
   }, []);
 
+  /**
+   * Manipula a alternância do estado da sidebar (recolhida/expandida)
+   */
   const handleSidebarToggle = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
   };
@@ -60,6 +84,11 @@ const Dashboard = () => {
     }
   ];
 
+  /**
+   * Formata uma data como string legível em português brasileiro
+   * @param {Date} date - Data a ser formatada
+   * @returns {string} Data formatada (dia da semana, dia, mês, ano, hora, minuto)
+   */
   const formatDateTime = (date) => {
     return new Intl.DateTimeFormat('pt-BR', {
       weekday: 'long',

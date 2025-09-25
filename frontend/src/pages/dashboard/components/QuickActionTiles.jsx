@@ -63,6 +63,10 @@ const QuickActionTiles = () => {
     }
   ];
 
+  /**
+   * Manipula o clique em um cartão de ação rápida
+   * @param {string} route - Rota para navegar
+   */
   const handleActionClick = (route) => {
     navigate(route);
   };

@@ -1,7 +1,38 @@
+/**
+ * MetricsCard - Componente para exibir métricas do dashboard
+ *
+ * Cartão informativo que apresenta uma métrica específica com ícone,
+ * valor principal, indicador de mudança e cor temática. Utilizado
+ * para mostrar KPIs importantes como vendas, pedidos, etc.
+ *
+ * @param {Object} props - Propriedades do componente
+ * @param {string} props.title - Título da métrica (ex: "Vendas Hoje")
+ * @param {string|number} props.value - Valor principal da métrica
+ * @param {string} [props.change] - Texto de mudança/variação
+ * @param {string} [props.changeType] - Tipo da mudança: "positive" | "negative" | "neutral"
+ * @param {string} props.icon - Nome do ícone (da biblioteca Lucide)
+ * @param {string} [props.color="primary"] - Cor do tema: "primary" | "success" | "warning" | "error"
+ *
+ * @returns {JSX.Element} Cartão de métrica renderizado
+ *
+ * @example
+ * <MetricsCard
+ *   title="Vendas Hoje"
+ *   value="R$ 2.847,50"
+ *   change="+12,5%"
+ *   changeType="positive"
+ *   icon="TrendingUp"
+ *   color="success"
+ * />
+ */
 import React from 'react';
 import Icon from '../../../components/AppIcon';
 
 const MetricsCard = ({ title, value, change, changeType, icon, color = 'primary' }) => {
+  /**
+   * Obtém as classes CSS de cor baseadas no tipo de cor especificado
+   * @returns {string} Classes CSS para o fundo do ícone
+   */
   const getColorClasses = () => {
     switch (color) {
       case 'success':
@@ -15,6 +46,10 @@ const MetricsCard = ({ title, value, change, changeType, icon, color = 'primary'
     }
   };
 
+  /**
+   * Obtém a classe CSS de cor para o indicador de mudança
+   * @returns {string} Classe CSS para a cor do texto da mudança
+   */
   const getChangeColor = () => {
     if (changeType === 'positive') return 'text-success';
     if (changeType === 'negative') return 'text-error';

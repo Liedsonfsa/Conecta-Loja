@@ -1,3 +1,16 @@
+/**
+ * Toaster - Componente de renderização de notificações toast
+ *
+ * Componente que gerencia a exibição de múltiplas notificações toast
+ * na aplicação. Utiliza o hook useToast para obter o estado atual
+ * dos toasts e renderiza cada um com título, descrição e ações.
+ *
+ * @returns {JSX.Element} Container com todos os toasts ativos renderizados
+ *
+ * @example
+ * // Deve ser incluído no componente raiz da aplicação
+ * <Toaster />
+ */
 import {
   Toast,
   ToastClose,

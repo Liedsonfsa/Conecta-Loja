@@ -1,17 +1,59 @@
+/**
+ * Componentes Dialog - Modal customizável
+ *
+ * Conjunto de componentes para criar modais acessíveis baseados no Radix UI Dialog.
+ * Inclui overlay, conteúdo, cabeçalho, rodapé e botões de controle com animações
+ * e foco adequados para acessibilidade.
+ *
+ * Componentes incluídos:
+ * - Dialog: Container raiz do modal
+ * - DialogTrigger: Elemento que abre o modal
+ * - DialogContent: Conteúdo principal do modal
+ * - DialogHeader: Cabeçalho do modal
+ * - DialogFooter: Rodapé do modal
+ * - DialogTitle: Título do modal
+ * - DialogDescription: Descrição do modal
+ * - DialogClose: Botão para fechar o modal
+ *
+ * @module dialog
+ */
+
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 
 import { cn } from "@/utils/utils";
 
+/**
+ * Container raiz do modal. Controla o estado aberto/fechado.
+ * @type {React.Component}
+ */
 const Dialog = DialogPrimitive.Root;
 
+/**
+ * Elemento trigger que abre o modal quando clicado.
+ * @type {React.Component}
+ */
 const DialogTrigger = DialogPrimitive.Trigger;
 
+/**
+ * Portal para renderizar o modal fora da árvore DOM normal.
+ * @type {React.Component}
+ */
 const DialogPortal = DialogPrimitive.Portal;
 
+/**
+ * Botão para fechar o modal.
+ * @type {React.Component}
+ */
 const DialogClose = DialogPrimitive.Close;
 
+/**
+ * Overlay escuro que cobre a tela atrás do modal.
+ * @param {Object} props - Propriedades do componente
+ * @param {string} [props.className] - Classes CSS adicionais
+ * @param {React.Ref} ref - Referência para o elemento overlay
+ */
 const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
@@ -24,6 +66,13 @@ const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
 ));
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
+/**
+ * Conteúdo principal do modal com botão de fechar integrado.
+ * @param {Object} props - Propriedades do componente
+ * @param {string} [props.className] - Classes CSS adicionais
+ * @param {React.ReactNode} props.children - Conteúdo do modal
+ * @param {React.Ref} ref - Referência para o elemento de conteúdo
+ */
 const DialogContent = React.forwardRef(({ className, children, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
@@ -45,16 +94,32 @@ const DialogContent = React.forwardRef(({ className, children, ...props }, ref) 
 ));
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
+/**
+ * Cabeçalho do modal com layout responsivo.
+ * @param {Object} props - Propriedades do componente
+ * @param {string} [props.className] - Classes CSS adicionais
+ */
 const DialogHeader = ({ className, ...props }) => (
   <div className={cn("flex flex-col space-y-1.5 text-center sm:text-left", className)} {...props} />
 );
 DialogHeader.displayName = "DialogHeader";
 
+/**
+ * Rodapé do modal com layout responsivo para botões.
+ * @param {Object} props - Propriedades do componente
+ * @param {string} [props.className] - Classes CSS adicionais
+ */
 const DialogFooter = ({ className, ...props }) => (
   <div className={cn("flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2", className)} {...props} />
 );
 DialogFooter.displayName = "DialogFooter";
 
+/**
+ * Título do modal com semântica adequada para acessibilidade.
+ * @param {Object} props - Propriedades do componente
+ * @param {string} [props.className] - Classes CSS adicionais
+ * @param {React.Ref} ref - Referência para o elemento título
+ */
 const DialogTitle = React.forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
@@ -64,6 +129,12 @@ const DialogTitle = React.forwardRef(({ className, ...props }, ref) => (
 ));
 DialogTitle.displayName = DialogPrimitive.Title.displayName;
 
+/**
+ * Descrição do modal com semântica adequada para acessibilidade.
+ * @param {Object} props - Propriedades do componente
+ * @param {string} [props.className] - Classes CSS adicionais
+ * @param {React.Ref} ref - Referência para o elemento descrição
+ */
 const DialogDescription = React.forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Description ref={ref} className={cn("text-sm text-muted-foreground", className)} {...props} />
 ));
