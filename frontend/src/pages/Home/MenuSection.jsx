@@ -79,6 +79,11 @@ const MenuSection = () => {
     }
   ];
 
+  /**
+   * Manipula a mudança de quantidade de um item do menu
+   * @param {string|number} itemId - ID do item do menu
+   * @param {number} change - Mudança na quantidade (+1 ou -1)
+   */
   const handleQuantityChange = (itemId, change) => {
     setQuantities(prev => ({
       ...prev,

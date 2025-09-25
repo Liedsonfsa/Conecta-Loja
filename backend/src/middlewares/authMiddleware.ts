@@ -16,6 +16,22 @@ declare global {
 
 /**
  * Middleware para verificar autenticação JWT
+ *
+ * Verifica se o token JWT fornecido no header Authorization é válido.
+ * Extrai e valida o token, adiciona os dados do usuário à requisição
+ * se válido, ou retorna erro apropriado se inválido/ausente.
+ *
+ * @param req - Requisição Express com possível token JWT no header Authorization
+ * @param res - Resposta Express
+ * @param next - Função para continuar o fluxo da requisição
+ * @returns void - Chama next() se válido, ou retorna resposta de erro
+ *
+ * @example
+ * // Uso em rota protegida
+ * app.get('/protected', authenticateToken, (req, res) => {
+ *   // req.user estará disponível com dados do usuário autenticado
+ *   res.json({ user: req.user });
+ * });
  */
 export const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;

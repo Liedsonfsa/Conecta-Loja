@@ -1,8 +1,27 @@
+/**
+ * Middlewares de validação para dados de usuário
+ *
+ * Este módulo contém middlewares Express Validator para validar
+ * dados de entrada em operações relacionadas a usuários, incluindo
+ * criação de usuários e login.
+ */
 import { body, validationResult } from 'express-validator';
 import { Request, Response, NextFunction } from 'express';
 
 /**
- * Middleware para validar dados de criação de usuário
+ * Array de middlewares para validar dados de criação de usuário
+ *
+ * Valida os campos obrigatórios e formatos para criação de novo usuário:
+ * - Nome: 2-100 caracteres, apenas letras e espaços
+ * - Email: formato válido, até 255 caracteres
+ * - Senha: 6-128 caracteres, deve conter maiúscula, minúscula e número
+ * - Contato: 10-20 caracteres, apenas números, espaços, hífens, parênteses e +
+ *
+ * @returns Array de middlewares Express Validator
+ *
+ * @example
+ * // Uso em rota
+ * router.post('/user/cadastrar', validateCreateUser, createUserHandler);
  */
 export const validateCreateUser = [
   // Validação do nome
@@ -52,7 +71,17 @@ export const validateCreateUser = [
 ];
 
 /**
- * Middleware para validar dados de login
+ * Array de middlewares para validar dados de login
+ *
+ * Valida os campos obrigatórios para autenticação de usuário:
+ * - Email: formato válido, normalizado
+ * - Senha: campo obrigatório, não vazio
+ *
+ * @returns Array de middlewares Express Validator
+ *
+ * @example
+ * // Uso em rota de login
+ * router.post('/auth/login', validateLogin, loginHandler);
  */
 export const validateLogin = [
   // Validação do email

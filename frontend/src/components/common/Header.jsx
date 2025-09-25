@@ -28,6 +28,9 @@ const Header = () => {
 
   // Verificar se há token válido quando o componente monta
   useEffect(() => {
+    /**
+     * Verifica o status de autenticação do usuário
+     */
     const checkAuthStatus = async () => {
       const token = localStorage.getItem('authToken');
       console.log('🔍 Verificando token no localStorage:', token ? 'Token encontrado' : 'Nenhum token');
@@ -73,10 +76,17 @@ const Header = () => {
     checkAuthStatus();
   }, []);
 
+  /**
+   * Manipula o login do usuário
+   * @param {Object} userData - Dados do usuário logado
+   */
   const handleLogin = (userData) => {
     setUser(userData);
   };
 
+  /**
+   * Manipula o logout do usuário
+   */
   const handleLogout = () => {
     setUser(null);
     setApiOffline(false);
@@ -84,6 +94,9 @@ const Header = () => {
   };
 
   // Função para tentar reconectar quando API volta
+  /**
+   * Tenta reconectar verificando se há token válido
+   */
   const tryReconnect = async () => {
     const token = localStorage.getItem('authToken');
     if (token && apiOffline) {

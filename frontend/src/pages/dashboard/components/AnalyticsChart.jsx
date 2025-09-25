@@ -1,3 +1,21 @@
+/**
+ * AnalyticsChart - Componente de gráficos analíticos interativos
+ *
+ * Exibe diferentes tipos de gráficos para análise de dados do negócio,
+ * incluindo vendas, pedidos e distribuição por categoria. Permite alternar
+ * entre tipos de gráfico e períodos de tempo com dados simulados.
+ *
+ * Tipos de gráfico suportados:
+ * - Barras: Comparação de vendas e pedidos
+ * - Linhas: Tendências ao longo do tempo
+ * - Pizza: Distribuição por categoria de produtos
+ *
+ * @returns {JSX.Element} Container com gráficos interativos renderizado
+ *
+ * @example
+ * // Uso no dashboard
+ * <AnalyticsChart />
+ */
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 
@@ -63,6 +81,11 @@ const AnalyticsChart = () => {
     { id: 'monthly', label: 'Mensal' }
   ];
 
+  /**
+   * Formata um valor numérico como moeda brasileira
+   * @param {number} value - Valor a ser formatado
+   * @returns {string} Valor formatado como moeda
+   */
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -70,6 +93,13 @@ const AnalyticsChart = () => {
     })?.format(value);
   };
 
+  /**
+   * Componente personalizado para tooltip dos gráficos
+   * @param {boolean} active - Se o tooltip está ativo
+   * @param {Array} payload - Dados do tooltip
+   * @param {string} label - Rótulo do tooltip
+   * @returns {JSX.Element|null} Elemento tooltip renderizado ou null
+   */
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload?.length) {
       return (
@@ -88,6 +118,10 @@ const AnalyticsChart = () => {
     return null;
   };
 
+  /**
+   * Renderiza o gráfico apropriado baseado no tipo selecionado
+   * @returns {JSX.Element} Elemento do gráfico renderizado
+   */
   const renderChart = () => {
     switch (activeChart) {
       case 'sales':

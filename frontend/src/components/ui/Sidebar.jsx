@@ -1,3 +1,24 @@
+/**
+ * Sidebar - Barra lateral de navegação do dashboard
+ *
+ * Componente de navegação lateral responsivo com itens organizados
+ * em grupos, indicadores de notificações e suporte a colapso/expansão.
+ * Inclui navegação programática e destaque do item ativo.
+ *
+ * @param {Object} props - Propriedades do componente
+ * @param {boolean} [props.isCollapsed=false] - Se a sidebar está recolhida
+ * @param {Function} props.onToggle - Função chamada ao alternar estado
+ * @param {string} [props.className=''] - Classes CSS adicionais
+ *
+ * @returns {JSX.Element} Sidebar de navegação renderizada
+ *
+ * @example
+ * <Sidebar
+ *   isCollapsed={sidebarCollapsed}
+ *   onToggle={handleSidebarToggle}
+ *   className="lg:block"
+ * />
+ */
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Icon from '../AppIcon';
@@ -56,12 +77,26 @@ const Sidebar = ({ isCollapsed = false, onToggle, className = '' }) => {
     }
   ];
 
+  /**
+   * Verifica se o caminho fornecido está ativo na navegação atual
+   * @param {string} path - Caminho a ser verificado
+   * @returns {boolean} Verdadeiro se o caminho está ativo
+   */
   const isActivePath = (path) => location?.pathname === path;
 
+  /**
+   * Manipula a navegação para um caminho específico
+   * @param {string} path - Caminho para navegar
+   */
   const handleNavigation = (path) => {
     window.location.href = path;
   };
 
+  /**
+   * Obtém a contagem de notificações para um caminho específico
+   * @param {string} path - Caminho para verificar notificações
+   * @returns {number} Número de notificações para o caminho
+   */
   const getNotificationCount = (path) => {
     return notifications?.[path] || 0;
   };
@@ -78,6 +113,16 @@ const Sidebar = ({ isCollapsed = false, onToggle, className = '' }) => {
     return () => clearInterval(interval);
   }, []);
 
+  /**
+   * Renderiza um item individual de navegação
+   * @param {Object} item - Item de navegação a ser renderizado
+   * @param {string} item.label - Rótulo do item
+   * @param {string} item.path - Caminho do item
+   * @param {string} item.icon - Ícone do item
+   * @param {string} item.description - Descrição do item
+   * @param {boolean} [isChild=false] - Se é um item filho (indentado)
+   * @returns {JSX.Element} Elemento do item de navegação renderizado
+   */
   const renderNavigationItem = (item, isChild = false) => {
     const isActive = isActivePath(item?.path);
     const notificationCount = getNotificationCount(item?.path);
@@ -127,6 +172,13 @@ const Sidebar = ({ isCollapsed = false, onToggle, className = '' }) => {
     );
   };
 
+  /**
+   * Renderiza um grupo de navegação com seus itens filhos
+   * @param {Object} group - Grupo de navegação a ser renderizado
+   * @param {string} group.label - Rótulo do grupo
+   * @param {Array} group.children - Itens filhos do grupo
+   * @returns {JSX.Element} Elemento do grupo de navegação renderizado
+   */
   const renderNavigationGroup = (group) => {
     return (
       <div key={group?.label} className="mb-4">

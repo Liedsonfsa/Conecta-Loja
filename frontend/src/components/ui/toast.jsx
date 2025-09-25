@@ -1,3 +1,13 @@
+/**
+ * Componentes Toast - Sistema de notificações
+ *
+ * Conjunto de componentes para criar notificações toast acessíveis
+ * baseadas no Radix UI Toast. Inclui provedor, viewport, toast
+ * individual e ações com animações e foco adequados.
+ *
+ * @module toast
+ */
+
 import * as React from "react";
 import * as ToastPrimitives from "@radix-ui/react-toast";
 import { cva } from "class-variance-authority";
