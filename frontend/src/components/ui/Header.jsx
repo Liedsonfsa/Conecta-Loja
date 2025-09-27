@@ -9,8 +9,8 @@ const Header = ({ onMenuToggle, isSidebarCollapsed = false }) => {
 
   const primaryNavItems = [
     { label: 'Dashboard', path: '/dashboard', icon: 'LayoutDashboard' },
-    { label: 'Produtos', path: '/product-management', icon: 'Package' },
-    { label: 'Pedidos', path: '/order-management', icon: 'ShoppingCart' },
+    { label: 'Produtos', path: '/produtos', icon: 'Package' },
+    { label: 'Pedidos', path: '/pedidos', icon: 'ShoppingCart' },
     { label: 'Loja', path: '/customer-storefront', icon: 'Store' },
   ];
 
