@@ -34,6 +34,7 @@ export const createProduct = async (req: Request, res: Response) => {
     if (errorMessage.includes('Nome do produto é obrigatório') ||
         errorMessage.includes('Descrição do produto é obrigatória') ||
         errorMessage.includes('Preço do produto deve ser um valor positivo') ||
+        errorMessage.includes('Estoque do produto não pode ser negativo') ||
         errorMessage.includes('Categoria não encontrada') ||
         errorMessage.includes('Valor do desconto não pode ser negativo') ||
         errorMessage.includes('Tipo do desconto é obrigatório') ||
@@ -217,6 +218,7 @@ export const updateProduct = async (req: Request, res: Response) => {
     if (errorMessage.includes('Nome do produto não pode ser vazio') ||
         errorMessage.includes('Descrição do produto não pode ser vazia') ||
         errorMessage.includes('Preço do produto deve ser um valor positivo') ||
+        errorMessage.includes('Estoque do produto não pode ser negativo') ||
         errorMessage.includes('Categoria não encontrada') ||
         errorMessage.includes('Valor do desconto não pode ser negativo') ||
         errorMessage.includes('Tipo do desconto é obrigatório') ||

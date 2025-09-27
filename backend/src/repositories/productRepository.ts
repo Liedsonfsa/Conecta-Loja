@@ -18,6 +18,7 @@ export class ProductRepository {
     price: number;
     categoryId: number;
     available?: boolean;
+    estoque?: number;
     image?: string;
     discount?: number;
     discountType?: 'PERCENTAGE' | 'FIXED_VALUE';
@@ -29,6 +30,7 @@ export class ProductRepository {
         price: data.price,
         categoryId: data.categoryId,
         available: data.available ?? true,
+        estoque: data.estoque ?? 0,
         image: data.image,
         discount: data.discount,
         discountType: data.discountType,
@@ -106,6 +108,7 @@ export class ProductRepository {
     price?: number;
     categoryId?: number;
     available?: boolean;
+    estoque?: number;
     image?: string;
     discount?: number;
     discountType?: 'PERCENTAGE' | 'FIXED_VALUE';

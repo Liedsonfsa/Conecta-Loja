@@ -3,7 +3,7 @@ import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 import Button from '../../../components/ui/ButtonDash';
 
-const ProductTable = ({ products, onEdit, onToggleAvailability, onDelete, searchTerm, selectedCategory, priceRange, stockFilter, availabilityFilter }) => {
+const ProductTable = ({ products, onEdit, onDelete, searchTerm, selectedCategory, priceRange, stockFilter, availabilityFilter }) => {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
   const filteredProducts = products?.filter(product => {
@@ -54,6 +54,21 @@ const ProductTable = ({ products, onEdit, onToggleAvailability, onDelete, search
       style: 'currency',
       currency: 'BRL'
     })?.format(price);
+  };
+
+  const calculateFinalPrice = (product) => {
+    const basePrice = parseFloat(product?.price);
+    const discount = parseFloat(product?.discount) || 0;
+
+    if (discount > 0) {
+      if (product?.discountType === 'percentage') {
+        return basePrice * (1 - discount / 100);
+      } else {
+        return Math.max(0, basePrice - discount);
+      }
+    }
+
+    return basePrice;
   };
 
   const formatDate = (date) => {
@@ -139,12 +154,17 @@ const ProductTable = ({ products, onEdit, onToggleAvailability, onDelete, search
                     </div>
                   </td>
                   <td className="p-4">
-                    <span className="font-medium text-foreground">{formatPrice(product?.price)}</span>
-                    {product?.discount > 0 && (
-                      <div className="text-xs text-success">
-                        {product?.discountType === 'percentage' ? `${product?.discount}% OFF` : `R$ ${product?.discount} OFF`}
-                      </div>
-                    )}
+                    <div className="space-y-1">
+                      <span className="font-medium text-foreground">{formatPrice(calculateFinalPrice(product))}</span>
+                      {product?.discount > 0 && (
+                        <div className="text-xs text-muted-foreground">
+                          <span className="line-through">{formatPrice(product?.price)}</span>
+                          <span className="ml-2 text-success font-medium">
+                            {product?.discountType === 'percentage' ? `${product?.discount}% OFF` : `R$ ${product?.discount} OFF`}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </td>
                   <td className="p-4">
                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-accent text-accent-foreground">
@@ -160,14 +180,13 @@ const ProductTable = ({ products, onEdit, onToggleAvailability, onDelete, search
                     </div>
                   </td>
                   <td className="p-4">
-                    <Button
-                      variant={product?.isAvailable ? "success" : "outline"}
-                      size="sm"
-                      onClick={() => onToggleAvailability(product?.id)}
-                      className="min-w-[80px]"
-                    >
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                      product?.isAvailable
+                        ? 'bg-success/10 text-success border border-success/20'
+                        : 'bg-muted text-muted-foreground border border-border'
+                    }`}>
                       {product?.isAvailable ? 'Ativo' : 'Inativo'}
-                    </Button>
+                    </span>
                   </td>
                   <td className="p-4">
                     <span className="text-sm text-muted-foreground">
@@ -219,11 +238,21 @@ const ProductTable = ({ products, onEdit, onToggleAvailability, onDelete, search
                   <h3 className="font-medium text-foreground mb-1">{product?.name}</h3>
                   <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{product?.description}</p>
                   <div className="flex items-center space-x-2">
-                    <span className="font-medium text-foreground">{formatPrice(product?.price)}</span>
+                    <div className="flex flex-col">
+                      <span className="font-medium text-foreground">{formatPrice(calculateFinalPrice(product))}</span>
+                      {product?.discount > 0 && (
+                        <span className="text-xs text-muted-foreground line-through">{formatPrice(product?.price)}</span>
+                      )}
+                    </div>
                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-accent text-accent-foreground">
                       {product?.category}
                     </span>
                   </div>
+                  {product?.discount > 0 && (
+                    <div className="text-xs text-success font-medium">
+                      {product?.discountType === 'percentage' ? `${product?.discount}% OFF` : `R$ ${product?.discount} OFF`}
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="flex items-center justify-between mb-3">
@@ -234,13 +263,13 @@ const ProductTable = ({ products, onEdit, onToggleAvailability, onDelete, search
                     </span>
                     <span className="text-sm text-muted-foreground">({product?.stock})</span>
                   </div>
-                  <Button
-                    variant={product?.isAvailable ? "success" : "outline"}
-                    size="sm"
-                    onClick={() => onToggleAvailability(product?.id)}
-                  >
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                    product?.isAvailable
+                      ? 'bg-success/10 text-success border border-success/20'
+                      : 'bg-muted text-muted-foreground border border-border'
+                  }`}>
                     {product?.isAvailable ? 'Ativo' : 'Inativo'}
-                  </Button>
+                  </span>
                 </div>
               </div>
               <div className="flex items-center justify-between">

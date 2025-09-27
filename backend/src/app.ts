@@ -35,7 +35,7 @@ app.use(cors({
 app.use(express.json());
 
 // Servir arquivos estáticos (imagens dos produtos)
-app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Rota inicial de teste - útil para verificar se o servidor está respondendo
 app.get("/", (req, res) => {

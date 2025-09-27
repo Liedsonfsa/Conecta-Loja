@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter, Routes as RouterRoutes, Route } from "react-router-dom";
 import ScrollToTop from "@/components/ScrollToTop";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { Toaster } from "@/components/ui/toaster";
 
 // Import page components
 import HomePage from './pages/Home';
@@ -37,6 +38,7 @@ const AppRoutes = () => {
         <Route path="/produtos" element={<ProductManagement />} />
         <Route path="*" element={<NotFoundPage />} />
       </RouterRoutes>
+      <Toaster />
     </ErrorBoundary>
     </BrowserRouter>
   );
