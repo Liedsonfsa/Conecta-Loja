@@ -6,7 +6,7 @@ import Select from '../../../components/ui/Select';
 import Button from '../../../components/ui/ButtonDash';
 import { Checkbox } from '../../../components/ui/Checkbox';
 
-const ProductForm = ({ product, onSave, onCancel, categories }) => {
+const ProductForm = ({ product, onSave, onCancel, categories, loading, categoryMap }) => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -16,10 +16,7 @@ const ProductForm = ({ product, onSave, onCancel, categories }) => {
     isAvailable: true,
     images: [],
     discount: 0,
-    discountType: 'percentage',
-    hasScheduledAvailability: false,
-    availableFrom: '',
-    availableTo: ''
+    discountType: 'percentage'
   });
 
   const [errors, setErrors] = useState({});
@@ -32,15 +29,12 @@ const ProductForm = ({ product, onSave, onCancel, categories }) => {
         name: product?.name || '',
         description: product?.description || '',
         price: product?.price?.toString() || '',
-        category: product?.category || '',
+        category: product?.category || '', // Já vem como nome da categoria
         stock: product?.stock?.toString() || '',
         isAvailable: product?.isAvailable ?? true,
         images: product?.images || [product?.image],
         discount: product?.discount || 0,
-        discountType: product?.discountType || 'percentage',
-        hasScheduledAvailability: product?.hasScheduledAvailability || false,
-        availableFrom: product?.availableFrom || '',
-        availableTo: product?.availableTo || ''
+        discountType: product?.discountType || 'percentage'
       });
       setImagePreview(product?.images || [product?.image]);
     }
@@ -128,25 +122,26 @@ const ProductForm = ({ product, onSave, onCancel, categories }) => {
 
   const handleSubmit = async (e) => {
     e?.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setIsSubmitting(true);
-    
-    try {
-      const productData = {
-        ...formData,
-        price: parseFloat(formData?.price),
-        stock: parseInt(formData?.stock),
-        discount: parseFloat(formData?.discount) || 0,
-        image: formData?.images?.[0], // Primary image
-        updatedAt: new Date()?.toISOString()
-      };
 
-      if (!product) {
-        productData.id = Date.now()?.toString();
-        productData.createdAt = new Date()?.toISOString();
-      }
+    try {
+      // Converter nome da categoria para categoryId
+      const categoryId = categoryMap ? Object.keys(categoryMap).find(key => categoryMap[key] === formData.category) : null;
+
+      const productData = {
+        name: formData.name,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        categoryId: categoryId ? parseInt(categoryId) : null,
+        stock: parseInt(formData.stock),
+        available: formData.isAvailable,
+        discount: parseFloat(formData.discount) || 0,
+        discountType: formData.discountType,
+        image: formData.images?.[0] || null // Primary image
+      };
 
       await onSave(productData);
     } catch (error) {
@@ -350,30 +345,6 @@ const ProductForm = ({ product, onSave, onCancel, categories }) => {
               checked={formData?.isAvailable}
               onChange={(e) => handleInputChange('isAvailable', e?.target?.checked)}
             />
-
-            <Checkbox
-              label="Configurar disponibilidade por horário"
-              checked={formData?.hasScheduledAvailability}
-              onChange={(e) => handleInputChange('hasScheduledAvailability', e?.target?.checked)}
-            />
-
-            {formData?.hasScheduledAvailability && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-6">
-                <Input
-                  label="Disponível a partir de"
-                  type="time"
-                  value={formData?.availableFrom}
-                  onChange={(e) => handleInputChange('availableFrom', e?.target?.value)}
-                />
-
-                <Input
-                  label="Disponível até"
-                  type="time"
-                  value={formData?.availableTo}
-                  onChange={(e) => handleInputChange('availableTo', e?.target?.value)}
-                />
-              </div>
-            )}
           </div>
         </div>
 
@@ -389,7 +360,8 @@ const ProductForm = ({ product, onSave, onCancel, categories }) => {
           </Button>
           <Button
             type="submit"
-            loading={isSubmitting}
+            loading={isSubmitting || loading}
+            disabled={isSubmitting || loading}
             iconName={product ? "Save" : "Plus"}
             iconPosition="left"
           >

@@ -8,7 +8,10 @@
 // Serviços de autenticação
 export { authService } from "./auth";
 
+// Serviços de produtos e categorias
+export { productService } from "./products";
+export { categoryService } from "./categories";
+
 // Futuramente, adicionar outros serviços:
-// export { productService } from './products';
 // export { orderService } from './orders';
 // export { userService } from './users';

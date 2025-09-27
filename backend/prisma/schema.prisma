@@ -24,23 +24,23 @@ model usuario {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   enderecos endereco[] // UM usuário pode ter VÁRIOS endereços
-  pedidos   pedido[]   // UM usuário pode ter VÁRIOS pedidos
+  pedidos   pedido[] // UM usuário pode ter VÁRIOS pedidos
 
   @@map("usuarios")
 }
 
 model endereco {
-  id                   Int      @id @default(autoincrement())
-  cep                  String   @db.VarChar(10)  // CEP (XXXXX-XXX)
-  logradouro           String   @db.VarChar(255) // Nome da rua/avenida
-  numero               String   @db.VarChar(10)  // Número do endereço
-  complemento          String?  @db.VarChar(100) // Complemento (opcional)
-  informacoes_adicionais String? @db.VarChar(255) // Informações adicionais (opcional)
-  bairro               String   @db.VarChar(100) // Bairro/distrito
-  cidade               String   @db.VarChar(100) // Cidade
-  estado               String   @db.VarChar(2)   // Estado (UF - 2 letras)
-  createdAt            DateTime @default(now()) @map("created_at")
-  updatedAt            DateTime @updatedAt @map("updated_at")
+  id                     Int      @id @default(autoincrement())
+  cep                    String   @db.VarChar(10) // CEP (XXXXX-XXX)
+  logradouro             String   @db.VarChar(255) // Nome da rua/avenida
+  numero                 String   @db.VarChar(10) // Número do endereço
+  complemento            String?  @db.VarChar(100) // Complemento (opcional)
+  informacoes_adicionais String?  @db.VarChar(255) // Informações adicionais (opcional)
+  bairro                 String   @db.VarChar(100) // Bairro/distrito
+  cidade                 String   @db.VarChar(100) // Cidade
+  estado                 String   @db.VarChar(2) // Estado (UF - 2 letras)
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @updatedAt @map("updated_at")
 
   // Foreign Key para usuário
   usuarioId Int
@@ -51,36 +51,36 @@ model endereco {
 
 // Order model
 model pedido {
-  id            Int         @id @default(autoincrement())
-  precoTotal    Decimal     @db.Decimal(10, 2)     // Preço total do pedido
-  status        OrderStatus @default(RECEBIDO)    // Status atual do pedido
-  createdAt     DateTime    @default(now()) @map("created_at")
-  updatedAt     DateTime    @updatedAt @map("updated_at")
+  id         Int         @id @default(autoincrement())
+  precoTotal Decimal     @db.Decimal(10, 2) // Preço total do pedido
+  status     OrderStatus @default(RECEBIDO) // Status atual do pedido
+  createdAt  DateTime    @default(now()) @map("created_at")
+  updatedAt  DateTime    @updatedAt @map("updated_at")
 
   // Foreign Keys
-  usuarioId     Int         // ID do usuário que fez o pedido
-  cupomId       Int?        // ID do cupom usado (opcional)
+  usuarioId Int // ID do usuário que fez o pedido
+  cupomId   Int? // ID do cupom usado (opcional)
 
   // Relations
-  usuario       usuario     @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
-  cupom         cupom?      @relation(fields: [cupomId], references: [id])
-  produtos      pedido_produto[] // UM pedido pode ter VÁRIOS produtos
+  usuario  usuario          @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  cupom    cupom?           @relation(fields: [cupomId], references: [id])
+  produtos pedido_produto[] // UM pedido pode ter VÁRIOS produtos
 
   @@map("pedidos")
 }
 
 // Junction table for order-product relationship (N:M)
 model pedido_produto {
-  id        Int     @id @default(autoincrement())
-  quantidade Int    @default(1) // Quantidade do produto no pedido
+  id         Int @id @default(autoincrement())
+  quantidade Int @default(1) // Quantidade do produto no pedido
 
   // Foreign Keys
   pedidoId  Int
   produtoId Int
 
   // Relations
-  pedido    pedido  @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
-  produto   product @relation(fields: [produtoId], references: [id])
+  pedido  pedido  @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  produto product @relation(fields: [produtoId], references: [id])
 
   @@unique([pedidoId, produtoId]) // Um produto pode aparecer apenas uma vez por pedido
   @@map("pedido_produto")
@@ -93,19 +93,19 @@ model funcionario {
   password String
   role     String
 
-  lojaId   Int
-  loja     store @relation(fields: [lojaId], references: [id])
+  lojaId Int
+  loja   store @relation(fields: [lojaId], references: [id])
 }
 
 model store {
-  id            Int           @id @default(autoincrement())
-  name          String
-  contact       String
-  email         String
-  description   String
-  image         String?
+  id          Int     @id @default(autoincrement())
+  name        String
+  contact     String
+  email       String
+  description String
+  image       String?
 
-  funcionarios  funcionario[] // UMA loja pode ter VÁRIOS funcionários
+  funcionarios funcionario[] // UMA loja pode ter VÁRIOS funcionários
 }
 
 // Enum for discount type
@@ -116,14 +116,14 @@ enum DiscountType {
 
 // Enum for order status
 enum OrderStatus {
-  RECEBIDO                    // Pedido recebido
-  AGUARDANDO_PAGAMENTO        // Aguardando pagamento
-  PAGAMENTO_APROVADO         // Pagamento aprovado
-  PREPARO                    // Em preparo
-  ENVIADO_PARA_ENTREGA       // Enviado para entrega
-  ENTREGUE                   // Entregue
-  CANCELADO                  // Cancelado
-  TENTATIVA_ENTREGA_FALHADA  // Tentativa de entrega não realizada
+  RECEBIDO // Pedido recebido
+  AGUARDANDO_PAGAMENTO // Aguardando pagamento
+  PAGAMENTO_APROVADO // Pagamento aprovado
+  PREPARO // Em preparo
+  ENVIADO_PARA_ENTREGA // Enviado para entrega
+  ENTREGUE // Entregue
+  CANCELADO // Cancelado
+  TENTATIVA_ENTREGA_FALHADA // Tentativa de entrega não realizada
 }
 
 // Enum for coupon status
@@ -134,49 +134,50 @@ enum CouponStatus {
 
 // Coupon model
 model cupom {
-  id          Int          @id @default(autoincrement())
-  codigo      String       @unique @db.VarChar(50)  // Código único do cupom
-  valor       Decimal      @db.Decimal(10, 2)       // Valor do desconto
-  status      CouponStatus @default(ATIVO)         // Status do cupom
-  createdAt   DateTime     @default(now()) @map("created_at")
-  updatedAt   DateTime     @updatedAt @map("updated_at")
+  id        Int          @id @default(autoincrement())
+  codigo    String       @unique @db.VarChar(50) // Código único do cupom
+  valor     Decimal      @db.Decimal(10, 2) // Valor do desconto
+  status    CouponStatus @default(ATIVO) // Status do cupom
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
 
   // Relations
-  pedidos     pedido[]     // UM cupom pode ser usado em VÁRIOS pedidos
+  pedidos pedido[] // UM cupom pode ser usado em VÁRIOS pedidos
 
   @@map("cupons")
 }
 
 // Product category model
 model category {
-  id              Int       @id @default(autoincrement())
-  name            String    @unique
-  activeProducts  Int       @default(0)  // Active products counter
-  totalValue      Decimal   @default(0)  @db.Decimal(10, 2) // Total value of products in stock
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id             Int      @id @default(autoincrement())
+  name           String   @unique
+  activeProducts Int      @default(0) // Active products counter
+  totalValue     Decimal  @default(0) @db.Decimal(10, 2) // Total value of products in stock
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  products        product[] // One category can have MANY products
+  products product[] // One category can have MANY products
 
   @@map("categoria")
 }
 
 // Product model
 model product {
-  id              Int           @id @default(autoincrement())
-  name            String
-  description     String
-  price           Decimal       @db.Decimal(10, 2) // Unit price
-  categoryId      Int
-  available       Boolean       @default(true) // Flag if product is available
-  image           String?       // Image URL or path
-  discount        Decimal?      @db.Decimal(10, 2) // Discount value
-  discountType    DiscountType? // Applied discount type
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id           Int           @id @default(autoincrement())
+  name         String
+  description  String
+  price        Decimal       @db.Decimal(10, 2) // Unit price
+  categoryId   Int
+  available    Boolean       @default(true) // Flag if product is available
+  estoque      Int           @default(0) // Quantidade em estoque
+  image        String? // Image URL or path
+  discount     Decimal?      @db.Decimal(10, 2) // Discount value
+  discountType DiscountType? // Applied discount type
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 
-  category        category      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  pedidos         pedido_produto[] // UM produto pode estar em VÁRIOS pedidos
+  category category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  pedidos  pedido_produto[] // UM produto pode estar em VÁRIOS pedidos
 
   @@map("produto")
 }

@@ -14,6 +14,7 @@ export class ProductService {
    * @param data.price - Preço do produto
    * @param data.categoryId - ID da categoria do produto
    * @param data.available - Disponibilidade do produto (opcional, padrão: true)
+   * @param data.estoque - Quantidade em estoque (opcional, padrão: 0)
    * @param data.image - URL da imagem do produto (opcional)
    * @param data.discount - Valor do desconto (opcional)
    * @param data.discountType - Tipo do desconto (opcional)
@@ -25,6 +26,7 @@ export class ProductService {
     price: number;
     categoryId: number;
     available?: boolean;
+    estoque?: number;
     image?: string;
     discount?: number;
     discountType?: 'PERCENTAGE' | 'FIXED_VALUE';
@@ -41,6 +43,10 @@ export class ProductService {
 
       if (data.price === undefined || data.price < 0) {
         throw new Error('Preço do produto deve ser um valor positivo');
+      }
+
+      if (data.estoque !== undefined && data.estoque < 0) {
+        throw new Error('Estoque do produto não pode ser negativo');
       }
 
       // Verificar se a categoria existe
@@ -172,6 +178,7 @@ export class ProductService {
    *
    * @param id - ID do produto a ser atualizado
    * @param data - Dados a serem atualizados
+   * @param data.estoque - Quantidade em estoque (opcional)
    * @returns Promise com o produto atualizado
    */
   static async updateProduct(id: number, data: {
@@ -180,6 +187,7 @@ export class ProductService {
     price?: number;
     categoryId?: number;
     available?: boolean;
+    estoque?: number;
     image?: string;
     discount?: number;
     discountType?: 'PERCENTAGE' | 'FIXED_VALUE';
@@ -202,6 +210,10 @@ export class ProductService {
 
       if (data.price !== undefined && data.price < 0) {
         throw new Error('Preço do produto deve ser um valor positivo');
+      }
+
+      if (data.estoque !== undefined && data.estoque < 0) {
+        throw new Error('Estoque do produto não pode ser negativo');
       }
 
       // Verificar se a categoria existe se categoryId for fornecido

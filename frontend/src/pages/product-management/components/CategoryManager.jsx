@@ -2,11 +2,28 @@ import React, { useState } from 'react';
 import Icon from '../../../components/AppIcon';
 import { Input } from '@/components/ui/input';
 import Button from '../../../components/ui/ButtonDash';
+import ConfirmDialog from '../../../components/ui/ConfirmDialog';
+import { useToast } from '../../../hooks/use-toast';
 
 const CategoryManager = ({ categories, onAddCategory, onDeleteCategory, products }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [newCategory, setNewCategory] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+
+  // Toast system
+  const { toast } = useToast();
+
+  // Confirmation dialog state
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    title: '',
+    description: '',
+    confirmText: 'Confirmar',
+    cancelText: 'Cancelar',
+    variant: 'default',
+    onConfirm: () => {},
+    onClose: () => setConfirmDialog(prev => ({ ...prev, isOpen: false }))
+  });
 
   const getCategoryStats = (category) => {
     const categoryProducts = products?.filter(p => p?.category === category);
@@ -15,6 +32,20 @@ const CategoryManager = ({ categories, onAddCategory, onDeleteCategory, products
       active: categoryProducts?.filter(p => p?.isAvailable)?.length,
       totalValue: categoryProducts?.reduce((sum, p) => sum + (p?.price * p?.stock), 0)
     };
+  };
+
+  // Helper function to show confirmation dialog
+  const showConfirmDialog = (title, description, onConfirm, options = {}) => {
+    setConfirmDialog({
+      isOpen: true,
+      title,
+      description,
+      confirmText: options.confirmText || 'Confirmar',
+      cancelText: options.cancelText || 'Cancelar',
+      variant: options.variant || 'default',
+      onConfirm,
+      onClose: () => setConfirmDialog(prev => ({ ...prev, isOpen: false }))
+    });
   };
 
   const handleAddCategory = async () => {
@@ -33,16 +64,71 @@ const CategoryManager = ({ categories, onAddCategory, onDeleteCategory, products
 
   const handleDeleteCategory = async (category) => {
     const stats = getCategoryStats(category);
-    if (stats?.total > 0) {
-      if (!confirm(`Esta categoria possui ${stats?.total} produto(s). Tem certeza que deseja excluí-la? Os produtos ficarão sem categoria.`)) {
-        return;
-      }
-    }
 
-    try {
-      await onDeleteCategory(category);
-    } catch (error) {
-      console.error('Error deleting category:', error);
+    if (stats?.total > 0) {
+      showConfirmDialog(
+        'Excluir Categoria',
+        `Esta categoria possui ${stats?.total} produto(s). Tem certeza que deseja excluí-la? Os produtos ficarão sem categoria.`,
+        async () => {
+          try {
+            await onDeleteCategory(category);
+          } catch (error) {
+            console.error('Error deleting category:', error);
+
+            // Mensagens específicas baseadas no tipo de erro
+            let errorTitle = "Erro ao excluir categoria";
+            let errorDescription = error.message || "Não foi possível excluir a categoria.";
+
+            // Verificar se é erro específico de categoria com produtos
+            if (error.message && error.message.includes("produtos associados")) {
+              errorTitle = "Não é possível excluir categoria";
+              errorDescription = "Esta categoria possui produtos associados. Remova ou mova os produtos para outra categoria antes de excluí-la.";
+            } else if (error.message && error.message.includes("não encontrada")) {
+              errorTitle = "Categoria não encontrada";
+              errorDescription = "A categoria que você tentou excluir não foi encontrada.";
+            }
+
+            toast({
+              variant: "destructive",
+              title: errorTitle,
+              description: errorDescription,
+            });
+          }
+        },
+        { variant: 'destructive', confirmText: 'Excluir' }
+      );
+    } else {
+      showConfirmDialog(
+        'Excluir Categoria',
+        `Tem certeza que deseja excluir a categoria "${category}"?`,
+        async () => {
+          try {
+            await onDeleteCategory(category);
+          } catch (error) {
+            console.error('Error deleting category:', error);
+
+            // Mensagens específicas baseadas no tipo de erro
+            let errorTitle = "Erro ao excluir categoria";
+            let errorDescription = error.message || "Não foi possível excluir a categoria.";
+
+            // Verificar se é erro específico de categoria com produtos
+            if (error.message && error.message.includes("produtos associados")) {
+              errorTitle = "Não é possível excluir categoria";
+              errorDescription = "Esta categoria possui produtos associados. Remova ou mova os produtos para outra categoria antes de excluí-la.";
+            } else if (error.message && error.message.includes("não encontrada")) {
+              errorTitle = "Categoria não encontrada";
+              errorDescription = "A categoria que você tentou excluir não foi encontrada.";
+            }
+
+            toast({
+              variant: "destructive",
+              title: errorTitle,
+              description: errorDescription,
+            });
+          }
+        },
+        { variant: 'destructive', confirmText: 'Excluir' }
+      );
     }
   };
 
@@ -141,6 +227,18 @@ const CategoryManager = ({ categories, onAddCategory, onDeleteCategory, products
           )}
         </div>
       )}
+
+      {/* Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        onClose={confirmDialog.onClose}
+        onConfirm={confirmDialog.onConfirm}
+        title={confirmDialog.title}
+        description={confirmDialog.description}
+        confirmText={confirmDialog.confirmText}
+        cancelText={confirmDialog.cancelText}
+        variant={confirmDialog.variant}
+      />
     </div>
   );
 };
