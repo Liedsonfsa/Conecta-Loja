@@ -28,8 +28,8 @@ const Sidebar = ({ isCollapsed = false, onToggle, className = '' }) => {
   const location = useLocation();
   const [notifications, setNotifications] = useState({
     '/dashboard': 0,
-    '/order-management': 5,
-    '/product-management': 2,
+    '/pedidos': 0,
+    '/produtos': 0,
   });
 
   const navigationItems = [
@@ -45,13 +45,13 @@ const Sidebar = ({ isCollapsed = false, onToggle, className = '' }) => {
       children: [
         {
           label: 'Gestão de Produtos',
-          path: '/product-management',
+          path: '/produtos',
           icon: 'Package',
           description: 'Catálogo e estoque'
         },
         {
           label: 'Gestão de Pedidos',
-          path: '/order-management',
+          path: '/pedidos',
           icon: 'ShoppingCart',
           description: 'Pedidos e WhatsApp'
         }
@@ -106,7 +106,7 @@ const Sidebar = ({ isCollapsed = false, onToggle, className = '' }) => {
     const interval = setInterval(() => {
       setNotifications(prev => ({
         ...prev,
-        '/order-management': Math.floor(Math.random() * 10),
+        '/pedidos': Math.floor(Math.random() * 10),
       }));
     }, 30000);
 
