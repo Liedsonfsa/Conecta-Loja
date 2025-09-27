@@ -19,6 +19,7 @@
  */
 import express from "express";
 import cors from "cors";
+import path from "path";
 import routes from './routes';
 
 const app = express();
@@ -32,6 +33,9 @@ app.use(cors({
 
 // Middleware para parsing de JSON no corpo das requisições
 app.use(express.json());
+
+// Servir arquivos estáticos (imagens dos produtos)
+app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));
 
 // Rota inicial de teste - útil para verificar se o servidor está respondendo
 app.get("/", (req, res) => {
