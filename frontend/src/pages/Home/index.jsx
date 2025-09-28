@@ -3,6 +3,8 @@ import { Helmet } from 'react-helmet';
 import Header from '../../components/common/Header';
 import HeroSection from './HeroSection';
 import MenuSection from './MenuSection';
+import Footer from '../../components/ui/Footer';
+import FloatingWhatsAppButton from '../../components/ui/FloatingWhatsAppButton';
 import { Toaster } from '../../components/ui/toaster';
 
 /**
@@ -35,6 +37,8 @@ const Home = () => {
           <HeroSection />
           <MenuSection />
         </main>
+        <Footer />
+        <FloatingWhatsAppButton />
         <Toaster />
       </div>
     </>

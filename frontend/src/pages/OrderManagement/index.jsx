@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Header from '../../components/ui/Header';
 import Sidebar from '../../components/ui/Sidebar';
-import Button from '../../components/ui/Button';
+import Button from '../../components/ui/ButtonDash';
 import Icon from '../../components/AppIcon';
 import OrderStats from './components/OrderStats';
 import OrderFilters from './components/OrderFilters';
@@ -481,14 +481,6 @@ const OrderManagement = () => {
                                 onClick={() => window.location?.reload()}
                             >
                                 Atualizar
-                            </Button>
-                            <Button
-                                variant="default"
-                                iconName="Plus"
-                                iconPosition="left"
-                                onClick={() => window.location.href = '/customer-storefront'}
-                            >
-                                Nova Venda
                             </Button>
                         </div>
                     </div>

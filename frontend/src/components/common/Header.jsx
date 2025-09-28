@@ -9,7 +9,6 @@ import { authService } from "../../api/auth";
  *
  * Exibe o cabeçalho responsivo da aplicação Conecta-Loja contendo:
  * - Logo da empresa
- * - Menu de navegação para desktop
  * - Informações de contato (telefone e localização)
  * - Botões de ação (entrar e carrinho)
  * - Menu mobile responsivo
@@ -125,15 +124,6 @@ const Header = () => {
 
           {/* Desktop Navigation Menu */}
           <nav className="hidden lg:flex items-center space-x-8">
-            {/* Menu Items */}
-            <div className="flex items-center space-x-6">
-              <button className="text-gray-700 hover:text-orange-500 transition-colors font-medium">
-                Cardápio
-              </button>
-              <button className="text-gray-700 hover:text-orange-500 transition-colors font-medium">
-                Sobre
-              </button>
-            </div>
 
             {/* Contact Info */}
             <div className="flex items-center space-x-6 text-sm text-gray-500">
@@ -212,15 +202,6 @@ const Header = () => {
         {menuOpen && (
           <nav className="lg:hidden py-4 border-t border-gray-200">
             <div className="flex flex-col space-y-4">
-              {/* Menu Items */}
-              <div className="flex flex-col space-y-3">
-                <button className="text-left text-gray-700 hover:text-orange-500 transition-colors font-medium">
-                  Cardápio
-                </button>
-                <button className="text-left text-gray-700 hover:text-orange-500 transition-colors font-medium">
-                  Sobre
-                </button>
-              </div>
 
               {/* Contact Info */}
               <div className="flex flex-col space-y-2 text-sm text-gray-500 pt-2 border-t border-gray-100">
