@@ -43,6 +43,31 @@ export const createEmployee = async (req: Request, res: Response) => {
     }
 };
 
+/**
+ * Atualiza os dados de um funcionário existente
+ *
+ * Recebe o ID do funcionário via parâmetro da URL e os novos dados via body da requisição.
+ * Valida e processa as informações recebidas, chama o serviço para atualizar o funcionário
+ * e retorna a resposta apropriada.
+ *
+ * @param req - Requisição Express contendo os dados para atualização
+ * @param req.params.id - ID do funcionário a ser atualizado
+ * @param req.body - Dados do funcionário a serem atualizados
+ * @param req.body.name - (Opcional) Novo nome do funcionário
+ * @param req.body.email - (Opcional) Novo email do funcionário
+ * @param req.body.password - (Opcional) Nova senha do funcionário (será hasheada)
+ * @param req.body.role - (Opcional) Nova função/cargo do funcionário
+ * @param req.body.storeId - (Opcional) Novo ID da loja onde trabalha
+ * @param res - Resposta Express
+ * @returns Promise<Response> - Resposta com funcionário atualizado ou erro
+ *
+ * @example
+ * // Requisição PUT /api/employee/editar/1
+ * {
+ *   "name": "João Silva Atualizado",
+ *   "password": "novaSenha456"
+ * }
+ */
 export const updateEmployee = async (req: Request, res: Response) => {
     try {
         const id = Number(req.params.id);

@@ -53,12 +53,25 @@ export class EmployeeRepository {
         });
     };
 
+    /**
+     * Busca um funcionário pelo ID
+     *
+     * @param id - ID do funcionário a ser buscado
+     * @returns Funcionário encontrado ou null se não existir
+     */
     static async findEmployeeById(id: number) {
         return await prisma.funcionario.findUnique({
             where: {id}
         });
     };
 
+    /**
+     * Atualiza um funcionário no banco de dados
+     *
+     * @param id - ID do funcionário a ser atualizado
+     * @param data - Dados que serão atualizados
+     * @returns Funcionário atualizado
+     */
     static async updateEmployee(id: number, data: any) {
         return await prisma.funcionario.update({
             where: {id},
