@@ -1,29 +1,8 @@
-import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import React from 'react';
 import Icon from '../AppIcon';
 import Button from './ButtonDash';
 
 const Header = ({ onMenuToggle, isSidebarCollapsed = false }) => {
-  const location = useLocation();
-  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
-
-  const primaryNavItems = [
-    { label: 'Dashboard', path: '/dashboard', icon: 'LayoutDashboard' },
-    { label: 'Produtos', path: '/produtos', icon: 'Package' },
-    { label: 'Pedidos', path: '/pedidos', icon: 'ShoppingCart' },
-    { label: 'Loja', path: '/customer-storefront', icon: 'Store' },
-  ];
-
-  const secondaryNavItems = [
-    { label: 'Analytics', path: '/sales-analytics', icon: 'BarChart3' },
-    { label: 'Configurações', path: '/store-settings', icon: 'Settings' },
-  ];
-
-  const isActivePath = (path) => location?.pathname === path;
-
-  const handleNavigation = (path) => {
-    window.location.href = path;
-  };
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-card border-b border-border z-1000">
@@ -80,63 +59,8 @@ const Header = ({ onMenuToggle, isSidebarCollapsed = false }) => {
           </div>
         </div>
 
-        {/* Center Section - Primary Navigation (Desktop) */}
-        <nav className="hidden lg:flex items-center space-x-1">
-          {primaryNavItems?.map((item) => (
-            <Button
-              key={item?.path}
-              variant={isActivePath(item?.path) ? "default" : "ghost"}
-              onClick={() => handleNavigation(item?.path)}
-              className="flex items-center space-x-2 px-4 py-2"
-            >
-              <Icon name={item?.icon} size={18} />
-              <span>{item?.label}</span>
-            </Button>
-          ))}
-        </nav>
-
-        {/* Right Section - More Menu and Actions */}
+        {/* Right Section - Actions */}
         <div className="flex items-center space-x-2">
-          {/* More Menu */}
-          <div className="relative">
-            <Button
-              variant="ghost"
-              onClick={() => setIsMoreMenuOpen(!isMoreMenuOpen)}
-              className="flex items-center space-x-2"
-            >
-              <Icon name="MoreHorizontal" size={18} />
-              <span className="hidden sm:inline">Mais</span>
-            </Button>
-
-            {isMoreMenuOpen && (
-              <>
-                <div
-                  className="fixed inset-0 z-1010"
-                  onClick={() => setIsMoreMenuOpen(false)}
-                />
-                <div className="absolute right-0 top-full mt-2 w-48 bg-popover border border-border rounded-md shadow-elevation-2 z-1020">
-                  <div className="py-1">
-                    {secondaryNavItems?.map((item) => (
-                      <button
-                        key={item?.path}
-                        onClick={() => {
-                          handleNavigation(item?.path);
-                          setIsMoreMenuOpen(false);
-                        }}
-                        className={`w-full flex items-center space-x-3 px-4 py-2 text-sm text-left hover:bg-accent transition-micro ${
-                          isActivePath(item?.path) ? 'bg-accent text-accent-foreground' : 'text-popover-foreground'
-                        }`}
-                      >
-                        <Icon name={item?.icon} size={16} />
-                        <span>{item?.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-
           {/* Notification Bell */}
           <Button variant="ghost" size="icon" className="relative">
             <Icon name="Bell" size={18} />

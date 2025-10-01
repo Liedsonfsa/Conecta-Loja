@@ -59,4 +59,61 @@ export class EmployeeService {
             throw error;
         }
     }
+
+    /**
+     * Atualiza os dados de um funcionário existente no banco de dados.
+     *
+     * Permite modificar nome, email, função/cargo, ID da loja e senha (opcional).
+     * Caso uma nova senha seja fornecida, ela será automaticamente hasheada com bcrypt.
+     *
+     * @param id - ID do funcionário a ser atualizado
+     * @param data - Dados a serem atualizados
+     * @param data.name - (Opcional) Novo nome do funcionário
+     * @param data.email - (Opcional) Novo email do funcionário
+     * @param data.password - (Opcional) Nova senha em texto plano (será hasheada)
+     * @param data.role - (Opcional) Nova função/cargo do funcionário
+     * @param data.storeId - (Opcional) Novo ID da loja onde o funcionário trabalha
+     * @returns Promise com o funcionário atualizado (sem senha)
+     *
+     * @throws Error se o funcionário não for encontrado ou se ocorrer falha na atualização
+     *
+     * @example
+     * const updatedEmployee = await EmployeeService.editEmployee(1, {
+     *   name: "João Silva Atualizado",
+     *   password: "novaSenha456"
+     * });
+     */
+    static async editEmployee(
+        id: number,
+        data: {
+            name?: string,
+            email?: string,
+            password?: string,
+            role?: string,
+            storeId?: number
+        }
+    ) {
+        try {
+            const existingEmployee = await EmployeeRepository.findEmployeeById(id);
+            if (!existingEmployee) {
+                throw new Error("Funcionário não encontrado");
+            }
+
+            const updatedData: any = { ...data };
+
+            if (data.password) {
+                const saltRounds = 12;
+                updatedData.password = await bcrypt.hash(data.password, saltRounds);
+            }
+
+            const updatedEmployee = await EmployeeRepository.updateEmployee(id, updatedData);
+
+            const { password, ...employeeWithoutPassword } = updatedEmployee;
+            return employeeWithoutPassword;
+
+        } catch (error) {
+            throw error;
+        }
+    }
+
 }

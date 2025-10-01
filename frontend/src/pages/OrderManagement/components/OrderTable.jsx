@@ -1,5 +1,5 @@
 import React from 'react';
-import Button from '../../../components/ui/Button';
+import Button from '../../../components/ui/ButtonDash';
 import Icon from '../../../components/AppIcon';
 import OrderStatusBadge from './OrderStatusBadge';
 import { formatCurrency, formatDateTime } from 'src/utils';
