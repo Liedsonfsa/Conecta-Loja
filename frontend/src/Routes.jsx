@@ -5,11 +5,12 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import { Toaster } from "@/components/ui/toaster";
 
 // Import page components
-import HomePage from './pages/Home';
-import Dashboard from './pages/dashboard';
-import NotFoundPage from './pages/NotFound';
-import OrderManagement from './pages/OrderManagement'
-import ProductManagement from './pages/product-management';
+import HomePage from "./pages/Home";
+import Dashboard from "./pages/dashboard";
+import NotFoundPage from "./pages/NotFound";
+import OrderManagement from "./pages/OrderManagement";
+import ProductManagement from "./pages/product-management";
+import UserProfile from "./pages/User/UserProfile";
 /**
  * Routes - Componente principal de configuração de roteamento da aplicação
  *
@@ -28,18 +29,18 @@ import ProductManagement from './pages/product-management';
 const AppRoutes = () => {
   return (
     <BrowserRouter>
-    <ErrorBoundary>
-    <ScrollToTop />
-      <RouterRoutes>
-
-        <Route path="/" element={<HomePage />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/pedidos" element={<OrderManagement />} />
-        <Route path="/produtos" element={<ProductManagement />} />
-        <Route path="*" element={<NotFoundPage />} />
-      </RouterRoutes>
-      <Toaster />
-    </ErrorBoundary>
+      <ErrorBoundary>
+        <ScrollToTop />
+        <RouterRoutes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/pedidos" element={<OrderManagement />} />
+          <Route path="/produtos" element={<ProductManagement />} />
+          <Route path="/profile" element={<UserProfile />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </RouterRoutes>
+        <Toaster />
+      </ErrorBoundary>
     </BrowserRouter>
   );
 };
