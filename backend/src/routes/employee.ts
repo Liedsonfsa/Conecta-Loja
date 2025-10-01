@@ -9,7 +9,10 @@
  * - POST /api/employee/cadastrar - Cria um novo funcionário
  */
 import { Router } from 'express';
-import { createEmployee } from '../controllers/employeeController';
+import { 
+    createEmployee,
+    updateEmployee
+} from '../controllers/employeeController';
 
 const router = Router();
 
@@ -21,5 +24,6 @@ const router = Router();
  * @returns {employee: object} - Dados do funcionário criado (sem senha)
  */
 router.post('/cadastrar', createEmployee);
+router.put('/editar/:id', updateEmployee);
 
 export default router;

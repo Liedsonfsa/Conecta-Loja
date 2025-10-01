@@ -52,4 +52,17 @@ export class EmployeeRepository {
             }
         });
     };
+
+    static async findEmployeeById(id: number) {
+        return await prisma.funcionario.findUnique({
+            where: {id}
+        });
+    };
+
+    static async updateEmployee(id: number, data: any) {
+        return await prisma.funcionario.update({
+            where: {id},
+            data
+        });
+    };
 }
