@@ -1,9 +1,9 @@
-import React from 'react';
-import { Helmet } from 'react-helmet';
-import Header from '../../components/common/Header';
-import HeroSection from './HeroSection';
-import MenuSection from './MenuSection';
-import { Toaster } from '../../components/ui/toaster';
+import React from "react";
+import { Helmet } from "react-helmet";
+import Header from "../../components/common/Header";
+import HeroSection from "./HeroSection";
+import MenuSection from "./MenuSection";
+import { Toaster } from "../../components/ui/toaster";
 
 /**
  * Home - Página inicial da aplicação Conecta-Loja
