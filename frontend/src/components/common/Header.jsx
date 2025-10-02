@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Button from "../ui/Button";
 import LoginModal from "../../pages/Home/LoginModal";
+import UserProfileDropdown from "../ui/userProfileDropdown";
 import { FiPhone, FiMapPin, FiUser, FiMenu, FiX } from "react-icons/fi";
 import { authService } from "../../api/auth";
 
@@ -140,15 +141,7 @@ const Header = () => {
             {/* Action Buttons */}
             <div className="flex items-center space-x-3">
               {user ? (
-                <div className="flex items-center space-x-3">
-                  <span className="text-gray-700">Olá, {user.name}</span>
-                  <button
-                    onClick={handleLogout}
-                    className="text-gray-700 hover:text-orange-500 transition-colors"
-                  >
-                    Sair
-                  </button>
-                </div>
+                <UserProfileDropdown user={user} onLogout={handleLogout} />
               ) : apiOffline ? (
                 <button
                   onClick={tryReconnect}
@@ -218,15 +211,7 @@ const Header = () => {
               {/* Action Buttons */}
               <div className="flex flex-col space-y-3 pt-3 border-t border-gray-100">
                 {user ? (
-                  <div className="flex flex-col space-y-2">
-                    <span className="text-gray-700">Olá, {user.name}</span>
-                    <button
-                      onClick={handleLogout}
-                      className="text-left text-gray-700 hover:text-orange-500 transition-colors"
-                    >
-                      Sair
-                    </button>
-                  </div>
+                  <UserProfileDropdown user={user} onLogout={handleLogout} />
                 ) : apiOffline ? (
                   <button
                     onClick={tryReconnect}
