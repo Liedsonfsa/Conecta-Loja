@@ -20,6 +20,50 @@ import ProductForm from './components/ProductForm';
 import StatsCards from './components/StatsCards';
 import CategoryManager from './components/CategoryManager';
 
+/**
+ * ProductManagement - Página principal de gestão de produtos da aplicação Conecta-Loja
+ *
+ * Esta página fornece uma interface completa para gerenciar o catálogo de produtos,
+ * incluindo operações CRUD, filtros avançados, controle de estoque, categorias e
+ * estatísticas do catálogo. Suporta tanto visualização desktop quanto mobile responsiva.
+ *
+ * Funcionalidades principais:
+ * - Visualização em tabela/cards de todos os produtos
+ * - Filtros avançados (busca, categoria, preço, estoque, disponibilidade)
+ * - Formulário para criação/edição de produtos
+ * - Gerenciamento de categorias
+ * - Estatísticas do catálogo (cards de métricas)
+ * - Controle de estoque e disponibilidade
+ * - Sistema de confirmação para ações destrutivas
+ *
+ * Estados gerenciados:
+ * - Lista de produtos e suas informações completas
+ * - Categorias disponíveis no sistema
+ * - Estados de loading e operações assíncronas
+ * - Filtros aplicados à listagem
+ * - Formulário de produto (criação/edição)
+ * - Dialog de confirmação
+ *
+ * Integrações:
+ * - API de produtos (productService)
+ * - API de categorias (categoryService)
+ * - Sistema de notificações (useToast)
+ * - Dialog de confirmação (ConfirmDialog)
+ *
+ * Tratamento de erros:
+ * - Mensagens específicas baseadas no tipo de erro da API
+ * - Tratamento de problemas de conectividade
+ * - Validações de permissões e dados
+ *
+ * @component
+ * @example
+ * // Rota configurada em Routes.jsx
+ * <Route path="/products" element={<ProductManagement />} />
+ *
+ * @example
+ * // Acesso através do menu lateral do dashboard
+ * <SidebarMenuItem to="/products" icon="Package" label="Produtos" />
+ */
 const ProductManagement = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showProductForm, setShowProductForm] = useState(false);
@@ -55,7 +99,17 @@ const ProductManagement = () => {
   const [stockFilter, setStockFilter] = useState('all');
   const [availabilityFilter, setAvailabilityFilter] = useState('all');
 
-  // Helper function to show confirmation dialog
+  /**
+   * Exibe um dialog de confirmação para ações críticas
+   *
+   * @param {string} title - Título do dialog
+   * @param {string} description - Descrição/mensagem do dialog
+   * @param {Function} onConfirm - Função a ser executada ao confirmar
+   * @param {Object} options - Opções adicionais do dialog
+   * @param {string} options.confirmText - Texto do botão de confirmação
+   * @param {string} options.cancelText - Texto do botão de cancelamento
+   * @param {string} options.variant - Variante visual do botão de confirmação
+   */
   const showConfirmDialog = (title, description, onConfirm, options = {}) => {
     setConfirmDialog({
       isOpen: true,
@@ -69,7 +123,19 @@ const ProductManagement = () => {
     });
   };
 
-  // Função para carregar categorias da API
+  /**
+   * Carrega as categorias disponíveis da API
+   *
+   * Faz uma chamada para categoryService.getAllCategories() e processa
+   * a resposta para criar um array de nomes de categorias e um mapeamento
+   * ID -> Nome para facilitar a conversão entre formatos.
+   *
+   * Em caso de erro, exibe mensagens específicas baseadas no tipo de erro
+   * através do sistema de toast.
+   *
+   * @async
+   * @returns {Promise<void>}
+   */
   const loadCategories = async () => {
     try {
       const response = await categoryService.getAllCategories();
@@ -106,7 +172,20 @@ const ProductManagement = () => {
     }
   };
 
-  // Função para carregar produtos da API
+  /**
+   * Carrega os produtos da API e os formata para uso no frontend
+   *
+   * Faz uma chamada para productService.getAllProducts() e converte
+   * os dados da API para o formato esperado pelos componentes do frontend.
+   * Realiza mapeamento de categorias usando o categoryMap e formatação
+   * de preços, imagens e outros campos.
+   *
+   * Em caso de erro, exibe mensagens específicas baseadas no tipo de erro
+   * através do sistema de toast.
+   *
+   * @async
+   * @returns {Promise<void>}
+   */
   const loadProducts = async () => {
     try {
       setLoading(true);
@@ -182,6 +261,26 @@ const ProductManagement = () => {
     setShowProductForm(true);
   };
 
+  /**
+   * Salva um produto (criação ou atualização)
+   *
+   * Processa os dados do formulário, converte para o formato da API
+   * e faz a chamada apropriada (createProduct ou updateProduct).
+   * Após o sucesso, recarrega a lista de produtos e fecha o formulário.
+   *
+   * @async
+   * @param {Object} productData - Dados do produto do formulário
+   * @param {string} productData.name - Nome do produto
+   * @param {string} productData.description - Descrição do produto
+   * @param {number} productData.price - Preço do produto
+   * @param {number} productData.categoryId - ID da categoria
+   * @param {number} productData.stock - Quantidade em estoque
+   * @param {boolean} productData.available - Disponibilidade do produto
+   * @param {string} [productData.image] - URL da imagem do produto
+   * @param {number} [productData.discount] - Valor do desconto
+   * @param {string} [productData.discountType] - Tipo do desconto ('fixed' ou 'percentage')
+   * @returns {Promise<void>}
+   */
   const handleSaveProduct = async (productData) => {
     try {
       setSavingProduct(true);
@@ -243,6 +342,17 @@ const ProductManagement = () => {
     }
   };
 
+  /**
+   * Exclui um produto após confirmação do usuário
+   *
+   * Exibe um dialog de confirmação antes de proceder com a exclusão.
+   * Se confirmado, faz a chamada para productService.deleteProduct()
+   * e recarrega a lista de produtos.
+   *
+   * @async
+   * @param {string|number} productId - ID do produto a ser excluído
+   * @returns {Promise<void>}
+   */
   const handleDeleteProduct = async (productId) => {
     const product = products.find(p => p.id === productId?.toString());
     const productName = product?.name || 'este produto';
@@ -290,6 +400,17 @@ const ProductManagement = () => {
 
 
 
+  /**
+   * Adiciona uma nova categoria ao sistema
+   *
+   * Verifica se a categoria não existe e cria uma nova através do
+   * categoryService.createCategory(). Após o sucesso, recarrega
+   * categorias e produtos para atualizar o mapeamento.
+   *
+   * @async
+   * @param {string} categoryName - Nome da nova categoria
+   * @returns {Promise<void>}
+   */
   const handleAddCategory = async (categoryName) => {
     try {
     if (!categories?.includes(categoryName)) {
@@ -326,6 +447,17 @@ const ProductManagement = () => {
     }
   };
 
+  /**
+   * Exclui uma categoria do sistema
+   *
+   * Encontra o ID da categoria pelo nome e faz a chamada para
+   * categoryService.deleteCategory(). Após o sucesso, recarrega
+   * categorias e produtos para atualizar o mapeamento.
+   *
+   * @async
+   * @param {string} categoryName - Nome da categoria a ser excluída
+   * @returns {Promise<void>}
+   */
   const handleDeleteCategory = async (categoryName) => {
     try {
       // Encontrar o ID da categoria pelo nome

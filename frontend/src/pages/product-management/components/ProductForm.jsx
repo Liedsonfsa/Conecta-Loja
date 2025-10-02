@@ -6,6 +6,60 @@ import Select from '../../../components/ui/Select';
 import Button from '../../../components/ui/ButtonDash';
 import { Checkbox } from '../../../components/ui/Checkbox';
 
+/**
+ * ProductForm - Formulário para criação e edição de produtos
+ *
+ * Formulário completo para gerenciar produtos com validação em tempo real,
+ * upload de imagens, configuração de desconto e controle de estoque.
+ * Suporta tanto criação de novos produtos quanto edição de produtos existentes.
+ *
+ * Funcionalidades:
+ * - Campos obrigatórios validados (nome, descrição, preço)
+ * - Upload múltiplo de imagens com preview
+ * - Seleção de categoria via dropdown
+ * - Configuração de desconto (percentual ou valor fixo)
+ * - Controle de disponibilidade e estoque
+ * - Validação em tempo real com mensagens de erro
+ * - Estados de loading durante submissão
+ * - Reset automático ao cancelar
+ *
+ * Estados gerenciados:
+ * - Dados do formulário (formData)
+ * - Erros de validação (errors)
+ * - Preview de imagens (imagePreview)
+ * - Estado de submissão (isSubmitting)
+ *
+ * @component
+ * @param {Object} props - Propriedades do componente
+ * @param {Object} [props.product] - Produto para edição (null para criação)
+ * @param {Function} props.onSave - Função chamada ao salvar produto
+ * @param {Function} props.onCancel - Função chamada ao cancelar
+ * @param {Array<string>} props.categories - Lista de categorias disponíveis
+ * @param {boolean} props.loading - Indica se está salvando
+ * @param {Object} props.categoryMap - Mapeamento ID -> Nome das categorias
+ *
+ * @example
+ * // Para criação de novo produto
+ * <ProductForm
+ *   product={null}
+ *   onSave={handleSaveProduct}
+ *   onCancel={handleCancel}
+ *   categories={['Eletrônicos', 'Roupas']}
+ *   loading={saving}
+ *   categoryMap={{1: 'Eletrônicos', 2: 'Roupas'}}
+ * />
+ *
+ * @example
+ * // Para edição de produto existente
+ * <ProductForm
+ *   product={selectedProduct}
+ *   onSave={handleSaveProduct}
+ *   onCancel={handleCancel}
+ *   categories={['Eletrônicos', 'Roupas']}
+ *   loading={saving}
+ *   categoryMap={{1: 'Eletrônicos', 2: 'Roupas'}}
+ * />
+ */
 const ProductForm = ({ product, onSave, onCancel, categories, loading, categoryMap }) => {
   const [formData, setFormData] = useState({
     name: '',
@@ -47,6 +101,15 @@ const ProductForm = ({ product, onSave, onCancel, categories, loading, categoryM
     { value: 'fixed', label: 'Valor Fixo (R$)' }
   ];
 
+  /**
+   * Manipula mudanças nos campos do formulário
+   *
+   * Atualiza o estado do formulário e remove mensagens de erro
+   * para o campo que está sendo editado.
+   *
+   * @param {string} field - Nome do campo sendo alterado
+   * @param {any} value - Novo valor do campo
+   */
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors?.[field]) {
@@ -54,6 +117,14 @@ const ProductForm = ({ product, onSave, onCancel, categories, loading, categoryM
     }
   };
 
+  /**
+   * Processa o upload de imagens do produto
+   *
+   * Converte arquivos selecionados para base64 e atualiza
+   * o estado do formulário e preview das imagens.
+   *
+   * @param {Event} e - Evento de mudança do input file
+   */
   const handleImageUpload = (e) => {
     const files = Array.from(e?.target?.files);
     const newImages = [];
@@ -77,6 +148,14 @@ const ProductForm = ({ product, onSave, onCancel, categories, loading, categoryM
     });
   };
 
+  /**
+   * Remove uma imagem específica da lista
+   *
+   * Atualiza tanto o estado do formulário quanto o preview
+   * removendo a imagem no índice especificado.
+   *
+   * @param {number} index - Índice da imagem a ser removida
+   */
   const removeImage = (index) => {
     setImagePreview(prev => prev?.filter((_, i) => i !== index));
     setFormData(prev => ({
@@ -85,6 +164,14 @@ const ProductForm = ({ product, onSave, onCancel, categories, loading, categoryM
     }));
   };
 
+  /**
+   * Valida os dados do formulário
+   *
+   * Verifica campos obrigatórios e regras de negócio,
+   * retornando um objeto com mensagens de erro.
+   *
+   * @returns {Object} Objeto contendo erros de validação por campo
+   */
   const validateForm = () => {
     const newErrors = {};
 

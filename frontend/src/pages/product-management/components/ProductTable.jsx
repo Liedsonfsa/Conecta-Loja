@@ -3,6 +3,47 @@ import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 import Button from '../../../components/ui/ButtonDash';
 
+/**
+ * ProductTable - Componente de tabela para exibição e gerenciamento de produtos
+ *
+ * Exibe uma tabela responsiva de produtos com funcionalidades de ordenação,
+ * filtros aplicados e ações de edição/exclusão. Suporta tanto visualização
+ * desktop (tabela) quanto mobile (cards). Inclui formatação de preços,
+ * status de estoque, disponibilidade e informações visuais dos produtos.
+ *
+ * Funcionalidades:
+ * - Ordenação por preço, categoria e estoque (asc/desc)
+ * - Filtros aplicados dinamicamente (busca, categoria, preço, estoque, disponibilidade)
+ * - Visualização desktop com tabela completa
+ * - Visualização mobile com cards responsivos
+ * - Status visuais para estoque (Esgotado, Baixo, Em Estoque)
+ * - Formatação de preços com desconto aplicado
+ * - Ações de editar/excluir para cada produto
+ * - Estado vazio quando nenhum produto encontrado
+ *
+ * @component
+ * @param {Object} props - Propriedades do componente
+ * @param {Array} props.products - Lista de produtos a serem exibidos
+ * @param {Function} props.onEdit - Função chamada ao editar um produto
+ * @param {Function} props.onDelete - Função chamada ao excluir um produto
+ * @param {string} props.searchTerm - Termo de busca aplicado
+ * @param {string} props.selectedCategory - Categoria selecionada para filtro
+ * @param {Array<number>} props.priceRange - Faixa de preço [min, max]
+ * @param {string} props.stockFilter - Filtro de estoque ('all', 'in', 'low', 'out')
+ * @param {string} props.availabilityFilter - Filtro de disponibilidade ('all', 'available', 'unavailable')
+ *
+ * @example
+ * <ProductTable
+ *   products={products}
+ *   onEdit={handleEditProduct}
+ *   onDelete={handleDeleteProduct}
+ *   searchTerm="camiseta"
+ *   selectedCategory="Roupas"
+ *   priceRange={[0, 100]}
+ *   stockFilter="in"
+ *   availabilityFilter="available"
+ * />
+ */
 const ProductTable = ({ products, onEdit, onDelete, searchTerm, selectedCategory, priceRange, stockFilter, availabilityFilter }) => {
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
@@ -36,6 +77,14 @@ const ProductTable = ({ products, onEdit, onDelete, searchTerm, selectedCategory
     });
   }, [filteredProducts, sortConfig]);
 
+  /**
+   * Manipula a ordenação da tabela por uma coluna específica
+   *
+   * Alterna entre ordem ascendente e descendente. Se a coluna já estiver
+   * sendo ordenada, inverte a direção; caso contrário, define a nova coluna.
+   *
+   * @param {string} key - Chave da coluna para ordenar ('price', 'category', 'stock')
+   */
   const handleSort = (key) => {
     setSortConfig(prev => ({
       key,
@@ -43,12 +92,26 @@ const ProductTable = ({ products, onEdit, onDelete, searchTerm, selectedCategory
     }));
   };
 
+  /**
+   * Determina o status visual do estoque baseado na quantidade
+   *
+   * @param {number} stock - Quantidade em estoque
+   * @returns {Object} Objeto com label e classe CSS do status
+   * @returns {string} return.label - Texto descritivo do status
+   * @returns {string} return.color - Classes CSS para estilização
+   */
   const getStockStatus = (stock) => {
     if (stock === 0) return { label: 'Esgotado', color: 'text-destructive bg-destructive/10' };
     if (stock <= 10) return { label: 'Baixo', color: 'text-warning bg-warning/10' };
     return { label: 'Em Estoque', color: 'text-success bg-success/10' };
   };
 
+  /**
+   * Formata um valor numérico para moeda brasileira (R$)
+   *
+   * @param {number} price - Valor a ser formatado
+   * @returns {string} Valor formatado em reais
+   */
   const formatPrice = (price) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -56,6 +119,18 @@ const ProductTable = ({ products, onEdit, onDelete, searchTerm, selectedCategory
     })?.format(price);
   };
 
+  /**
+   * Calcula o preço final de um produto aplicando desconto se existir
+   *
+   * Suporta dois tipos de desconto: percentual e valor fixo.
+   * Se não houver desconto, retorna o preço base.
+   *
+   * @param {Object} product - Objeto do produto
+   * @param {number} product.price - Preço base do produto
+   * @param {number} product.discount - Valor do desconto
+   * @param {string} product.discountType - Tipo do desconto ('percentage' ou 'fixed')
+   * @returns {number} Preço final após aplicar desconto
+   */
   const calculateFinalPrice = (product) => {
     const basePrice = parseFloat(product?.price);
     const discount = parseFloat(product?.discount) || 0;
@@ -71,6 +146,14 @@ const ProductTable = ({ products, onEdit, onDelete, searchTerm, selectedCategory
     return basePrice;
   };
 
+  /**
+   * Formata uma data para o padrão brasileiro
+   *
+   * Exibe data e hora no formato DD/MM/AAAA HH:MM
+   *
+   * @param {string|Date} date - Data a ser formatada
+   * @returns {string} Data formatada em português brasileiro
+   */
   const formatDate = (date) => {
     return new Intl.DateTimeFormat('pt-BR', {
       day: '2-digit',
