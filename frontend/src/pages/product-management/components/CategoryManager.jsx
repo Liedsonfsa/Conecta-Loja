@@ -5,6 +5,54 @@ import Button from '../../../components/ui/ButtonDash';
 import ConfirmDialog from '../../../components/ui/ConfirmDialog';
 import { useToast } from '../../../hooks/use-toast';
 
+/**
+ * CategoryManager - Componente para gerenciamento de categorias de produtos
+ *
+ * Interface completa para visualizar, adicionar e excluir categorias de produtos.
+ * Exibe estatísticas de cada categoria (total de produtos, ativos, valor total)
+ * e permite operações CRUD com confirmação para ações destrutivas.
+ *
+ * Funcionalidades:
+ * - Visualização de todas as categorias com estatísticas
+ * - Adição de novas categorias via modal/formulário inline
+ * - Exclusão de categorias com confirmação e validação
+ * - Estatísticas por categoria (produtos totais, ativos, valor total)
+ * - Validação de dependências (não permite excluir categoria com produtos)
+ * - Sistema de confirmação para ações críticas
+ * - Tratamento de erros com mensagens específicas
+ *
+ * Estados gerenciados:
+ * - Lista de categorias disponíveis
+ * - Modal/formulário de adição (expandido/colapsado)
+ * - Estados de loading para operações assíncronas
+ * - Dialog de confirmação para exclusão
+ *
+ * Validações:
+ * - Nome da categoria não pode estar vazio
+ * - Categoria não pode ser duplicada
+ * - Não permite excluir categoria que possui produtos
+ *
+ * @component
+ * @param {Object} props - Propriedades do componente
+ * @param {Array<string>} props.categories - Lista de nomes das categorias
+ * @param {Function} props.onAddCategory - Função para adicionar nova categoria
+ * @param {Function} props.onDeleteCategory - Função para excluir categoria
+ * @param {Array} props.products - Lista completa de produtos para estatísticas
+ *
+ * @example
+ * <CategoryManager
+ *   categories={['Eletrônicos', 'Roupas', 'Casa']}
+ *   onAddCategory={handleAddCategory}
+ *   onDeleteCategory={handleDeleteCategory}
+ *   products={productsList}
+ * />
+ *
+ * @example
+ * // Estatísticas calculadas por categoria:
+ * // Eletrônicos: 15 produtos (12 ativos) - R$ 45.000,00
+ * // Roupas: 8 produtos (8 ativos) - R$ 12.000,00
+ * // Casa: 5 produtos (3 ativos) - R$ 8.000,00
+ */
 const CategoryManager = ({ categories, onAddCategory, onDeleteCategory, products }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [newCategory, setNewCategory] = useState('');

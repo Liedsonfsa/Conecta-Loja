@@ -5,6 +5,62 @@ import Select from '../../../components/ui/Select';
 import Button from '../../../components/ui/ButtonDash';
 import { Checkbox } from '../../../components/ui/Checkbox';
 
+/**
+ * BulkActions - Componente para ações em lote nos produtos selecionados
+ *
+ * Interface para executar operações em massa em múltiplos produtos selecionados.
+ * Permite alterar categoria, disponibilidade, ajustar estoque, aplicar descontos
+ * e excluir produtos em lote, com validações e confirmações apropriadas.
+ *
+ * Ações disponíveis:
+ * - Alterar Categoria: Move múltiplos produtos para uma categoria
+ * - Alterar Disponibilidade: Ativa/desativa produtos em lote
+ * - Ajustar Estoque: Adiciona, remove ou define quantidade de estoque
+ * - Aplicar Desconto: Aplica desconto percentual ou fixo
+ * - Excluir Produtos: Remove múltiplos produtos com confirmação
+ *
+ * Funcionalidades:
+ * - Seleção múltipla de produtos via checkboxes
+ * - Interface expandível/colapsável para economizar espaço
+ * - Validações específicas para cada tipo de ação
+ * - Preview das alterações antes da execução
+ * - Sistema de confirmação para ações destrutivas
+ * - Indicadores visuais de progresso e resultados
+ *
+ * Estados gerenciados:
+ * - Produtos selecionados para ações em lote
+ * - Tipo de ação selecionada
+ * - Valores para cada tipo de ação
+ * - Estados de loading e validação
+ *
+ * Validações:
+ * - Pelo menos um produto deve estar selecionado
+ * - Campos obrigatórios baseados na ação escolhida
+ * - Valores numéricos válidos para estoque e desconto
+ *
+ * @component
+ * @param {Object} props - Propriedades do componente
+ * @param {Array<string>} props.selectedProducts - IDs dos produtos selecionados
+ * @param {Function} props.onBulkUpdate - Função para executar ação em lote
+ * @param {Function} props.onClearSelection - Função para limpar seleção
+ * @param {Array} props.products - Lista completa de produtos
+ *
+ * @example
+ * <BulkActions
+ *   selectedProducts={['1', '2', '3']}
+ *   onBulkUpdate={handleBulkUpdate}
+ *   onClearSelection={clearSelection}
+ *   products={productsList}
+ * />
+ *
+ * @example
+ * // Ações disponíveis:
+ * // - Alterar categoria para "Eletrônicos"
+ * // - Definir disponibilidade como "Disponível"
+ * // - Adicionar 10 unidades ao estoque
+ * // - Aplicar 15% de desconto
+ * // - Excluir produtos selecionados
+ */
 const BulkActions = ({ selectedProducts, onBulkUpdate, onClearSelection, products }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [bulkAction, setBulkAction] = useState('');

@@ -4,19 +4,73 @@ import { Input } from '@/components/ui/input';
 import Select from '../../../components/ui/Select';
 import Button from '../../../components/ui/ButtonDash';
 
-const ProductFilters = ({ 
-  searchTerm, 
-  onSearchChange, 
-  selectedCategory, 
-  onCategoryChange, 
-  priceRange, 
-  onPriceRangeChange, 
-  stockFilter, 
-  onStockFilterChange, 
-  availabilityFilter, 
+/**
+ * ProductFilters - Componente de filtros avançados para produtos
+ *
+ * Interface de filtros completa para pesquisa e segmentação de produtos,
+ * incluindo busca textual, categoria, faixa de preço, estoque e disponibilidade.
+ * Fornece feedback visual sobre filtros ativos e opção de limpar todos os filtros.
+ *
+ * Funcionalidades:
+ * - Busca textual por nome ou descrição do produto
+ * - Filtro por categoria específica ou todas
+ * - Faixa de preço configurável (range slider)
+ * - Filtros de estoque (todos, em estoque, baixo, esgotado)
+ * - Filtros de disponibilidade (todos, disponível, indisponível)
+ * - Detecção automática de filtros ativos
+ * - Botão para limpar todos os filtros
+ *
+ * Estados dos filtros:
+ * - searchTerm: Termo de busca textual
+ * - selectedCategory: Categoria selecionada ('all' para todas)
+ * - priceRange: Array [min, max] da faixa de preço
+ * - stockFilter: Filtro de estoque ('all', 'in', 'low', 'out')
+ * - availabilityFilter: Filtro de disponibilidade ('all', 'available', 'unavailable')
+ *
+ * @component
+ * @param {Object} props - Propriedades do componente
+ * @param {string} props.searchTerm - Termo de busca atual
+ * @param {Function} props.onSearchChange - Função para alterar termo de busca
+ * @param {string} props.selectedCategory - Categoria selecionada
+ * @param {Function} props.onCategoryChange - Função para alterar categoria
+ * @param {Array<number>} props.priceRange - Faixa de preço [min, max]
+ * @param {Function} props.onPriceRangeChange - Função para alterar faixa de preço
+ * @param {string} props.stockFilter - Filtro de estoque atual
+ * @param {Function} props.onStockFilterChange - Função para alterar filtro de estoque
+ * @param {string} props.availabilityFilter - Filtro de disponibilidade atual
+ * @param {Function} props.onAvailabilityFilterChange - Função para alterar filtro de disponibilidade
+ * @param {Function} props.onClearFilters - Função para limpar todos os filtros
+ * @param {Array<string>} props.categories - Lista de categorias disponíveis
+ *
+ * @example
+ * <ProductFilters
+ *   searchTerm="camiseta"
+ *   onSearchChange={setSearchTerm}
+ *   selectedCategory="Roupas"
+ *   onCategoryChange={setSelectedCategory}
+ *   priceRange={[0, 100]}
+ *   onPriceRangeChange={setPriceRange}
+ *   stockFilter="in"
+ *   onStockFilterChange={setStockFilter}
+ *   availabilityFilter="available"
+ *   onAvailabilityFilterChange={setAvailabilityFilter}
+ *   onClearFilters={clearAllFilters}
+ *   categories={['Eletrônicos', 'Roupas', 'Casa']}
+ * />
+ */
+const ProductFilters = ({
+  searchTerm,
+  onSearchChange,
+  selectedCategory,
+  onCategoryChange,
+  priceRange,
+  onPriceRangeChange,
+  stockFilter,
+  onStockFilterChange,
+  availabilityFilter,
   onAvailabilityFilterChange,
   onClearFilters,
-  categories 
+  categories
 }) => {
   const categoryOptions = [
     { value: 'all', label: 'Todas as Categorias' },
