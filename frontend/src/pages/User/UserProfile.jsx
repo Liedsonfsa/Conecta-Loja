@@ -3,24 +3,50 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, User, Mail, Phone, MapPin, Camera, Save } from "lucide-react";
+import {
+  ArrowLeft,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Camera,
+  Save,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
+/**
+ * UserProfile - Página de perfil do usuário da aplicação Conecta-Loja
+ *
+ * Página dedicada à visualização e edição das informações pessoais do usuário,
+ * permitindo gerenciar dados de contato, endereço e configurações da conta.
+ * Interface intuitiva com formulários organizados em seções temáticas.
+ *
+ *
+ * Estrutura de dados gerenciada:
+ * - Nome completo e data de nascimento
+ * - Email e telefone de contato
+
+ * @example
+ * // Rota configurada em Routes.jsx
+ * <Route path="/profile" element={<UserProfile />} />
+ *
+ * @example
+ * // Navegação via dropdown de usuário
+ * <UserProfileDropdown user={currentUser} onLogout={handleLogout} />
+ *
+ */
+
 const UserProfile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const [profile, setProfile] = useState({
     name: "João Silva",
     email: "joao@email.com",
     phone: "(11) 99999-9999",
     birthDate: "1990-05-15",
-    address: "Rua das Flores, 123",
-    city: "São Paulo",
-    state: "SP",
-    cep: "01234-567"
   });
 
   const handleSave = () => {
@@ -33,9 +59,9 @@ const UserProfile = () => {
 
   const getInitials = (name) => {
     return name
-      .split(' ')
-      .map(n => n[0])
-      .join('')
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
       .toUpperCase()
       .slice(0, 2);
   };
@@ -45,10 +71,10 @@ const UserProfile = () => {
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="icon"
-            onClick={() => navigate('/')}
+            onClick={() => navigate("/")}
             className="hover:bg-muted"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -97,7 +123,9 @@ const UserProfile = () => {
                 <Input
                   id="name"
                   value={profile.name}
-                  onChange={(e) => setProfile(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={(e) =>
+                    setProfile((prev) => ({ ...prev, name: e.target.value }))
+                  }
                 />
               </div>
               <div>
@@ -106,7 +134,12 @@ const UserProfile = () => {
                   id="birthDate"
                   type="date"
                   value={profile.birthDate}
-                  onChange={(e) => setProfile(prev => ({ ...prev, birthDate: e.target.value }))}
+                  onChange={(e) =>
+                    setProfile((prev) => ({
+                      ...prev,
+                      birthDate: e.target.value,
+                    }))
+                  }
                 />
               </div>
             </div>
@@ -130,7 +163,9 @@ const UserProfile = () => {
                   id="email"
                   type="email"
                   value={profile.email}
-                  onChange={(e) => setProfile(prev => ({ ...prev, email: e.target.value }))}
+                  onChange={(e) =>
+                    setProfile((prev) => ({ ...prev, email: e.target.value }))
+                  }
                   className="pl-9"
                 />
               </div>
@@ -142,7 +177,9 @@ const UserProfile = () => {
                 <Input
                   id="phone"
                   value={profile.phone}
-                  onChange={(e) => setProfile(prev => ({ ...prev, phone: e.target.value }))}
+                  onChange={(e) =>
+                    setProfile((prev) => ({ ...prev, phone: e.target.value }))
+                  }
                   className="pl-9"
                 />
               </div>
