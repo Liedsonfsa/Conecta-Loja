@@ -108,6 +108,87 @@ const UserProfile = () => {
           </CardContent>
         </Card>
 
+          {/* Endereco de entrega  */}
+          <Card className="mb-6">
+              <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                      <MapPin className="h-5 w-5" />
+                      Endereço de Entrega
+                  </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                  {/* Campo do CEP */}
+                  <div>
+                      <Label htmlFor="cep">CEP</Label>
+                      <Input
+                          id="cep"
+                          value="01310-200"
+                          readOnly
+                      />
+                  </div>
+
+                  {/* Rua e Número */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="md:col-span-2">
+                          <Label htmlFor="rua">Rua / Logradouro</Label>
+                          <Input
+                              id="rua"
+                              value="Avenida Paulista"
+                              readOnly
+                          />
+                      </div>
+                      <div>
+                          <Label htmlFor="numero">Número</Label>
+                          <Input
+                              id="numero"
+                              value="1578"
+                              readOnly
+                          />
+                      </div>
+                  </div>
+
+                  {/* Complemento e Bairro  */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                          <Label htmlFor="complemento">Complemento</Label>
+                          <Input
+                              id="complemento"
+                              value="Andar 10, Sala 101"
+                              readOnly
+                          />
+                      </div>
+                      <div>
+                          <Label htmlFor="bairro">Bairro</Label>
+                          <Input
+                              id="bairro"
+                              value="Bela Vista"
+                              readOnly
+                          />
+                      </div>
+                  </div>
+
+                  {/* Cidade e Estado */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="md:col-span-2">
+                          <Label htmlFor="cidade">Cidade</Label>
+                          <Input
+                              id="cidade"
+                              value="São Paulo"
+                              readOnly
+                          />
+                      </div>
+                      <div>
+                          <Label htmlFor="estado">Estado (UF)</Label>
+                          <Input
+                              id="estado"
+                              value="SP"
+                              readOnly
+                          />
+                      </div>
+                  </div>
+              </CardContent>
+          </Card>
+
         {/* Personal Information */}
         <Card className="mb-6">
           <CardHeader>
