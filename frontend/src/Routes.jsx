@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 
 // Import components
 import AdminRoute from "@/components/AdminRoute";
+import EmployeeRoute from "@/components/EmployeeRoute";
 
 // Import page components
 import HomePage from "./pages/Home";
@@ -37,7 +38,11 @@ const AppRoutes = () => {
         <ScrollToTop />
         <RouterRoutes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={
+            <EmployeeRoute>
+              <Dashboard />
+            </EmployeeRoute>
+          } />
           <Route path="/pedidos" element={<OrderManagement />} />
           <Route path="/produtos" element={<ProductManagement />} />
           <Route path="/profile" element={<UserProfile />} />
