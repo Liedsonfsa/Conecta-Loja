@@ -39,7 +39,7 @@ export class EmployeeRepository {
         name: string,
         email: string,
         password: string,
-        role: string,
+        role: 'FUNCIONARIO' | 'ADMIN',
         storeId: number
     }) {
         return await prisma.funcionario.create({

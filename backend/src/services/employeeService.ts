@@ -47,7 +47,7 @@ export class EmployeeService {
         name: string,
         email: string,
         password: string,
-        role: string,
+        role: 'FUNCIONARIO' | 'ADMIN',
         storeId: number
     }) {
         try {
@@ -98,7 +98,7 @@ export class EmployeeService {
             name?: string,
             email?: string,
             password?: string,
-            role?: string,
+            role?: 'FUNCIONARIO' | 'ADMIN',
             storeId?: number
         }
     ) {
