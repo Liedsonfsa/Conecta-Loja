@@ -9,7 +9,7 @@ declare global {
         id: number;
         email: string;
         name: string;
-        userType: 'cliente' | 'funcionario';
+        userType: 'cliente' | 'funcionario' | 'admin';
       };
     }
   }
@@ -52,7 +52,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
       id: number;
       email: string;
       name: string;
-      userType: 'cliente' | 'funcionario';
+      userType: 'cliente' | 'funcionario' | 'admin';
       iat: number;
       exp: number;
     };

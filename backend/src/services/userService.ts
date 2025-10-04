@@ -73,7 +73,7 @@ export class UserService {
   static async login(email: string, password: string) {
     try {
       let foundUser = null;
-      let userType: 'cliente' | 'funcionario' = 'cliente';
+      let userType: 'cliente' | 'funcionario' | 'admin' = 'cliente';
 
       // Primeiro, tentar encontrar na tabela de usuários (clientes)
       foundUser = await UserRepository.findUserByEmail(email);
@@ -84,7 +84,8 @@ export class UserService {
         // Se não encontrou como cliente, tentar como funcionário
         foundUser = await EmployeeRepository.findEmployeeByEmail(email);
         if (foundUser) {
-          userType = 'funcionario';
+          // Verificar se é admin baseado no role
+          userType = foundUser.role === 'ADMIN' ? 'admin' : 'funcionario';
         }
       }
 

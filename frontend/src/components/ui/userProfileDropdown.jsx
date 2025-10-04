@@ -79,7 +79,7 @@ const UserProfileDropdown = ({ user, onLogout }) => {
               </button>
 
               {/* Opção de Dashboard para funcionários */}
-              {user.userType === 'funcionario' && (
+              {(user.userType === 'funcionario' || user.userType === 'admin') && (
                 <>
                   <button
                     onClick={handleDashboardClick}
