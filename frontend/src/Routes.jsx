@@ -4,6 +4,10 @@ import ScrollToTop from "@/components/ScrollToTop";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Toaster } from "@/components/ui/toaster";
 
+// Import components
+import AdminRoute from "@/components/AdminRoute";
+import EmployeeRoute from "@/components/EmployeeRoute";
+
 // Import page components
 import HomePage from "./pages/Home";
 import Dashboard from "./pages/dashboard";
@@ -34,11 +38,19 @@ const AppRoutes = () => {
         <ScrollToTop />
         <RouterRoutes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard" element={
+            <EmployeeRoute>
+              <Dashboard />
+            </EmployeeRoute>
+          } />
           <Route path="/pedidos" element={<OrderManagement />} />
           <Route path="/produtos" element={<ProductManagement />} />
           <Route path="/profile" element={<UserProfile />} />
-          <Route path="/store-settings" element={<StoreSettings />} />
+          <Route path="/store-settings" element={
+            <AdminRoute>
+              <StoreSettings />
+            </AdminRoute>
+          } />
           <Route path="*" element={<NotFoundPage />} />
         </RouterRoutes>
         <Toaster />

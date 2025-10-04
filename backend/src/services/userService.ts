@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { UserRepository } from '../repositories/userRepository';
+import { EmployeeRepository } from '../repositories/employeeRepository';
 
 /**
  * Serviço responsável pelas regras de negócio relacionadas a usuários
@@ -63,6 +64,7 @@ export class UserService {
 
   /**
    * Realiza login do usuário com email e senha
+   * Verifica tanto na tabela de usuários (clientes) quanto funcionários
    *
    * @param email - Email do usuário
    * @param password - Senha em texto plano
@@ -70,36 +72,56 @@ export class UserService {
    */
   static async login(email: string, password: string) {
     try {
-      // Buscar usuário por email
-      const user = await UserRepository.findUserByEmail(email);
-      if (!user) {
+      let foundUser = null;
+      let userType: 'cliente' | 'funcionario' | 'admin' = 'cliente';
+
+      // Primeiro, tentar encontrar na tabela de usuários (clientes)
+      foundUser = await UserRepository.findUserByEmail(email);
+
+      if (foundUser) {
+        userType = 'cliente';
+      } else {
+        // Se não encontrou como cliente, tentar como funcionário
+        foundUser = await EmployeeRepository.findEmployeeByEmail(email);
+        if (foundUser) {
+          // Verificar se é admin baseado no role
+          userType = foundUser.role === 'ADMIN' ? 'admin' : 'funcionario';
+        }
+      }
+
+      // Se não encontrou em nenhuma tabela
+      if (!foundUser) {
         throw new Error('Email ou senha incorretos');
       }
 
       // Verificar senha
-      const isPasswordValid = await this.verifyPassword(password, user.password);
+      const isPasswordValid = await this.verifyPassword(password, foundUser.password);
       if (!isPasswordValid) {
         throw new Error('Email ou senha incorretos');
       }
 
-      // Gerar token JWT (24 horas)
+      // Gerar token JWT (24 horas) incluindo o tipo de usuário
       const secret = process.env.JWT_SECRET || 'fallback-secret-change-in-production';
       const token = jwt.sign(
         {
-          id: user.id,
-          email: user.email,
-          name: user.name
+          id: foundUser.id,
+          email: foundUser.email,
+          name: foundUser.name,
+          userType: userType
         },
         secret,
         { expiresIn: '24h' }
       );
 
       // Retornar token e dados do usuário (sem senha)
-      const { password: _, ...userWithoutPassword } = user;
+      const { password: _, ...userWithoutPassword } = foundUser;
 
       return {
         token,
-        user: userWithoutPassword,
+        user: {
+          ...userWithoutPassword,
+          userType: userType
+        },
         expiresIn: '24h'
       };
     } catch (error) {

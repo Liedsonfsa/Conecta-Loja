@@ -9,6 +9,7 @@ declare global {
         id: number;
         email: string;
         name: string;
+        userType: 'cliente' | 'funcionario' | 'admin';
       };
     }
   }
@@ -51,6 +52,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
       id: number;
       email: string;
       name: string;
+      userType: 'cliente' | 'funcionario' | 'admin';
       iat: number;
       exp: number;
     };
@@ -59,7 +61,8 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
     req.user = {
       id: decoded.id,
       email: decoded.email,
-      name: decoded.name
+      name: decoded.name,
+      userType: decoded.userType
     };
 
     next();

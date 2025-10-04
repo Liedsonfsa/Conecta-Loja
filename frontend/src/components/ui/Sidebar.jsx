@@ -23,9 +23,11 @@ import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Icon from '../AppIcon';
 import Button from './ButtonDash';
+import { useAuth } from '../../hooks/use-auth';
 
 const Sidebar = ({ isCollapsed = false, onToggle, className = '' }) => {
   const location = useLocation();
+  const { userType } = useAuth();
   const [notifications, setNotifications] = useState({
     '/dashboard': 0,
     '/pedidos': 0,
@@ -76,6 +78,14 @@ const Sidebar = ({ isCollapsed = false, onToggle, className = '' }) => {
       description: 'Funcionários da loja'
     }
   ];
+
+  // Filtrar itens de navegação baseado no tipo de usuário (apenas admin vê configurações)
+  const filteredNavigationItems = navigationItems.filter(item => {
+    if (item.path === '/store-settings' && userType !== 'admin') {
+      return false;
+    }
+    return true;
+  });
 
   /**
    * Verifica se o caminho fornecido está ativo na navegação atual
@@ -271,7 +281,7 @@ const Sidebar = ({ isCollapsed = false, onToggle, className = '' }) => {
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto p-4">
           <div className="space-y-2">
-            {navigationItems?.map(item => {
+            {filteredNavigationItems?.map(item => {
               if (item?.type === 'group') {
                 return renderNavigationGroup(item);
               }

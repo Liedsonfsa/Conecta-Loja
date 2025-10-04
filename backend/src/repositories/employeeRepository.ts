@@ -39,7 +39,7 @@ export class EmployeeRepository {
         name: string,
         email: string,
         password: string,
-        role: string,
+        role: 'FUNCIONARIO' | 'ADMIN',
         storeId: number
     }) {
         return await prisma.funcionario.create({
@@ -62,6 +62,21 @@ export class EmployeeRepository {
     static async findEmployeeById(id: number) {
         return await prisma.funcionario.findUnique({
             where: {id}
+        });
+    };
+
+    /**
+     * Busca um funcionário pelo email
+     *
+     * @param email - Email do funcionário a ser buscado
+     * @returns Funcionário encontrado ou null se não existir
+     */
+    static async findEmployeeByEmail(email: string) {
+        return await prisma.funcionario.findUnique({
+            where: { email },
+            include: {
+                loja: true // Incluir dados da loja associada
+            }
         });
     };
 
