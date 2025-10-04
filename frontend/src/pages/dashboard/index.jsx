@@ -27,10 +27,12 @@ import AnalyticsChart from './components/AnalyticsChart';
 import QuickActionTiles from './components/QuickActionTiles';
 import Icon from '../../components/AppIcon';
 import Button from '../../components/ui/ButtonDash';
+import { useAuth } from '../../hooks/use-auth';
 
 const Dashboard = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const { userType } = useAuth();
 
   // Update current time every minute
   useEffect(() => {
@@ -202,7 +204,7 @@ const Dashboard = () => {
               <Icon name="Zap" size={24} className="text-primary" />
               <h2 className="text-xl font-semibold text-foreground">Ações Rápidas</h2>
             </div>
-            <QuickActionTiles />
+            <QuickActionTiles userType={userType} />
           </section>
 
           {/* Footer */}

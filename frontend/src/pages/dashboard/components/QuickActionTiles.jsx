@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/ButtonDash';
 
-const QuickActionTiles = () => {
+const QuickActionTiles = ({ userType }) => {
   const navigate = useNavigate();
 
   const quickActions = [
@@ -63,6 +63,11 @@ const QuickActionTiles = () => {
     }
   ];
 
+  // Filtrar ações baseado no tipo de usuário (apenas admin pode ver employees e settings)
+  const filteredActions = userType === 'admin'
+    ? quickActions
+    : quickActions.filter(action => action.id !== 'employees' && action.id !== 'settings');
+
   /**
    * Manipula o clique em um cartão de ação rápida
    * @param {string} route - Rota para navegar
@@ -73,7 +78,7 @@ const QuickActionTiles = () => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {quickActions?.map((action) => (
+      {filteredActions?.map((action) => (
         <div
           key={action?.id}
           className="bg-card border border-border rounded-lg p-6 shadow-elevation-1 hover:shadow-elevation-2 transition-layout cursor-pointer group"
