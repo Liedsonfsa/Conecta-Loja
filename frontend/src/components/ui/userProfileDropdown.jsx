@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User, LogOut } from "lucide-react";
+import { User, LogOut, LayoutDashboard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
@@ -20,6 +20,11 @@ const UserProfileDropdown = ({ user, onLogout }) => {
 
   const handleProfileClick = () => {
     navigate("/profile");
+    setIsOpen(false);
+  };
+
+  const handleDashboardClick = () => {
+    navigate("/dashboard");
     setIsOpen(false);
   };
 
@@ -73,7 +78,23 @@ const UserProfileDropdown = ({ user, onLogout }) => {
                 Meu Perfil
               </button>
 
-              <hr className="border-gray-100" />
+              {/* Opção de Dashboard para funcionários */}
+              {user.userType === 'funcionario' && (
+                <>
+                  <button
+                    onClick={handleDashboardClick}
+                    className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                  >
+                    <LayoutDashboard className="mr-3 h-4 w-4" />
+                    Dashboard da Loja
+                  </button>
+                  <hr className="border-gray-100" />
+                </>
+              )}
+
+              {!user.userType || user.userType === 'cliente' ? (
+                <hr className="border-gray-100" />
+              ) : null}
 
               <button
                 onClick={handleLogout}

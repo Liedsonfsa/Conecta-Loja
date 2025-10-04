@@ -66,6 +66,21 @@ export class EmployeeRepository {
     };
 
     /**
+     * Busca um funcionário pelo email
+     *
+     * @param email - Email do funcionário a ser buscado
+     * @returns Funcionário encontrado ou null se não existir
+     */
+    static async findEmployeeByEmail(email: string) {
+        return await prisma.funcionario.findUnique({
+            where: { email },
+            include: {
+                loja: true // Incluir dados da loja associada
+            }
+        });
+    };
+
+    /**
      * Atualiza um funcionário no banco de dados
      *
      * @param id - ID do funcionário a ser atualizado
