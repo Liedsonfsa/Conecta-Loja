@@ -70,10 +70,10 @@ const Sidebar = ({ isCollapsed = false, onToggle, className = '' }) => {
       description: 'Relatórios de vendas'
     },
     {
-      label: 'Configurações',
+      label: 'Funcionários',
       path: '/store-settings',
       icon: 'Settings',
-      description: 'Configurações da loja'
+      description: 'Funcionários da loja'
     }
   ];
 
