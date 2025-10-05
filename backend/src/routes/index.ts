@@ -17,6 +17,7 @@ import employeeRoutes from './employee';
 import authRoutes from './auth';
 import productRoutes from './product';
 import categoryRoutes from './category';
+import storeRoutes from './store';
 
 const router = Router();
 
@@ -26,5 +27,6 @@ router.use('/employee', employeeRoutes);
 router.use('/auth', authRoutes);
 router.use('/product', productRoutes);
 router.use('/category', categoryRoutes);
+router.use('/store', storeRoutes);
 
 export default router;
