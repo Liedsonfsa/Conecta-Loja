@@ -10,6 +10,7 @@
  * - /api/auth/* - Operações de autenticação e autorização
  * - /api/product/* - Operações relacionadas a produtos
  * - /api/category/* - Operações relacionadas a categorias
+ * - /api/store/* - Operações relacionadas a loja
  */
 import { Router } from 'express';
 import userRoutes from './user';
