@@ -91,10 +91,22 @@ model funcionario {
   name     String
   email    String       @unique
   password String
-  role     EmployeeRole @default(FUNCIONARIO)
+
+  cargoId Int?  // Temporariamente opcional
+  cargo   cargo? @relation(fields: [cargoId], references: [id])
 
   lojaId Int
   loja   store @relation(fields: [lojaId], references: [id])
+}
+
+model cargo {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  description String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  funcionarios funcionario[] // UM cargo pode ter VÁRIOS funcionários
 }
 
 model store {
@@ -124,12 +136,6 @@ enum OrderStatus {
   ENTREGUE // Entregue
   CANCELADO // Cancelado
   TENTATIVA_ENTREGA_FALHADA // Tentativa de entrega não realizada
-}
-
-// Enum for employee roles
-enum EmployeeRole {
-  FUNCIONARIO
-  ADMIN
 }
 
 // Enum for coupon status
