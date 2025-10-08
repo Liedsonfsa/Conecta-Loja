@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import Button from "../ui/Button";
 import LoginModal from "../../pages/Home/LoginModal";
 import UserProfileDropdown from "../ui/userProfileDropdown";
-import { FiPhone, FiMapPin, FiUser, FiMenu, FiX } from "react-icons/fi";
+import { FiPhone, FiMapPin, FiUser, FiMenu, FiX, FiShoppingCart } from "react-icons/fi";
 import { authService } from "../../api/auth";
+import { useCart } from "../../hooks/useCart.jsx";
 
 /**
  * Header - Componente de cabeçalho principal da aplicação
@@ -13,6 +14,7 @@ import { authService } from "../../api/auth";
  * - Informações de contato (telefone e localização)
  * - Botões de ação (entrar e carrinho)
  * - Menu mobile responsivo
+ * - Integração com o carrinho de compras
  *
  * @returns {JSX.Element} Componente de cabeçalho renderizado
  *
@@ -25,6 +27,9 @@ const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [apiOffline, setApiOffline] = useState(false);
+  
+  // Hook do carrinho
+  const { totalItems, openCart } = useCart();
 
   // Verificar se há token válido quando o componente monta
   useEffect(() => {
@@ -160,20 +165,18 @@ const Header = () => {
                 </LoginModal>
               )}
 
-              <Button
-                text="Carrinho"
-                text_font_size="14"
-                text_font_family="Inter"
-                text_font_weight="500"
-                text_color="#ffffff"
-                fill_background_color="#ff531a"
-                border_border_radius="8px"
-                padding="8px 16px"
-                variant="primary"
-                size="medium"
-                className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors"
-                onClick={() => {}}
-              />
+              <button
+                onClick={openCart}
+                className="relative flex items-center space-x-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                <FiShoppingCart className="w-4 h-4" />
+                <span className="text-sm font-medium">Carrinho</span>
+                {totalItems > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                    {totalItems}
+                  </span>
+                )}
+              </button>
             </div>
           </nav>
 
@@ -230,20 +233,18 @@ const Header = () => {
                   </LoginModal>
                 )}
 
-                <Button
-                  text="Carrinho"
-                  text_font_size="14"
-                  text_font_family="Inter"
-                  text_font_weight="500"
-                  text_color="#ffffff"
-                  fill_background_color="#ff531a"
-                  border_border_radius="8px"
-                  padding="8px 16px"
-                  variant="primary"
-                  size="medium"
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors w-fit"
-                  onClick={() => {}}
-                />
+                <button
+                  onClick={openCart}
+                  className="relative flex items-center space-x-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors w-fit"
+                >
+                  <FiShoppingCart className="w-4 h-4" />
+                  <span className="text-sm font-medium">Carrinho</span>
+                  {totalItems > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                      {totalItems}
+                    </span>
+                  )}
+                </button>
               </div>
             </div>
           </nav>

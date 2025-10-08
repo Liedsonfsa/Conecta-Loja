@@ -5,7 +5,9 @@ import HeroSection from './HeroSection';
 import MenuSection from './MenuSection';
 import Footer from '../../components/ui/Footer';
 import FloatingWhatsAppButton from '../../components/ui/FloatingWhatsAppButton';
+import CartSidebar from '../../components/ui/cartSideBar';
 import { Toaster } from '../../components/ui/toaster';
+import { useCart } from '../../hooks/useCart.jsx';
 
 /**
  * Home - Página inicial da aplicação Conecta-Loja
@@ -13,6 +15,7 @@ import { Toaster } from '../../components/ui/toaster';
  * Página principal que apresenta a landing page da aplicação,
  * contendo todas as seções principais para atrair e engajar os usuários.
  * Inclui metadados SEO para otimização de motores de busca.
+ * Integra o sidebar do carrinho para permitir visualização e gerenciamento dos itens.
  *
  * @returns {JSX.Element} Página inicial completa com todas as seções
  *
@@ -22,6 +25,15 @@ import { Toaster } from '../../components/ui/toaster';
  */
 
 const Home = () => {
+  const {
+    items: cartItems,
+    isCartOpen,
+    closeCart,
+    updateQuantity,
+    removeItem,
+    checkout
+  } = useCart();
+
   return (
     <>
       <Helmet>
@@ -40,6 +52,16 @@ const Home = () => {
         <Footer />
         <FloatingWhatsAppButton />
         <Toaster />
+        
+        {/* Cart Sidebar */}
+        <CartSidebar
+          isOpen={isCartOpen}
+          onClose={closeCart}
+          cartItems={cartItems}
+          onUpdateQuantity={updateQuantity}
+          onRemoveItem={removeItem}
+          onCheckout={checkout}
+        />
       </div>
     </>
   );

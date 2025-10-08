@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import Button from '../../components/ui/Button';
+import { useCart } from '../../hooks/useCart.jsx';
+import { useToast } from '../../hooks/use-toast';
 
 /**
  * MenuSection - Seção de apresentação do cardápio na página inicial
@@ -8,6 +10,7 @@ import Button from '../../components/ui/Button';
  * mostrando itens organizados em grid responsivo. Permite
  * ao usuário explorar diferentes categorias de produtos
  * antes de acessar a página completa do menu.
+ * Integra funcionalidade de adicionar itens ao carrinho.
  *
  * @returns {JSX.Element} Seção de menu com filtros e grid de produtos
  *
@@ -19,6 +22,10 @@ import Button from '../../components/ui/Button';
 const MenuSection = () => {
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [quantities, setQuantities] = useState({});
+  
+  // Hooks do carrinho e toast
+  const { addItem } = useCart();
+  const { toast } = useToast();
 
   const categories = ['Todos', 'Pizzas', 'Burgers', 'Bebidas', 'Sobremesas'];
 
@@ -27,7 +34,8 @@ const MenuSection = () => {
       id: 1,
       name: 'Pizza Margherita',
       description: 'Molho de tomate, mussarela, manjericão fresco e azeite de oliva',
-      price: 'R$ 45,90',
+      price: 45.90,
+      priceFormatted: 'R$ 45,90',
       category: 'Pizzas',
       image: '/images/img_pizza_margherita.png',
       available: true
@@ -36,7 +44,8 @@ const MenuSection = () => {
       id: 2,
       name: 'Burger Clássico',
       description: 'Hambúrguer artesanal, queijo, alface, tomate, cebola e molho especial',
-      price: 'R$ 32,90',
+      price: 32.90,
+      priceFormatted: 'R$ 32,90',
       category: 'Burgers',
       image: '/images/img_burger_cl_ssico.png',
       available: true
@@ -45,7 +54,8 @@ const MenuSection = () => {
       id: 3,
       name: 'Pizza Pepperoni',
       description: 'Molho de tomate, mussarela e generosas fatias de pepperoni',
-      price: 'R$ 52,90',
+      price: 52.90,
+      priceFormatted: 'R$ 52,90',
       category: 'Pizzas',
       image: '/images/img_pizza_margherita.png',
       available: true
@@ -54,7 +64,8 @@ const MenuSection = () => {
       id: 4,
       name: 'Coca-Cola 350ml',
       description: 'Refrigerante gelado',
-      price: 'R$ 6,90',
+      price: 6.90,
+      priceFormatted: 'R$ 6,90',
       category: 'Bebidas',
       image: '/images/img_coca_cola_350ml.png',
       available: true
@@ -63,7 +74,8 @@ const MenuSection = () => {
       id: 5,
       name: 'Burger Bacon',
       description: 'Hambúrguer artesanal, queijo, bacon crocante, alface e molho barbecue',
-      price: 'R$ 38,90',
+      price: 38.90,
+      priceFormatted: 'R$ 38,90',
       category: 'Burgers',
       image: '/images/img_burger_cl_ssico.png',
       available: true
@@ -72,7 +84,8 @@ const MenuSection = () => {
       id: 6,
       name: 'Brownie com Sorvete',
       description: 'Brownie quentinho com sorvete de baunilha e calda de chocolate',
-      price: 'R$ 18,90',
+      price: 18.90,
+      priceFormatted: 'R$ 18,90',
       category: 'Sobremesas',
       image: '/images/img_brownie_com_sorvete.png',
       available: false
@@ -88,6 +101,30 @@ const MenuSection = () => {
     setQuantities(prev => ({
       ...prev,
       [itemId]: Math.max(1, (prev?.[itemId] || 1) + change)
+    }));
+  };
+
+  /**
+   * Adiciona item ao carrinho
+   * @param {Object} item - Item do menu a ser adicionado
+   */
+  const handleAddToCart = (item) => {
+    const quantity = quantities[item.id] || 1;
+    
+    // Adiciona o item ao carrinho
+    addItem(item, quantity);
+    
+    // Mostra toast de confirmação
+    toast({
+      title: "Item adicionado!",
+      description: `${item.name} foi adicionado ao seu carrinho.`,
+      duration: 3000,
+    });
+    
+    // Reset da quantidade para 1
+    setQuantities(prev => ({
+      ...prev,
+      [item.id]: 1
     }));
   };
 
@@ -185,7 +222,7 @@ const MenuSection = () => {
                     {item?.description}
                   </p>
                   <span className="text-[21px] font-bold leading-[27px] text-[#ff6600] font-['Inter']">
-                    {item?.price}
+                    {item?.priceFormatted}
                   </span>
                 </div>
 
@@ -213,7 +250,7 @@ const MenuSection = () => {
                     size="medium"
                     leftImage=""
                     padding="12px 34px"
-                    onClick={() => {}}
+                    onClick={() => handleAddToCart(item)}
                     className="w-full mt-3"
                   />
                 )}
