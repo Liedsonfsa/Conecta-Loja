@@ -44,9 +44,11 @@ const EmployeeManagementSection = () => {
   ]);
 
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [newEmployee, setNewEmployee] = useState({
     name: "",
     email: "",
+    password: "",
     role: "cashier",
     permissions: []
   });
@@ -105,8 +107,13 @@ const EmployeeManagementSection = () => {
   };
 
   const handleAddEmployee = () => {
-    if (!newEmployee?.name || !newEmployee?.email) {
+    if (!newEmployee?.name || !newEmployee?.email || !newEmployee?.password) {
       alert('Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
+
+    if (newEmployee?.password?.length < 6) {
+      alert('A senha deve ter pelo menos 6 caracteres.');
       return;
     }
 
@@ -123,6 +130,7 @@ const EmployeeManagementSection = () => {
     setNewEmployee({
       name: "",
       email: "",
+      password: "",
       role: "cashier",
       permissions: []
     });
@@ -198,6 +206,32 @@ const EmployeeManagementSection = () => {
               onChange={(e) => handleNewEmployeeChange('email', e?.target?.value)}
               required
             />
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-foreground">
+                Senha <span className="text-destructive">*</span>
+              </label>
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  value={newEmployee?.password}
+                  onChange={(e) => handleNewEmployeeChange('password', e?.target?.value)}
+                  className="pr-10"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  title={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                >
+                  <Icon
+                    name={showPassword ? "EyeOff" : "Eye"}
+                    size={18}
+                  />
+                </button>
+              </div>
+            </div>
 
             <div className="col-span-1 md:col-span-2">
               <Select
@@ -323,22 +357,6 @@ const EmployeeManagementSection = () => {
               ))}
             </tbody>
           </table>
-        </div>
-      </div>
-      {/* Role Permissions Info */}
-      <div className="bg-card rounded-lg border border-border p-6">
-        <div className="flex items-center space-x-3 mb-4">
-          <Icon name="Shield" size={24} className="text-primary" />
-          <h4 className="text-lg font-semibold text-foreground">Níveis de Acesso</h4>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {roleOptions?.map(role => (
-            <div key={role?.value} className="p-4 bg-muted rounded-lg">
-              <h5 className="font-medium text-foreground mb-1">{role?.label}</h5>
-              <p className="text-sm text-muted-foreground">{role?.description}</p>
-            </div>
-          ))}
         </div>
       </div>
     </div>
