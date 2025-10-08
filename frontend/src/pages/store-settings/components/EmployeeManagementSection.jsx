@@ -47,6 +47,7 @@ const EmployeeManagementSection = () => {
   const [newEmployee, setNewEmployee] = useState({
     name: "",
     email: "",
+    password: "",
     role: "cashier",
     permissions: []
   });
@@ -105,8 +106,13 @@ const EmployeeManagementSection = () => {
   };
 
   const handleAddEmployee = () => {
-    if (!newEmployee?.name || !newEmployee?.email) {
+    if (!newEmployee?.name || !newEmployee?.email || !newEmployee?.password) {
       alert('Por favor, preencha todos os campos obrigatórios.');
+      return;
+    }
+
+    if (newEmployee?.password?.length < 6) {
+      alert('A senha deve ter pelo menos 6 caracteres.');
       return;
     }
 
@@ -123,6 +129,7 @@ const EmployeeManagementSection = () => {
     setNewEmployee({
       name: "",
       email: "",
+      password: "",
       role: "cashier",
       permissions: []
     });
@@ -196,6 +203,14 @@ const EmployeeManagementSection = () => {
               type="email"
               value={newEmployee?.email}
               onChange={(e) => handleNewEmployeeChange('email', e?.target?.value)}
+              required
+            />
+
+            <Input
+              label="Senha"
+              type="password"
+              value={newEmployee?.password}
+              onChange={(e) => handleNewEmployeeChange('password', e?.target?.value)}
               required
             />
 
