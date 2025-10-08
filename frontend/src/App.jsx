@@ -1,11 +1,13 @@
 import React from "react";
 import Routes from "./Routes";
+import { CartProvider } from "./hooks/useCart.jsx";
 
 /**
  * App - Componente raiz da aplicação Conecta-Loja
  *
  * Este é o componente principal da aplicação React que serve como ponto de entrada.
  * Ele renderiza o sistema de roteamento que controla toda a navegação da aplicação.
+ * Inclui o provedor do contexto do carrinho para gerenciar o estado global do carrinho.
  *
  * @returns {JSX.Element} Elemento raiz da aplicação com sistema de roteamento
  *
@@ -15,7 +17,9 @@ import Routes from "./Routes";
  */
 function App() {
   return (
-    <Routes />
+    <CartProvider>
+      <Routes />
+    </CartProvider>
   );
 }
 

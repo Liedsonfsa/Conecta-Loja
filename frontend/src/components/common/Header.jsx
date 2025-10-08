@@ -2,8 +2,16 @@ import React, { useState, useEffect } from "react";
 import Button from "../ui/Button";
 import LoginModal from "../../pages/Home/LoginModal";
 import UserProfileDropdown from "../ui/userProfileDropdown";
-import { FiPhone, FiMapPin, FiUser, FiMenu, FiX } from "react-icons/fi";
+import {
+  FiPhone,
+  FiMapPin,
+  FiUser,
+  FiMenu,
+  FiX,
+  FiShoppingCart,
+} from "react-icons/fi";
 import { authService } from "../../api/auth";
+import { useCart } from "../../hooks/useCart.jsx";
 
 /**
  * Header - Componente de cabeçalho principal da aplicação
@@ -13,6 +21,7 @@ import { authService } from "../../api/auth";
  * - Informações de contato (telefone e localização)
  * - Botões de ação (entrar e carrinho)
  * - Menu mobile responsivo
+ * - Integração com o carrinho de compras
  *
  * @returns {JSX.Element} Componente de cabeçalho renderizado
  *
@@ -26,49 +35,67 @@ const Header = () => {
   const [user, setUser] = useState(null);
   const [apiOffline, setApiOffline] = useState(false);
 
+  // Hook do carrinho
+  const { totalItems, openCart } = useCart();
+
   // Verificar se há token válido quando o componente monta
   useEffect(() => {
     /**
      * Verifica o status de autenticação do usuário
      */
     const checkAuthStatus = async () => {
-      const token = localStorage.getItem('authToken');
-      console.log('🔍 Verificando token no localStorage:', token ? 'Token encontrado' : 'Nenhum token');
+      const token = localStorage.getItem("authToken");
+      console.log(
+        "🔍 Verificando token no localStorage:",
+        token ? "Token encontrado" : "Nenhum token"
+      );
 
       if (token) {
         try {
-          console.log('📡 Verificando validade do token na API...');
+          console.log("📡 Verificando validade do token na API...");
           setApiOffline(false); // Reset offline status
           const response = await authService.verifyToken();
-          console.log('✅ Resposta da verificação:', response);
+          console.log("✅ Resposta da verificação:", response);
 
           if (response.user) {
-            console.log('👤 Usuário válido, definindo estado:', response.user);
+            console.log("👤 Usuário válido, definindo estado:", response.user);
             setUser(response.user);
           } else {
-            console.log('⚠️ Token válido mas sem dados do usuário');
+            console.log("⚠️ Token válido mas sem dados do usuário");
           }
         } catch (error) {
-          console.log('❌ Erro na verificação do token:', error.message);
+          console.log("❌ Erro na verificação do token:", error.message);
 
           // Só remover token se for erro de autenticação (401), não erro de conexão
-          if (error.message.includes('Sessão expirada') || error.message.includes('Token inválido')) {
-            console.log('🗑️ Token inválido/expirado, removendo do localStorage');
-            localStorage.removeItem('authToken');
+          if (
+            error.message.includes("Sessão expirada") ||
+            error.message.includes("Token inválido")
+          ) {
+            console.log(
+              "🗑️ Token inválido/expirado, removendo do localStorage"
+            );
+            localStorage.removeItem("authToken");
             setApiOffline(false);
-          } else if (error.message.includes('Erro de conexão') || error.message.includes('Verifique sua internet')) {
-            console.log('🔄 API offline - mantendo token para tentar novamente quando API estiver disponível');
-            console.log('⚠️ Modo offline ativado - usuário pode fazer login quando API voltar');
+          } else if (
+            error.message.includes("Erro de conexão") ||
+            error.message.includes("Verifique sua internet")
+          ) {
+            console.log(
+              "🔄 API offline - mantendo token para tentar novamente quando API estiver disponível"
+            );
+            console.log(
+              "⚠️ Modo offline ativado - usuário pode fazer login quando API voltar"
+            );
             setApiOffline(true);
             // Mantém o token salvo mas usuário fica null
           } else {
-            console.log('❓ Erro desconhecido, removendo token por segurança');
-            localStorage.removeItem('authToken');
+            console.log("❓ Erro desconhecido, removendo token por segurança");
+            localStorage.removeItem("authToken");
             setApiOffline(false);
           }
         }
       } else {
-        console.log('ℹ️ Nenhum token encontrado, usuário permanece deslogado');
+        console.log("ℹ️ Nenhum token encontrado, usuário permanece deslogado");
         setApiOffline(false);
       }
     };
@@ -90,7 +117,7 @@ const Header = () => {
   const handleLogout = () => {
     setUser(null);
     setApiOffline(false);
-    localStorage.removeItem('authToken');
+    localStorage.removeItem("authToken");
   };
 
   // Função para tentar reconectar quando API volta
@@ -98,18 +125,18 @@ const Header = () => {
    * Tenta reconectar verificando se há token válido
    */
   const tryReconnect = async () => {
-    const token = localStorage.getItem('authToken');
+    const token = localStorage.getItem("authToken");
     if (token && apiOffline) {
       try {
-        console.log('🔄 Tentando reconectar...');
+        console.log("🔄 Tentando reconectar...");
         const response = await authService.verifyToken();
         if (response.user) {
-          console.log('✅ Reconexão bem-sucedida!');
+          console.log("✅ Reconexão bem-sucedida!");
           setUser(response.user);
           setApiOffline(false);
         }
       } catch (error) {
-        console.log('❌ Reconexão falhou:', error.message);
+        console.log("❌ Reconexão falhou:", error.message);
       }
     }
   };
@@ -125,7 +152,6 @@ const Header = () => {
 
           {/* Desktop Navigation Menu */}
           <nav className="hidden lg:flex items-center space-x-8">
-
             {/* Contact Info */}
             <div className="flex items-center space-x-6 text-sm text-gray-500">
               <div className="flex items-center space-x-1">
@@ -160,20 +186,18 @@ const Header = () => {
                 </LoginModal>
               )}
 
-              <Button
-                text="Carrinho"
-                text_font_size="14"
-                text_font_family="Inter"
-                text_font_weight="500"
-                text_color="#ffffff"
-                fill_background_color="#ff531a"
-                border_border_radius="8px"
-                padding="8px 16px"
-                variant="primary"
-                size="medium"
-                className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors"
-                onClick={() => {}}
-              />
+              <button
+                onClick={openCart}
+                className="relative flex items-center space-x-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                <FiShoppingCart className="w-4 h-4" />
+                <span className="text-sm font-medium">Carrinho</span>
+                {totalItems > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                    {totalItems}
+                  </span>
+                )}
+              </button>
             </div>
           </nav>
 
@@ -195,7 +219,6 @@ const Header = () => {
         {menuOpen && (
           <nav className="lg:hidden py-4 border-t border-gray-200">
             <div className="flex flex-col space-y-4">
-
               {/* Contact Info */}
               <div className="flex flex-col space-y-2 text-sm text-gray-500 pt-2 border-t border-gray-100">
                 <div className="flex items-center space-x-2">
@@ -230,20 +253,18 @@ const Header = () => {
                   </LoginModal>
                 )}
 
-                <Button
-                  text="Carrinho"
-                  text_font_size="14"
-                  text_font_family="Inter"
-                  text_font_weight="500"
-                  text_color="#ffffff"
-                  fill_background_color="#ff531a"
-                  border_border_radius="8px"
-                  padding="8px 16px"
-                  variant="primary"
-                  size="medium"
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors w-fit"
-                  onClick={() => {}}
-                />
+                <button
+                  onClick={openCart}
+                  className="relative flex items-center space-x-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors w-fit"
+                >
+                  <FiShoppingCart className="w-4 h-4" />
+                  <span className="text-sm font-medium">Carrinho</span>
+                  {totalItems > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                      {totalItems}
+                    </span>
+                  )}
+                </button>
               </div>
             </div>
           </nav>
