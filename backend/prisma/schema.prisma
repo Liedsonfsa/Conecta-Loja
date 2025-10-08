@@ -87,12 +87,12 @@ model pedido_produto {
 }
 
 model funcionario {
-  id       Int          @id @default(autoincrement())
+  id       Int    @id @default(autoincrement())
   name     String
-  email    String       @unique
+  email    String @unique
   password String
 
-  cargoId Int?  // Temporariamente opcional
+  cargoId Int? // Temporariamente opcional
   cargo   cargo? @relation(fields: [cargoId], references: [id])
 
   lojaId Int
@@ -100,11 +100,11 @@ model funcionario {
 }
 
 model cargo {
-  id          Int          @id @default(autoincrement())
-  name        String       @unique
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
   description String?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   funcionarios funcionario[] // UM cargo pode ter VÁRIOS funcionários
 }
