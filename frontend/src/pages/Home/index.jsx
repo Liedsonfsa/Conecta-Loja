@@ -1,13 +1,13 @@
-import React from 'react';
-import { Helmet } from 'react-helmet';
-import Header from '../../components/common/Header';
-import HeroSection from './HeroSection';
-import MenuSection from './MenuSection';
-import Footer from '../../components/ui/Footer';
-import FloatingWhatsAppButton from '../../components/ui/FloatingWhatsAppButton';
-import CartSidebar from '../../components/ui/cartSideBar';
-import { Toaster } from '../../components/ui/toaster';
-import { useCart } from '../../hooks/useCart.jsx';
+import React from "react";
+import { Helmet } from "react-helmet";
+import Header from "../../components/common/Header";
+import HeroSection from "./HeroSection";
+import MenuSection from "./MenuSection";
+import Footer from "../../components/ui/Footer";
+import FloatingWhatsAppButton from "../../components/ui/FloatingWhatsAppButton";
+import CartSidebar from "../../components/ui/cartSideBar";
+import { Toaster } from "../../components/ui/toaster";
+import { useCart } from "../../hooks/useCart.jsx";
 
 /**
  * Home - Página inicial da aplicação Conecta-Loja
@@ -31,7 +31,7 @@ const Home = () => {
     closeCart,
     updateQuantity,
     removeItem,
-    checkout
+    checkout,
   } = useCart();
 
   return (
@@ -52,7 +52,7 @@ const Home = () => {
         <Footer />
         <FloatingWhatsAppButton />
         <Toaster />
-        
+
         {/* Cart Sidebar */}
         <CartSidebar
           isOpen={isCartOpen}
