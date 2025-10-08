@@ -359,22 +359,6 @@ const EmployeeManagementSection = () => {
           </table>
         </div>
       </div>
-      {/* Role Permissions Info */}
-      <div className="bg-card rounded-lg border border-border p-6">
-        <div className="flex items-center space-x-3 mb-4">
-          <Icon name="Shield" size={24} className="text-primary" />
-          <h4 className="text-lg font-semibold text-foreground">Níveis de Acesso</h4>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {roleOptions?.map(role => (
-            <div key={role?.value} className="p-4 bg-muted rounded-lg">
-              <h5 className="font-medium text-foreground mb-1">{role?.label}</h5>
-              <p className="text-sm text-muted-foreground">{role?.description}</p>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 };
