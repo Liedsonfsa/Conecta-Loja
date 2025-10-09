@@ -6,7 +6,7 @@ import { Checkbox } from '../../../components/ui/Checkbox';
 import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 import ConfirmDialog from '../../../components/ui/ConfirmDialog';
-import { employeeService } from '../../../api';
+import { employeeService, roleService } from '../../../api';
 import { useToast } from '../../../hooks/use-toast';
 
 const EmployeeManagementSection = () => {
@@ -14,6 +14,10 @@ const EmployeeManagementSection = () => {
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Estados para cargos
+  const [roles, setRoles] = useState([]);
+  const [loadingRoles, setLoadingRoles] = useState(true);
 
   // Hook para notificações toast
   const { toast } = useToast();
@@ -33,9 +37,15 @@ const EmployeeManagementSection = () => {
   const [employeeToDelete, setEmployeeToDelete] = useState(null);
   const [deletingEmployee, setDeletingEmployee] = useState(false);
 
-  // Carregar funcionários da API ao montar o componente
+  // Estados para modal de edição
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [employeeToEdit, setEmployeeToEdit] = useState(null);
+  const [editingEmployee, setEditingEmployee] = useState(false);
+
+  // Carregar funcionários e cargos da API ao montar o componente
   useEffect(() => {
     loadEmployees();
+    loadRoles();
   }, []);
 
   /**
@@ -55,13 +65,33 @@ const EmployeeManagementSection = () => {
     }
   };
 
-  const roleOptions = [
-    { value: "admin", label: "Administrador", description: "Acesso total ao sistema" },
-    { value: "manager", label: "Gerente", description: "Gerenciamento de operações" },
-    { value: "cashier", label: "Caixa", description: "Atendimento e pedidos" },
-    { value: "delivery", label: "Entregador", description: "Apenas visualização de pedidos" },
-    { value: "kitchen", label: "Cozinha", description: "Preparação de pedidos" }
-  ];
+  /**
+   * Carrega a lista de cargos da API
+   */
+  const loadRoles = async () => {
+    try {
+      setLoadingRoles(true);
+      const response = await roleService.getAllRoles();
+      // Mapear os cargos para o formato esperado pelo componente Select
+      const rolesOptions = response.roles?.map(role => ({
+        value: role.id.toString(), // Usar ID como value
+        label: role.name,
+        description: role.description || 'Cargo sem descrição'
+      })) || [];
+      setRoles(rolesOptions);
+    } catch (err) {
+      console.error('Erro ao carregar cargos:', err);
+      toast({
+        title: "Erro ao carregar cargos",
+        description: "Não foi possível carregar a lista de cargos. Tente recarregar a página.",
+        duration: 5000,
+      });
+      // Fallback para cargos vazios
+      setRoles([]);
+    } finally {
+      setLoadingRoles(false);
+    }
+  };
 
   const permissionOptions = [
     { value: "orders", label: "Gerenciar Pedidos", description: "Criar, editar e visualizar pedidos" },
@@ -77,10 +107,10 @@ const EmployeeManagementSection = () => {
       return employee.cargo.name;
     }
 
-    // Fallback para o campo role antigo (compatibilidade)
-    if (employee?.role) {
-      const roleOption = roleOptions?.find(r => r?.value === employee.role);
-      return roleOption ? roleOption?.label : employee.role;
+    // Fallback para buscar pelo ID nos cargos carregados
+    if (employee?.cargoId) {
+      const roleOption = roles?.find(r => r?.value === employee.cargoId.toString());
+      return roleOption ? roleOption?.label : `Cargo ID: ${employee.cargoId}`;
     }
 
     return 'Cargo não definido';
@@ -141,14 +171,12 @@ const EmployeeManagementSection = () => {
     }
 
     try {
-      // Preparar dados para a API (role precisa ser 'FUNCIONARIO' ou 'ADMIN', não os valores do frontend)
-      const apiRole = newEmployee.role === 'admin' ? 'ADMIN' : 'FUNCIONARIO';
-
+      // Preparar dados para a API - usar cargoId diretamente
       await employeeService.createEmployee({
         name: newEmployee.name.trim(),
         email: newEmployee.email.trim(),
         password: newEmployee.password,
-        role: apiRole,
+        cargoId: parseInt(newEmployee.role), // O value do select já é o ID do cargo
         storeId: 1 // TODO: implementar seleção de loja
       });
 
@@ -163,7 +191,7 @@ const EmployeeManagementSection = () => {
         name: "",
         email: "",
         password: "",
-        role: "cashier",
+        role: "",
         permissions: []
       });
       setShowAddForm(false);
@@ -181,6 +209,84 @@ const EmployeeManagementSection = () => {
     }
   };
 
+
+  const handleEditEmployee = (employeeId) => {
+    const employee = employees?.find(emp => emp?.id === employeeId);
+    if (!employee) return;
+
+    // Preparar dados para edição
+    setEmployeeToEdit(employee);
+
+    // Preencher formulário com dados do funcionário
+    // O valor do select deve ser o cargoId como string
+    const roleValue = employee?.cargo?.id?.toString() || employee?.cargoId?.toString() || '';
+
+    setNewEmployee({
+      name: employee.name || "",
+      email: employee.email || "",
+      password: "", // Não preencher senha por segurança
+      role: roleValue,
+      permissions: [] // TODO: implementar permissões se necessário
+    });
+
+    // Abrir modal de edição
+    setShowEditForm(true);
+  };
+
+  const handleUpdateEmployee = async () => {
+    if (!employeeToEdit) return;
+
+    if (!newEmployee?.name?.trim()) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Por favor, preencha o nome do funcionário.",
+        duration: 4000,
+      });
+      return;
+    }
+
+    try {
+      setEditingEmployee(true);
+
+      // Preparar dados para a API (apenas campos editáveis)
+      const updateData = {
+        name: newEmployee.name.trim(),
+        cargoId: parseInt(newEmployee.role) // O value do select já é o ID do cargo
+      };
+
+      await employeeService.updateEmployee(employeeToEdit.id, updateData);
+
+      toast({
+        title: "Funcionário atualizado",
+        description: "Os dados do funcionário foram atualizados com sucesso.",
+        duration: 3000,
+      });
+
+      // Reset form
+      setNewEmployee({
+        name: "",
+        email: "",
+        password: "",
+        role: "",
+        permissions: []
+      });
+      setShowEditForm(false);
+      setEmployeeToEdit(null);
+
+      // Recarregar lista
+      await loadEmployees();
+    } catch (error) {
+      console.error('Erro ao atualizar funcionário:', error);
+      const errorMessage = error.response?.data?.error || 'Erro ao atualizar funcionário. Tente novamente.';
+      toast({
+        title: "Erro ao atualizar",
+        description: errorMessage,
+        duration: 5000,
+      });
+    } finally {
+      setEditingEmployee(false);
+    }
+  };
 
   const handleDeleteEmployee = (employeeId) => {
     const employee = employees?.find(emp => emp?.id === employeeId);
@@ -304,10 +410,11 @@ const EmployeeManagementSection = () => {
             <div className="col-span-1 md:col-span-2">
               <Select
                 label="Cargo"
-                options={roleOptions}
+                options={roles}
                 value={newEmployee?.role}
                 onChange={(value) => handleNewEmployeeChange('role', value)}
                 description="Defina o nível de acesso do funcionário"
+                disabled={loadingRoles}
               />
             </div>
 
@@ -347,6 +454,101 @@ const EmployeeManagementSection = () => {
           </div>
         </div>
       )}
+
+      {/* Edit Employee Form */}
+      {showEditForm && employeeToEdit && (
+        <div className="bg-card rounded-lg border border-border p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h4 className="text-lg font-semibold text-foreground">Editar Funcionário</h4>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setShowEditForm(false);
+                setEmployeeToEdit(null);
+                setNewEmployee({
+                  name: "",
+                  email: "",
+                  password: "",
+                  role: "cashier",
+                  permissions: []
+                });
+              }}
+            >
+              <Icon name="X" size={20} />
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="col-span-1 md:col-span-2">
+              <Input
+                label="Nome Completo"
+                type="text"
+                value={newEmployee?.name}
+                onChange={(e) => handleNewEmployeeChange('name', e?.target?.value)}
+                required
+              />
+            </div>
+
+            <div className="col-span-1 md:col-span-2">
+              <Select
+                label="Cargo"
+                options={roles}
+                value={newEmployee?.role}
+                onChange={(value) => handleNewEmployeeChange('role', value)}
+                description="Defina o nível de acesso do funcionário"
+                disabled={loadingRoles}
+              />
+            </div>
+
+            <div className="col-span-1 md:col-span-2">
+              <label className="block text-sm font-medium text-foreground mb-3">
+                Permissões
+              </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {permissionOptions?.map(permission => (
+                  <Checkbox
+                    key={permission?.value}
+                    label={permission?.label}
+                    description={permission?.description}
+                    checked={newEmployee?.permissions?.includes(permission?.value)}
+                    onChange={(e) => handlePermissionChange(permission?.value, e?.target?.checked)}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-3 mt-6">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowEditForm(false);
+                setEmployeeToEdit(null);
+                setNewEmployee({
+                  name: "",
+                  email: "",
+                  password: "",
+                  role: "cashier",
+                  permissions: []
+                });
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="default"
+              onClick={handleUpdateEmployee}
+              disabled={editingEmployee}
+              iconName={editingEmployee ? "Loader2" : "Save"}
+              iconPosition="left"
+            >
+              {editingEmployee ? "Salvando..." : "Salvar Alterações"}
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Employees List */}
       <div className="bg-card rounded-lg border border-border overflow-hidden">
         {loading ? (
@@ -409,7 +611,7 @@ const EmployeeManagementSection = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => alert(`Editando ${employee?.name}`)}
+                            onClick={() => handleEditEmployee(employee?.id)}
                             title="Editar"
                           >
                             <Icon name="Edit" size={16} />
