@@ -14,7 +14,6 @@ const EmployeeManagementSection = () => {
       email: "carlos@pizzariabellavista.com.br",
       role: "manager",
       avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-      status: "active",
       permissions: ["orders", "products", "reports"],
       lastLogin: "2025-01-09 14:30",
       createdAt: "2024-12-15"
@@ -25,7 +24,6 @@ const EmployeeManagementSection = () => {
       email: "maria@pizzariabellavista.com.br",
       role: "cashier",
       avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-      status: "active",
       permissions: ["orders"],
       lastLogin: "2025-01-09 16:45",
       createdAt: "2025-01-02"
@@ -36,7 +34,6 @@ const EmployeeManagementSection = () => {
       email: "joao@pizzariabellavista.com.br",
       role: "delivery",
       avatar: "https://randomuser.me/api/portraits/men/56.jpg",
-      status: "inactive",
       permissions: ["orders"],
       lastLogin: "2025-01-08 12:15",
       createdAt: "2024-11-20"
@@ -74,21 +71,6 @@ const EmployeeManagementSection = () => {
     return roleOption ? roleOption?.label : role;
   };
 
-  const getStatusBadge = (status) => {
-    const statusConfig = {
-      active: { label: "Ativo", className: "bg-success text-success-foreground" },
-      inactive: { label: "Inativo", className: "bg-muted text-muted-foreground" },
-      suspended: { label: "Suspenso", className: "bg-destructive text-destructive-foreground" }
-    };
-
-    const config = statusConfig?.[status] || statusConfig?.inactive;
-    
-    return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${config?.className}`}>
-        {config?.label}
-      </span>
-    );
-  };
 
   const handleNewEmployeeChange = (field, value) => {
     setNewEmployee(prev => ({
@@ -121,7 +103,6 @@ const EmployeeManagementSection = () => {
       id: employees?.length + 1,
       ...newEmployee,
       avatar: `https://randomuser.me/api/portraits/${Math.random() > 0.5 ? 'men' : 'women'}/${Math.floor(Math.random() * 99)}.jpg`,
-      status: "active",
       lastLogin: "Nunca",
       createdAt: new Date()?.toISOString()?.split('T')?.[0]
     };
@@ -138,13 +119,6 @@ const EmployeeManagementSection = () => {
     alert('Funcionário adicionado com sucesso!');
   };
 
-  const handleToggleStatus = (employeeId) => {
-    setEmployees(prev => prev?.map(emp => 
-      emp?.id === employeeId 
-        ? { ...emp, status: emp?.status === 'active' ? 'inactive' : 'active' }
-        : emp
-    ));
-  };
 
   const handleDeleteEmployee = (employeeId) => {
     if (confirm('Tem certeza que deseja remover este funcionário?')) {
@@ -287,7 +261,6 @@ const EmployeeManagementSection = () => {
               <tr>
                 <th className="text-left p-4 font-medium text-foreground">Funcionário</th>
                 <th className="text-left p-4 font-medium text-foreground">Cargo</th>
-                <th className="text-left p-4 font-medium text-foreground">Status</th>
                 <th className="text-left p-4 font-medium text-foreground">Último Acesso</th>
                 <th className="text-left p-4 font-medium text-foreground">Ações</th>
               </tr>
@@ -314,25 +287,10 @@ const EmployeeManagementSection = () => {
                     <span className="text-sm text-foreground">{getRoleLabel(employee?.role)}</span>
                   </td>
                   <td className="p-4">
-                    {getStatusBadge(employee?.status)}
-                  </td>
-                  <td className="p-4">
                     <span className="text-sm text-muted-foreground">{employee?.lastLogin}</span>
                   </td>
                   <td className="p-4">
                     <div className="flex items-center space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleToggleStatus(employee?.id)}
-                        title={employee?.status === 'active' ? 'Desativar' : 'Ativar'}
-                      >
-                        <Icon 
-                          name={employee?.status === 'active' ? 'UserX' : 'UserCheck'} 
-                          size={16} 
-                        />
-                      </Button>
-                      
                       <Button
                         variant="ghost"
                         size="icon"
@@ -341,7 +299,7 @@ const EmployeeManagementSection = () => {
                       >
                         <Icon name="Edit" size={16} />
                       </Button>
-                      
+
                       <Button
                         variant="ghost"
                         size="icon"
