@@ -5,6 +5,7 @@ import Icon from '../../components/AppIcon';
 import BusinessInfoSection from './components/BusinessInfoSection';
 import BrandingSection from './components/BrandingSection';
 import EmployeeManagementSection from './components/EmployeeManagementSection';
+import RoleManagementSection from './components/RoleManagementSection';
 import SystemConfigSection from './components/SystemConfigSection';
 import PaymentCurrencySection from './components/PaymentCurrencySection';
 import ImportExportSection from './components/ImportExportSection';
@@ -12,7 +13,7 @@ import AdvancedOptionsSection from './components/AdvancedOptionsSection';
 
 const StoreSettings = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [activeTab, setActiveTab] = useState('employees');
+  const [activeTab, setActiveTab] = useState('roles');
 
   const tabs = [
     // {
@@ -27,6 +28,12 @@ const StoreSettings = () => {
     //   icon: 'Palette',
     //   description: 'Logo, cores e personalização'
     // },
+    {
+      id: 'roles',
+      label: 'Cargos',
+      icon: 'Briefcase',
+      description: 'Definição de cargos e responsabilidades'
+    },
     {
       id: 'employees',
       label: 'Funcionários',
@@ -70,6 +77,8 @@ const StoreSettings = () => {
       //   return <BusinessInfoSection />;
       // case 'branding':
       //   return <BrandingSection />;
+      case 'roles':
+        return <RoleManagementSection />;
       case 'employees':
         return <EmployeeManagementSection />;
       // case 'system':
@@ -81,7 +90,7 @@ const StoreSettings = () => {
       // case 'advanced':
       //   return <AdvancedOptionsSection />;
       default:
-        return <EmployeeManagementSection />;
+        return <RoleManagementSection />;
     }
   };
 
@@ -111,9 +120,9 @@ const StoreSettings = () => {
             <div className="flex items-center space-x-3 mb-2">
               <Icon name="Settings" size={32} className="text-primary" />
               <div>
-                <h1 className="text-3xl font-bold text-foreground">Gerenciamento de Funcionários</h1>
+                <h1 className="text-3xl font-bold text-foreground">Configurações da Loja</h1>
                 <p className="text-muted-foreground">
-                  Gerencie os funcionários da sua loja, atribua funções e defina permissões de acesso.
+                  Gerencie cargos, funcionários e configurações da sua loja.
                 </p>
               </div>
             </div>

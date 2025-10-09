@@ -10,6 +10,7 @@ declare global {
         email: string;
         name: string;
         userType: 'cliente' | 'funcionario' | 'admin';
+        cargoId?: number | null; // ID do cargo (para funcionários)
       };
     }
   }
@@ -53,6 +54,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
       email: string;
       name: string;
       userType: 'cliente' | 'funcionario' | 'admin';
+      cargoId?: number | null;
       iat: number;
       exp: number;
     };
@@ -62,7 +64,8 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
       id: decoded.id,
       email: decoded.email,
       name: decoded.name,
-      userType: decoded.userType
+      userType: decoded.userType,
+      cargoId: decoded.cargoId
     };
 
     next();

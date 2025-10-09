@@ -39,7 +39,13 @@ const AdminRoute = ({ children }) => {
         console.log('🔍 Verificando permissões de administrador...');
         const response = await authService.verifyToken();
 
-        if (response.user && response.user.userType === 'admin') {
+        // Verificar se é admin pelo userType ou se é funcionário com cargo de Administrador (id 2)
+        const isAdmin = response.user && (
+          response.user.userType === 'admin' ||
+          (response.user.userType === 'funcionario' && response.user.cargoId === 2)
+        );
+
+        if (isAdmin) {
           console.log('✅ Acesso autorizado para administrador');
           setIsAuthorized(true);
         } else {

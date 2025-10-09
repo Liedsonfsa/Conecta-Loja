@@ -39,7 +39,7 @@ export class EmployeeRepository {
         name: string,
         email: string,
         password: string,
-        role: 'FUNCIONARIO' | 'ADMIN',
+        cargoId?: number,
         storeId: number
     }) {
         return await prisma.funcionario.create({
@@ -47,7 +47,7 @@ export class EmployeeRepository {
                 name: data.name,
                 email: data.email,
                 password: data.password,
-                role: data.role,
+                cargoId: data.cargoId,
                 lojaId: data.storeId
             }
         });
@@ -75,7 +75,8 @@ export class EmployeeRepository {
         return await prisma.funcionario.findUnique({
             where: { email },
             include: {
-                loja: true // Incluir dados da loja associada
+                loja: true, // Incluir dados da loja associada
+                cargo: true // Incluir dados do cargo
             }
         });
     };
@@ -91,6 +92,56 @@ export class EmployeeRepository {
         return await prisma.funcionario.update({
             where: {id},
             data
+        });
+    };
+
+    /**
+     * Busca todos os funcionários com paginação e filtros
+     *
+     * @param options - Opções de busca
+     * @param options.skip - Número de registros a pular (para paginação)
+     * @param options.take - Número máximo de registros a retornar
+     * @param options.where - Filtros adicionais
+     * @returns Lista de funcionários
+     */
+    static async findAllEmployees(options?: {
+        skip?: number;
+        take?: number;
+        where?: any;
+    }) {
+        const { skip, take, where } = options || {};
+
+        return await prisma.funcionario.findMany({
+            skip,
+            take,
+            where,
+            include: {
+                loja: true, // Incluir dados da loja
+                cargo: true // Incluir dados do cargo se existir
+            },
+            orderBy: { name: 'asc' },
+        });
+    };
+
+    /**
+     * Conta o número total de funcionários com filtros
+     *
+     * @param where - Filtros opcionais
+     * @returns Número total de funcionários
+     */
+    static async countEmployees(where?: any) {
+        return await prisma.funcionario.count({ where });
+    };
+
+    /**
+     * Remove um funcionário do banco de dados
+     *
+     * @param id - ID do funcionário a ser removido
+     * @returns Funcionário removido
+     */
+    static async deleteEmployee(id: number) {
+        return await prisma.funcionario.delete({
+            where: { id }
         });
     };
 }

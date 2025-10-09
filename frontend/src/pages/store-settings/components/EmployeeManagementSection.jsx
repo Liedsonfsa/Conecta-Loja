@@ -1,47 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import Button from '../../../components/ui/ButtonDash';
 import Select from '../../../components/ui/Select';
 import { Checkbox } from '../../../components/ui/Checkbox';
 import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
+import ConfirmDialog from '../../../components/ui/ConfirmDialog';
+import { employeeService, roleService } from '../../../api';
+import { useToast } from '../../../hooks/use-toast';
 
 const EmployeeManagementSection = () => {
-  const [employees, setEmployees] = useState([
-    {
-      id: 1,
-      name: "Carlos Silva",
-      email: "carlos@pizzariabellavista.com.br",
-      role: "manager",
-      avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-      status: "active",
-      permissions: ["orders", "products", "reports"],
-      lastLogin: "2025-01-09 14:30",
-      createdAt: "2024-12-15"
-    },
-    {
-      id: 2,
-      name: "Maria Santos",
-      email: "maria@pizzariabellavista.com.br",
-      role: "cashier",
-      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-      status: "active",
-      permissions: ["orders"],
-      lastLogin: "2025-01-09 16:45",
-      createdAt: "2025-01-02"
-    },
-    {
-      id: 3,
-      name: "João Oliveira",
-      email: "joao@pizzariabellavista.com.br",
-      role: "delivery",
-      avatar: "https://randomuser.me/api/portraits/men/56.jpg",
-      status: "inactive",
-      permissions: ["orders"],
-      lastLogin: "2025-01-08 12:15",
-      createdAt: "2024-11-20"
-    }
-  ]);
+  // Estados para dados e loading
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Estados para cargos
+  const [roles, setRoles] = useState([]);
+  const [loadingRoles, setLoadingRoles] = useState(true);
+
+  // Hook para notificações toast
+  const { toast } = useToast();
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -49,46 +28,86 @@ const EmployeeManagementSection = () => {
     name: "",
     email: "",
     password: "",
-    role: "cashier",
-    permissions: []
+    role: "",
   });
 
-  const roleOptions = [
-    { value: "admin", label: "Administrador", description: "Acesso total ao sistema" },
-    { value: "manager", label: "Gerente", description: "Gerenciamento de operações" },
-    { value: "cashier", label: "Caixa", description: "Atendimento e pedidos" },
-    { value: "delivery", label: "Entregador", description: "Apenas visualização de pedidos" },
-    { value: "kitchen", label: "Cozinha", description: "Preparação de pedidos" }
-  ];
+  // Estados para dialog de confirmação de exclusão
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [employeeToDelete, setEmployeeToDelete] = useState(null);
+  const [deletingEmployee, setDeletingEmployee] = useState(false);
 
-  const permissionOptions = [
-    { value: "orders", label: "Gerenciar Pedidos", description: "Criar, editar e visualizar pedidos" },
-    { value: "products", label: "Gerenciar Produtos", description: "Adicionar e editar produtos" },
-    { value: "reports", label: "Relatórios", description: "Visualizar relatórios e analytics" },
-    { value: "settings", label: "Configurações", description: "Alterar configurações da loja" },
-    { value: "employees", label: "Gerenciar Funcionários", description: "Adicionar e remover funcionários" }
-  ];
+  // Estados para modal de edição
+  const [showEditForm, setShowEditForm] = useState(false);
+  const [employeeToEdit, setEmployeeToEdit] = useState(null);
+  const [editingEmployee, setEditingEmployee] = useState(false);
 
-  const getRoleLabel = (role) => {
-    const roleOption = roleOptions?.find(r => r?.value === role);
-    return roleOption ? roleOption?.label : role;
+  // Carregar funcionários e cargos da API ao montar o componente
+  useEffect(() => {
+    loadEmployees();
+    loadRoles();
+  }, []);
+
+  /**
+   * Carrega a lista de funcionários da API
+   */
+  const loadEmployees = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await employeeService.getAllEmployees();
+      setEmployees(response.employees || []);
+    } catch (err) {
+      console.error('Erro ao carregar funcionários:', err);
+      setError('Erro ao carregar funcionários. Tente novamente.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const getStatusBadge = (status) => {
-    const statusConfig = {
-      active: { label: "Ativo", className: "bg-success text-success-foreground" },
-      inactive: { label: "Inativo", className: "bg-muted text-muted-foreground" },
-      suspended: { label: "Suspenso", className: "bg-destructive text-destructive-foreground" }
-    };
-
-    const config = statusConfig?.[status] || statusConfig?.inactive;
-    
-    return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${config?.className}`}>
-        {config?.label}
-      </span>
-    );
+  /**
+   * Carrega a lista de cargos da API
+   */
+  const loadRoles = async () => {
+    try {
+      setLoadingRoles(true);
+      const response = await roleService.getAllRoles();
+      // Mapear os cargos para o formato esperado pelo componente Select
+      const rolesOptions = response.roles?.map(role => ({
+        value: role.id.toString(), // Usar ID como value
+        label: role.name,
+        description: role.description || 'Cargo sem descrição'
+      })) || [];
+      setRoles(rolesOptions);
+    } catch (err) {
+      console.error('Erro ao carregar cargos:', err);
+      toast({
+        title: "Erro ao carregar cargos",
+        description: "Não foi possível carregar a lista de cargos. Tente recarregar a página.",
+        duration: 5000,
+      });
+      // Fallback para cargos vazios
+      setRoles([]);
+    } finally {
+      setLoadingRoles(false);
+    }
   };
+
+
+  const getRoleLabel = (employee) => {
+    // Primeiro tenta usar o nome do cargo da relação
+    if (employee?.cargo?.name) {
+      return employee.cargo.name;
+    }
+
+    // Fallback para buscar pelo ID nos cargos carregados
+    if (employee?.cargoId) {
+      const roleOption = roles?.find(r => r?.value === employee.cargoId.toString());
+      return roleOption ? roleOption?.label : `Cargo ID: ${employee.cargoId}`;
+    }
+
+    return 'Cargo não definido';
+  };
+
 
   const handleNewEmployeeChange = (field, value) => {
     setNewEmployee(prev => ({
@@ -97,59 +116,215 @@ const EmployeeManagementSection = () => {
     }));
   };
 
-  const handlePermissionChange = (permission, checked) => {
-    setNewEmployee(prev => ({
-      ...prev,
-      permissions: checked 
-        ? [...prev?.permissions, permission]
-        : prev?.permissions?.filter(p => p !== permission)
-    }));
-  };
 
-  const handleAddEmployee = () => {
-    if (!newEmployee?.name || !newEmployee?.email || !newEmployee?.password) {
-      alert('Por favor, preencha todos os campos obrigatórios.');
+  const handleAddEmployee = async () => {
+    if (!newEmployee?.name?.trim()) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Por favor, preencha o nome do funcionário.",
+        duration: 4000,
+      });
+      return;
+    }
+
+    if (!newEmployee?.email?.trim()) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Por favor, preencha o email do funcionário.",
+        duration: 4000,
+      });
+      return;
+    }
+
+    if (!newEmployee?.role?.trim()) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Por favor, selecione um cargo para o funcionário.",
+        duration: 4000,
+      });
+      return;
+    }
+
+    const cargoId = parseInt(newEmployee.role);
+    if (isNaN(cargoId) || cargoId <= 0) {
+      toast({
+        title: "Cargo inválido",
+        description: "Por favor, selecione um cargo válido.",
+        duration: 4000,
+      });
+      return;
+    }
+
+    if (!newEmployee?.password?.trim()) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Por favor, preencha a senha do funcionário.",
+        duration: 4000,
+      });
       return;
     }
 
     if (newEmployee?.password?.length < 6) {
-      alert('A senha deve ter pelo menos 6 caracteres.');
+      toast({
+        title: "Senha muito curta",
+        description: "A senha deve ter pelo menos 6 caracteres.",
+        duration: 4000,
+      });
       return;
     }
 
-    const employee = {
-      id: employees?.length + 1,
-      ...newEmployee,
-      avatar: `https://randomuser.me/api/portraits/${Math.random() > 0.5 ? 'men' : 'women'}/${Math.floor(Math.random() * 99)}.jpg`,
-      status: "active",
-      lastLogin: "Nunca",
-      createdAt: new Date()?.toISOString()?.split('T')?.[0]
-    };
+    try {
+      // Preparar dados para a API - usar cargoId validado
+      await employeeService.createEmployee({
+        name: newEmployee.name.trim(),
+        email: newEmployee.email.trim(),
+        password: newEmployee.password,
+        cargoId: cargoId,
+        storeId: 1 // TODO: implementar seleção de loja
+      });
 
-    setEmployees(prev => [...prev, employee]);
-    setNewEmployee({
-      name: "",
-      email: "",
-      password: "",
-      role: "cashier",
-      permissions: []
-    });
-    setShowAddForm(false);
-    alert('Funcionário adicionado com sucesso!');
+      toast({
+        title: "Funcionário criado",
+        description: "O funcionário foi criado com sucesso.",
+        duration: 3000,
+      });
+
+      // Reset form
+      setNewEmployee({
+        name: "",
+        email: "",
+        password: "",
+        role: "",
+      });
+      setShowAddForm(false);
+
+      // Recarregar lista
+      await loadEmployees();
+    } catch (error) {
+      console.error('Erro ao criar funcionário:', error);
+      const errorMessage = error.response?.data?.error || 'Erro ao criar funcionário. Tente novamente.';
+      toast({
+        title: "Erro ao criar",
+        description: errorMessage,
+        duration: 5000,
+      });
+    }
   };
 
-  const handleToggleStatus = (employeeId) => {
-    setEmployees(prev => prev?.map(emp => 
-      emp?.id === employeeId 
-        ? { ...emp, status: emp?.status === 'active' ? 'inactive' : 'active' }
-        : emp
-    ));
+
+  const handleEditEmployee = (employeeId) => {
+    const employee = employees?.find(emp => emp?.id === employeeId);
+    if (!employee) return;
+
+    // Preparar dados para edição
+    setEmployeeToEdit(employee);
+
+    // Preencher formulário com dados do funcionário
+    // O valor do select deve ser o cargoId como string
+    const roleValue = employee?.cargo?.id?.toString() || employee?.cargoId?.toString() || '';
+
+    setNewEmployee({
+      name: employee.name || "",
+      email: employee.email || "",
+      password: "", // Não preencher senha por segurança
+      role: roleValue,
+ // TODO: implementar permissões se necessário
+    });
+
+    // Abrir modal de edição
+    setShowEditForm(true);
+  };
+
+  const handleUpdateEmployee = async () => {
+    if (!employeeToEdit) return;
+
+    if (!newEmployee?.name?.trim()) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Por favor, preencha o nome do funcionário.",
+        duration: 4000,
+      });
+      return;
+    }
+
+    try {
+      setEditingEmployee(true);
+
+      // Preparar dados para a API (apenas campos editáveis)
+      const updateData = {
+        name: newEmployee.name.trim(),
+        cargoId: parseInt(newEmployee.role) // O value do select já é o ID do cargo
+      };
+
+      await employeeService.updateEmployee(employeeToEdit.id, updateData);
+
+      toast({
+        title: "Funcionário atualizado",
+        description: "Os dados do funcionário foram atualizados com sucesso.",
+        duration: 3000,
+      });
+
+      // Reset form
+      setNewEmployee({
+        name: "",
+        email: "",
+        password: "",
+        role: "",
+      });
+      setShowEditForm(false);
+      setEmployeeToEdit(null);
+
+      // Recarregar lista
+      await loadEmployees();
+    } catch (error) {
+      console.error('Erro ao atualizar funcionário:', error);
+      const errorMessage = error.response?.data?.error || 'Erro ao atualizar funcionário. Tente novamente.';
+      toast({
+        title: "Erro ao atualizar",
+        description: errorMessage,
+        duration: 5000,
+      });
+    } finally {
+      setEditingEmployee(false);
+    }
   };
 
   const handleDeleteEmployee = (employeeId) => {
-    if (confirm('Tem certeza que deseja remover este funcionário?')) {
-      setEmployees(prev => prev?.filter(emp => emp?.id !== employeeId));
-      alert('Funcionário removido com sucesso!');
+    const employee = employees?.find(emp => emp?.id === employeeId);
+    if (!employee) return;
+
+    // Abrir dialog de confirmação
+    setEmployeeToDelete(employee);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDeleteEmployee = async () => {
+    if (!employeeToDelete) return;
+
+    setDeletingEmployee(true);
+
+    try {
+      await employeeService.deleteEmployee(employeeToDelete.id);
+      toast({
+        title: "Funcionário removido",
+        description: "O funcionário foi removido com sucesso.",
+        duration: 3000,
+      });
+
+      // Recarregar lista
+      await loadEmployees();
+    } catch (error) {
+      console.error('Erro ao remover funcionário:', error);
+      const errorMessage = error.response?.data?.error || 'Erro ao remover funcionário. Tente novamente.';
+      toast({
+        title: "Erro ao remover",
+        description: errorMessage,
+        duration: 5000,
+      });
+    } finally {
+      setDeletingEmployee(false);
+      setShowDeleteDialog(false);
+      setEmployeeToDelete(null);
     }
   };
 
@@ -162,7 +337,7 @@ const EmployeeManagementSection = () => {
           <div>
             <h3 className="text-lg font-semibold text-foreground">Gerenciamento de Funcionários</h3>
             <p className="text-sm text-muted-foreground">
-              {employees?.length} funcionário{employees?.length !== 1 ? 's' : ''} cadastrado{employees?.length !== 1 ? 's' : ''}
+              {loading ? 'Carregando...' : `${employees?.length} funcionário${employees?.length !== 1 ? 's' : ''} cadastrado${employees?.length !== 1 ? 's' : ''}`}
             </p>
           </div>
         </div>
@@ -236,29 +411,14 @@ const EmployeeManagementSection = () => {
             <div className="col-span-1 md:col-span-2">
               <Select
                 label="Cargo"
-                options={roleOptions}
+                options={roles}
                 value={newEmployee?.role}
                 onChange={(value) => handleNewEmployeeChange('role', value)}
                 description="Defina o nível de acesso do funcionário"
+                disabled={loadingRoles}
               />
             </div>
 
-            <div className="col-span-1 md:col-span-2">
-              <label className="block text-sm font-medium text-foreground mb-3">
-                Permissões
-              </label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {permissionOptions?.map(permission => (
-                  <Checkbox
-                    key={permission?.value}
-                    label={permission?.label}
-                    description={permission?.description}
-                    checked={newEmployee?.permissions?.includes(permission?.value)}
-                    onChange={(e) => handlePermissionChange(permission?.value, e?.target?.checked)}
-                  />
-                ))}
-              </div>
-            </div>
           </div>
 
           <div className="flex justify-end space-x-3 mt-6">
@@ -279,86 +439,199 @@ const EmployeeManagementSection = () => {
           </div>
         </div>
       )}
+
+      {/* Edit Employee Form */}
+      {showEditForm && employeeToEdit && (
+        <div className="bg-card rounded-lg border border-border p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h4 className="text-lg font-semibold text-foreground">Editar Funcionário</h4>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setShowEditForm(false);
+                setEmployeeToEdit(null);
+                setNewEmployee({
+                  name: "",
+                  email: "",
+                  password: "",
+                  role: "cashier",
+                });
+              }}
+            >
+              <Icon name="X" size={20} />
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="col-span-1 md:col-span-2">
+              <Input
+                label="Nome Completo"
+                type="text"
+                value={newEmployee?.name}
+                onChange={(e) => handleNewEmployeeChange('name', e?.target?.value)}
+                required
+              />
+            </div>
+
+            <div className="col-span-1 md:col-span-2">
+              <Select
+                label="Cargo"
+                options={roles}
+                value={newEmployee?.role}
+                onChange={(value) => handleNewEmployeeChange('role', value)}
+                disabled={loadingRoles}
+              />
+            </div>
+
+          </div>
+
+          <div className="flex justify-end space-x-3 mt-6">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowEditForm(false);
+                setEmployeeToEdit(null);
+                setNewEmployee({
+                  name: "",
+                  email: "",
+                  password: "",
+                  role: "cashier",
+                });
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="default"
+              onClick={handleUpdateEmployee}
+              disabled={editingEmployee}
+              iconName={editingEmployee ? "Loader2" : "Save"}
+              iconPosition="left"
+            >
+              {editingEmployee ? "Salvando..." : "Salvar Alterações"}
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Employees List */}
       <div className="bg-card rounded-lg border border-border overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-muted">
-              <tr>
-                <th className="text-left p-4 font-medium text-foreground">Funcionário</th>
-                <th className="text-left p-4 font-medium text-foreground">Cargo</th>
-                <th className="text-left p-4 font-medium text-foreground">Status</th>
-                <th className="text-left p-4 font-medium text-foreground">Último Acesso</th>
-                <th className="text-left p-4 font-medium text-foreground">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {employees?.map((employee, index) => (
-                <tr key={employee?.id} className={index % 2 === 0 ? 'bg-background' : 'bg-muted/30'}>
-                  <td className="p-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 rounded-full overflow-hidden bg-muted flex-shrink-0">
-                        <Image
-                          src={employee?.avatar}
-                          alt={employee?.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div>
-                        <div className="font-medium text-foreground">{employee?.name}</div>
-                        <div className="text-sm text-muted-foreground">{employee?.email}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <span className="text-sm text-foreground">{getRoleLabel(employee?.role)}</span>
-                  </td>
-                  <td className="p-4">
-                    {getStatusBadge(employee?.status)}
-                  </td>
-                  <td className="p-4">
-                    <span className="text-sm text-muted-foreground">{employee?.lastLogin}</span>
-                  </td>
-                  <td className="p-4">
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleToggleStatus(employee?.id)}
-                        title={employee?.status === 'active' ? 'Desativar' : 'Ativar'}
-                      >
-                        <Icon 
-                          name={employee?.status === 'active' ? 'UserX' : 'UserCheck'} 
-                          size={16} 
-                        />
-                      </Button>
-                      
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => alert(`Editando ${employee?.name}`)}
-                        title="Editar"
-                      >
-                        <Icon name="Edit" size={16} />
-                      </Button>
-                      
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteEmployee(employee?.id)}
-                        title="Remover"
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Icon name="Trash2" size={16} />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {loading ? (
+          <div className="p-8 text-center">
+            <Icon name="Loader2" size={48} className="text-muted-foreground mx-auto mb-4 animate-spin" />
+            <p className="text-sm text-muted-foreground">Carregando funcionários...</p>
+          </div>
+        ) : error ? (
+          <div className="p-8 text-center">
+            <Icon name="AlertCircle" size={48} className="text-destructive mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-foreground mb-2">Erro ao carregar funcionários</h3>
+            <p className="text-sm text-muted-foreground mb-4">{error}</p>
+            <Button
+              variant="outline"
+              onClick={loadEmployees}
+              iconName="RefreshCw"
+              iconPosition="left"
+            >
+              Tentar Novamente
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-muted">
+                  <tr>
+                    <th className="text-left p-4 font-medium text-foreground">Funcionário</th>
+                    <th className="text-left p-4 font-medium text-foreground">Cargo</th>
+                    <th className="text-left p-4 font-medium text-foreground">Loja</th>
+                    <th className="text-left p-4 font-medium text-foreground">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {employees?.map((employee, index) => (
+                    <tr key={employee?.id} className={index % 2 === 0 ? 'bg-background' : 'bg-muted/30'}>
+                      <td className="p-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 rounded-full overflow-hidden bg-muted flex-shrink-0">
+                            <Image
+                              src={`https://randomuser.me/api/portraits/${Math.random() > 0.5 ? 'men' : 'women'}/${Math.floor(Math.random() * 99)}.jpg`}
+                              alt={employee?.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div>
+                            <div className="font-medium text-foreground">{employee?.name}</div>
+                            <div className="text-sm text-muted-foreground">{employee?.email}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <span className="text-sm text-foreground">{getRoleLabel(employee)}</span>
+                      </td>
+                      <td className="p-4">
+                        <span className="text-sm text-muted-foreground">{employee?.loja?.name || 'N/A'}</span>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEditEmployee(employee?.id)}
+                            title="Editar"
+                          >
+                            <Icon name="Edit" size={16} />
+                          </Button>
+
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteEmployee(employee?.id)}
+                            title="Remover"
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Icon name="Trash2" size={16} />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {employees?.length === 0 && (
+              <div className="p-8 text-center">
+                <Icon name="Users" size={48} className="text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-foreground mb-2">Nenhum funcionário cadastrado</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Comece criando seu primeiro funcionário para organizar sua equipe.
+                </p>
+                <Button
+                  variant="default"
+                  onClick={() => setShowAddForm(true)}
+                  iconName="UserPlus"
+                  iconPosition="left"
+                >
+                  Criar Primeiro Funcionário
+                </Button>
+              </div>
+            )}
+          </>
+        )}
       </div>
+
+      {/* Dialog de confirmação de exclusão */}
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={confirmDeleteEmployee}
+        title="Remover funcionário"
+        description={`Tem certeza que deseja remover o funcionário "${employeeToDelete?.name}"? Esta ação não pode ser desfeita.`}
+        confirmText={deletingEmployee ? "Removendo..." : "Remover"}
+        cancelText="Cancelar"
+        variant="destructive"
+      />
     </div>
   );
 };
