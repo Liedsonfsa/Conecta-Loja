@@ -5,6 +5,39 @@ import Select from '../../../components/ui/Select';
 import { Checkbox } from '../../../components/ui/Checkbox';
 import Icon from '../../../components/AppIcon';
 
+/**
+ * ImportExportSection - Seção de importação/exportação - Conecta-Loja
+ *
+ * Componente que gerencia operações de importação e exportação de dados da loja,
+ * incluindo backup completo do sistema, migração de dados e histórico de backups.
+ * Permite exportar dados em diferentes formatos (JSON, CSV, XML) e importar
+ * dados com validações e opções de segurança.
+ *
+ * Funcionalidades principais:
+ * - Exportação seletiva de dados (produtos, pedidos, clientes, configurações)
+ * - Importação de dados com validação e backup automático
+ * - Histórico completo de backups (manuais e automáticos)
+ * - Suporte a múltiplos formatos de arquivo
+ * - Configurações de período para exportações filtradas
+ *
+ * Estados gerenciados:
+ * - exportSettings: Configurações de exportação de dados
+ * - importSettings: Configurações de importação de dados
+ * - backupHistory: Lista histórica de backups realizados
+ *
+ * @example
+ * // Uso na página de configurações da loja
+ * import ImportExportSection from './components/ImportExportSection';
+ *
+ * function StoreSettings() {
+ *   return (
+ *     <div>
+ *       <ImportExportSection />
+ *     </div>
+ *   );
+ * }
+ *
+ */
 const ImportExportSection = () => {
   const [exportSettings, setExportSettings] = useState({
     format: "json",
@@ -55,12 +88,20 @@ const ImportExportSection = () => {
     }
   ]);
 
+  /**
+   * Opções de formato para exportação de dados
+   * @type {Array<{value: string, label: string, description: string}>}
+   */
   const exportFormatOptions = [
     { value: "json", label: "JSON", description: "Formato completo com todas as informações" },
     { value: "csv", label: "CSV", description: "Planilha compatível com Excel" },
     { value: "xml", label: "XML", description: "Formato estruturado para integrações" }
   ];
 
+  /**
+   * Opções de período para filtros de exportação
+   * @type {Array<{value: string, label: string}>}
+   */
   const dateRangeOptions = [
     { value: "all", label: "Todos os dados" },
     { value: "last_month", label: "Último mês" },
@@ -69,6 +110,11 @@ const ImportExportSection = () => {
     { value: "custom", label: "Período personalizado" }
   ];
 
+  /**
+   * Manipula mudanças nas configurações de exportação
+   * @param {string} field - Campo a ser alterado
+   * @param {any} value - Novo valor do campo
+   */
   const handleExportSettingsChange = (field, value) => {
     setExportSettings(prev => ({
       ...prev,
@@ -76,6 +122,11 @@ const ImportExportSection = () => {
     }));
   };
 
+  /**
+   * Manipula mudanças nas configurações de importação
+   * @param {string} field - Campo a ser alterado
+   * @param {any} value - Novo valor do campo
+   */
   const handleImportSettingsChange = (field, value) => {
     setImportSettings(prev => ({
       ...prev,
@@ -83,6 +134,9 @@ const ImportExportSection = () => {
     }));
   };
 
+  /**
+   * Inicia o processo de exportação dos dados selecionados
+   */
   const handleExport = () => {
     const selectedData = [];
     if (exportSettings?.includeProducts) selectedData?.push('produtos');
@@ -100,6 +154,9 @@ const ImportExportSection = () => {
     }, 1000);
   };
 
+  /**
+   * Inicia o processo de importação de dados
+   */
   const handleImport = () => {
     if (!document.querySelector('input[type="file"]')?.files?.[0]) {
       alert('Por favor, selecione um arquivo para importar.');
@@ -113,11 +170,19 @@ const ImportExportSection = () => {
     alert('Importação iniciada! Você será notificado quando concluída.');
   };
 
+  /**
+   * Faz o download de um backup específico
+   * @param {number} backupId - ID do backup a ser baixado
+   */
   const handleDownloadBackup = (backupId) => {
     const backup = backupHistory?.find(b => b?.id === backupId);
     alert(`Baixando backup: ${backup?.name}`);
   };
 
+  /**
+   * Exclui um backup específico após confirmação
+   * @param {number} backupId - ID do backup a ser excluído
+   */
   const handleDeleteBackup = (backupId) => {
     if (confirm('Tem certeza que deseja excluir este backup?')) {
       setBackupHistory(prev => prev?.filter(b => b?.id !== backupId));
@@ -125,6 +190,9 @@ const ImportExportSection = () => {
     }
   };
 
+  /**
+   * Cria um novo backup manual do sistema
+   */
   const handleCreateManualBackup = () => {
     const newBackup = {
       id: backupHistory?.length + 1,
@@ -140,10 +208,20 @@ const ImportExportSection = () => {
     alert('Backup manual criado com sucesso!');
   };
 
+  /**
+   * Retorna o ícone apropriado para o tipo de backup
+   * @param {string} type - Tipo do backup (automatic/manual)
+   * @returns {string} Nome do ícone
+   */
   const getBackupTypeIcon = (type) => {
     return type === 'automatic' ? 'Clock' : 'User';
   };
 
+  /**
+   * Renderiza o badge de tipo do backup
+   * @param {string} type - Tipo do backup (automatic/manual)
+   * @returns {JSX.Element} Elemento do badge
+   */
   const getBackupTypeBadge = (type) => {
     const config = {
       automatic: { label: "Automático", className: "bg-blue-100 text-blue-800" },
@@ -151,7 +229,7 @@ const ImportExportSection = () => {
     };
 
     const typeConfig = config?.[type] || config?.manual;
-    
+
     return (
       <span className={`px-2 py-1 rounded-full text-xs font-medium ${typeConfig?.className}`}>
         {typeConfig?.label}

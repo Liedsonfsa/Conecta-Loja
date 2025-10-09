@@ -5,6 +5,40 @@ import Select from '../../../components/ui/Select';
 import { Checkbox } from '../../../components/ui/Checkbox';
 import Icon from '../../../components/AppIcon';
 
+/**
+ * SystemConfigSection - Seção de configurações do sistema - Conecta-Loja
+ *
+ * Componente que gerencia configurações avançadas do sistema, incluindo backup
+ * automático, configurações de segurança, otimização de performance e integrações
+ * com serviços externos. Permite controle completo sobre o comportamento técnico
+ * da plataforma.
+ *
+ * Funcionalidades principais:
+ * - Configuração de backup automático (frequência e horários)
+ * - Configurações de segurança (HTTPS, 2FA, sessões, rate limiting)
+ * - Otimização de performance (cache, compressão, modos de performance)
+ * - Sistema de notificações (email, SMS, WhatsApp)
+ * - Integrações com APIs externas (Google Analytics, Facebook Pixel, etc.)
+ * - Modo de manutenção para atualizações do sistema
+ *
+ * Estados gerenciados:
+ * - systemConfig: Configurações gerais do sistema
+ * - securitySettings: Configurações de segurança avançadas
+ * - integrationSettings: Configurações de integrações externas
+ *
+ * @example
+ * // Uso na página de configurações da loja
+ * import SystemConfigSection from './components/SystemConfigSection';
+ *
+ * function StoreSettings() {
+ *   return (
+ *     <div>
+ *       <SystemConfigSection />
+ *     </div>
+ *   );
+ * }
+ *
+ */
 const SystemConfigSection = () => {
   const [systemConfig, setSystemConfig] = useState({
     autoBackup: true,
@@ -43,6 +77,10 @@ const SystemConfigSection = () => {
     smtpPassword: ""
   });
 
+  /**
+   * Opções de frequência para backup automático
+   * @type {Array<{value: string, label: string}>}
+   */
   const backupFrequencyOptions = [
     { value: "hourly", label: "A cada hora" },
     { value: "daily", label: "Diariamente" },
@@ -50,24 +88,40 @@ const SystemConfigSection = () => {
     { value: "monthly", label: "Mensalmente" }
   ];
 
+  /**
+   * Opções de modos de performance do sistema
+   * @type {Array<{value: string, label: string, description: string}>}
+   */
   const performanceModeOptions = [
     { value: "eco", label: "Econômico", description: "Menor consumo de recursos" },
     { value: "balanced", label: "Balanceado", description: "Equilibrio entre performance e recursos" },
     { value: "performance", label: "Alta Performance", description: "Máxima velocidade" }
   ];
 
+  /**
+   * Opções de complexidade de senha
+   * @type {Array<{value: string, label: string, description: string}>}
+   */
   const passwordComplexityOptions = [
     { value: "low", label: "Baixa", description: "Mínimo 6 caracteres" },
     { value: "medium", label: "Média", description: "8 caracteres, letras e números" },
     { value: "high", label: "Alta", description: "12 caracteres, letras, números e símbolos" }
   ];
 
+  /**
+   * Opções de nível de segurança da sessão
+   * @type {Array<{value: string, label: string, description: string}>}
+   */
   const sessionSecurityOptions = [
     { value: "low", label: "Baixa", description: "Sessão persistente" },
     { value: "medium", label: "Média", description: "Timeout padrão" },
     { value: "high", label: "Alta", description: "Timeout curto e validação IP" }
   ];
 
+  /**
+   * Opções de provedores de e-mail disponíveis
+   * @type {Array<{value: string, label: string}>}
+   */
   const emailProviderOptions = [
     { value: "smtp", label: "SMTP Personalizado" },
     { value: "gmail", label: "Gmail" },
@@ -75,6 +129,11 @@ const SystemConfigSection = () => {
     { value: "sendgrid", label: "SendGrid" }
   ];
 
+  /**
+   * Manipula mudanças nas configurações gerais do sistema
+   * @param {string} field - Campo a ser alterado
+   * @param {any} value - Novo valor do campo
+   */
   const handleSystemConfigChange = (field, value) => {
     setSystemConfig(prev => ({
       ...prev,
@@ -82,6 +141,11 @@ const SystemConfigSection = () => {
     }));
   };
 
+  /**
+   * Manipula mudanças nas configurações de segurança
+   * @param {string} field - Campo a ser alterado
+   * @param {any} value - Novo valor do campo
+   */
   const handleSecuritySettingsChange = (field, value) => {
     setSecuritySettings(prev => ({
       ...prev,
@@ -89,6 +153,11 @@ const SystemConfigSection = () => {
     }));
   };
 
+  /**
+   * Manipula mudanças nas configurações de integração
+   * @param {string} field - Campo a ser alterado
+   * @param {any} value - Novo valor do campo
+   */
   const handleIntegrationSettingsChange = (field, value) => {
     setIntegrationSettings(prev => ({
       ...prev,
@@ -96,23 +165,36 @@ const SystemConfigSection = () => {
     }));
   };
 
+  /**
+   * Inicia um backup manual do sistema
+   */
   const handleBackupNow = () => {
     alert('Backup iniciado! Você será notificado quando concluído.');
   };
 
+  /**
+   * Testa conexão com um serviço específico
+   * @param {string} service - Nome do serviço a ser testado
+   */
   const handleTestConnection = (service) => {
     alert(`Testando conexão com ${service}...`);
   };
 
+  /**
+   * Salva todas as configurações do sistema
+   */
   const handleSave = () => {
     console.log('Saving system config:', { systemConfig, securitySettings, integrationSettings });
     alert('Configurações do sistema salvas com sucesso!');
   };
 
+  /**
+   * Alterna o modo de manutenção do sistema
+   */
   const handleMaintenanceToggle = () => {
     const newMode = !systemConfig?.maintenanceMode;
     handleSystemConfigChange('maintenanceMode', newMode);
-    
+
     if (newMode) {
       alert('Modo de manutenção ativado. A loja ficará temporariamente indisponível para clientes.');
     } else {

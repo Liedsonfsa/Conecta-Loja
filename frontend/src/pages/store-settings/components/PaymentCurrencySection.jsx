@@ -5,7 +5,39 @@ import Select from '../../../components/ui/Select';
 import { Checkbox } from '../../../components/ui/Checkbox';
 import Icon from '../../../components/AppIcon';
 
-
+/**
+ * PaymentCurrencySection - Seção de pagamentos e moeda - Conecta-Loja
+ *
+ * Componente que gerencia todas as configurações financeiras da loja, incluindo
+ * formatação de moeda, métodos de pagamento aceitos, taxas e impostos, além de
+ * certificações empresariais. Permite configuração completa do sistema de
+ * pagamentos com foco nas necessidades brasileiras.
+ *
+ * Funcionalidades principais:
+ * - Configuração de moeda e formatação (BRL, USD, EUR)
+ * - Personalização de separadores e casas decimais
+ * - Configuração de métodos de pagamento (dinheiro, PIX, cartões)
+ * - Gerenciamento de taxas e impostos
+ * - Controle de certificações empresariais (CNPJ, licenças)
+ * - Configuração de chave PIX para pagamentos
+ *
+ * Estados gerenciados:
+ * - paymentSettings: Configurações de moeda e pagamentos
+ * - businessCertifications: Lista de certificações empresariais
+ *
+ * @example
+ * // Uso na página de configurações da loja
+ * import PaymentCurrencySection from './components/PaymentCurrencySection';
+ *
+ * function StoreSettings() {
+ *   return (
+ *     <div>
+ *       <PaymentCurrencySection />
+ *     </div>
+ *   );
+ * }
+ *
+ */
 const PaymentCurrencySection = () => {
   const [paymentSettings, setPaymentSettings] = useState({
     currency: "BRL",
@@ -52,17 +84,29 @@ const PaymentCurrencySection = () => {
     }
   ]);
 
+  /**
+   * Opções de moedas disponíveis
+   * @type {Array<{value: string, label: string}>}
+   */
   const currencyOptions = [
     { value: "BRL", label: "Real Brasileiro (R$)" },
     { value: "USD", label: "Dólar Americano ($)" },
     { value: "EUR", label: "Euro (€)" }
   ];
 
+  /**
+   * Opções de posição do símbolo da moeda
+   * @type {Array<{value: string, label: string}>}
+   */
   const currencyPositionOptions = [
     { value: "before", label: "Antes do valor (R$ 10,00)" },
     { value: "after", label: "Depois do valor (10,00 R$)" }
   ];
 
+  /**
+   * Opções de tipos de chave PIX
+   * @type {Array<{value: string, label: string}>}
+   */
   const pixKeyTypeOptions = [
     { value: "cpf", label: "CPF" },
     { value: "cnpj", label: "CNPJ" },
@@ -71,6 +115,11 @@ const PaymentCurrencySection = () => {
     { value: "random", label: "Chave Aleatória" }
   ];
 
+  /**
+   * Manipula mudanças nas configurações de pagamento
+   * @param {string} field - Campo a ser alterado
+   * @param {any} value - Novo valor do campo
+   */
   const handlePaymentSettingsChange = (field, value) => {
     setPaymentSettings(prev => ({
       ...prev,
@@ -78,12 +127,22 @@ const PaymentCurrencySection = () => {
     }));
   };
 
+  /**
+   * Manipula mudanças no status das certificações
+   * @param {number} certId - ID da certificação
+   * @param {string} newStatus - Novo status da certificação
+   */
   const handleCertificationStatusChange = (certId, newStatus) => {
-    setBusinessCertifications(prev => prev?.map(cert => 
+    setBusinessCertifications(prev => prev?.map(cert =>
       cert?.id === certId ? { ...cert, status: newStatus } : cert
     ));
   };
 
+  /**
+   * Renderiza o badge de status da certificação
+   * @param {string} status - Status da certificação (verified/pending/expired)
+   * @returns {JSX.Element} Elemento do badge de status
+   */
   const getStatusBadge = (status) => {
     const statusConfig = {
       verified: { label: "Verificado", className: "bg-success text-success-foreground", icon: "CheckCircle" },
@@ -92,7 +151,7 @@ const PaymentCurrencySection = () => {
     };
 
     const config = statusConfig?.[status] || statusConfig?.pending;
-    
+
     return (
       <div className="flex items-center space-x-2">
         <Icon name={config?.icon} size={16} />
@@ -103,22 +162,34 @@ const PaymentCurrencySection = () => {
     );
   };
 
+  /**
+   * Formata valor monetário para prévia das configurações
+   * @param {string|number} value - Valor a ser formatado
+   * @returns {string} Valor formatado conforme configurações atuais
+   */
   const formatCurrencyPreview = (value) => {
     const formattedValue = parseFloat(value || 0)?.toLocaleString('pt-BR', {
       minimumFractionDigits: paymentSettings?.decimalPlaces,
       maximumFractionDigits: paymentSettings?.decimalPlaces
     });
 
-    return paymentSettings?.currencyPosition === 'before' 
+    return paymentSettings?.currencyPosition === 'before'
       ? `${paymentSettings?.currencySymbol} ${formattedValue}`
       : `${formattedValue} ${paymentSettings?.currencySymbol}`;
   };
 
+  /**
+   * Salva todas as configurações de pagamento e certificações
+   */
   const handleSave = () => {
     console.log('Saving payment settings:', { paymentSettings, businessCertifications });
     alert('Configurações de pagamento salvas com sucesso!');
   };
 
+  /**
+   * Processa o upload de uma certificação específica
+   * @param {number} certId - ID da certificação a ser enviada
+   */
   const handleUploadCertification = (certId) => {
     alert(`Upload de certificação para ${businessCertifications?.find(c => c?.id === certId)?.name}`);
   };

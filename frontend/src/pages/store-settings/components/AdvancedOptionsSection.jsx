@@ -5,6 +5,40 @@ import Select from '../../../components/ui/Select';
 import { Checkbox } from '../../../components/ui/Checkbox';
 import Icon from '../../../components/AppIcon';
 
+/**
+ * AdvancedOptionsSection - Seção de opções avançadas - Conecta-Loja
+ *
+ * Componente que gerencia configurações avançadas do sistema, incluindo otimização
+ * para motores de busca (SEO), integração com ferramentas de analytics, configurações
+ * de APIs externas e inserção de código personalizado. Oferece interface completa
+ * para personalização técnica da plataforma.
+ *
+ * Funcionalidades principais:
+ * - Configurações de SEO (meta tags, sitemap, dados estruturados)
+ * - Integração com Google Analytics, Facebook Pixel, Hotjar
+ * - Configurações de APIs (WhatsApp, SMS, Email, Pagamento, Entrega)
+ * - Webhooks para notificações automáticas
+ * - Código personalizado (HTML, CSS, JavaScript)
+ *
+ * Estados gerenciados:
+ * - seoSettings: Configurações de otimização para buscadores
+ * - analyticsSettings: Integrações com ferramentas de análise
+ * - apiSettings: Chaves e URLs de APIs externas
+ * - customCode: Scripts e estilos personalizados
+ *
+ * @example
+ * // Uso na página de configurações da loja
+ * import AdvancedOptionsSection from './components/AdvancedOptionsSection';
+ *
+ * function StoreSettings() {
+ *   return (
+ *     <div>
+ *       <AdvancedOptionsSection />
+ *     </div>
+ *   );
+ * }
+ *
+ */
 const AdvancedOptionsSection = () => {
   const [seoSettings, setSeoSettings] = useState({
     metaTitle: "Pizzaria Bella Vista - Pizzas Artesanais em São Paulo",
@@ -68,6 +102,10 @@ const AdvancedOptionsSection = () => {
 }`
   });
 
+  /**
+   * Opções disponíveis para provedores de SMS
+   * @type {Array<{value: string, label: string}>}
+   */
   const smsProviderOptions = [
     { value: "twilio", label: "Twilio" },
     { value: "nexmo", label: "Vonage (Nexmo)" },
@@ -75,6 +113,10 @@ const AdvancedOptionsSection = () => {
     { value: "custom", label: "API Personalizada" }
   ];
 
+  /**
+   * Opções disponíveis para provedores de e-mail
+   * @type {Array<{value: string, label: string}>}
+   */
   const emailProviderOptions = [
     { value: "sendgrid", label: "SendGrid" },
     { value: "mailgun", label: "Mailgun" },
@@ -82,6 +124,11 @@ const AdvancedOptionsSection = () => {
     { value: "smtp", label: "SMTP Personalizado" }
   ];
 
+  /**
+   * Manipula mudanças nas configurações de SEO
+   * @param {string} field - Campo a ser alterado
+   * @param {any} value - Novo valor do campo
+   */
   const handleSeoSettingsChange = (field, value) => {
     setSeoSettings(prev => ({
       ...prev,
@@ -89,6 +136,11 @@ const AdvancedOptionsSection = () => {
     }));
   };
 
+  /**
+   * Manipula mudanças nas configurações de analytics
+   * @param {string} field - Campo a ser alterado
+   * @param {any} value - Novo valor do campo
+   */
   const handleAnalyticsSettingsChange = (field, value) => {
     setAnalyticsSettings(prev => ({
       ...prev,
@@ -96,6 +148,11 @@ const AdvancedOptionsSection = () => {
     }));
   };
 
+  /**
+   * Manipula mudanças nas configurações de APIs
+   * @param {string} field - Campo a ser alterado
+   * @param {any} value - Novo valor do campo
+   */
   const handleApiSettingsChange = (field, value) => {
     setApiSettings(prev => ({
       ...prev,
@@ -103,6 +160,11 @@ const AdvancedOptionsSection = () => {
     }));
   };
 
+  /**
+   * Manipula mudanças no código personalizado
+   * @param {string} field - Campo a ser alterado
+   * @param {any} value - Novo valor do campo
+   */
   const handleCustomCodeChange = (field, value) => {
     setCustomCode(prev => ({
       ...prev,
@@ -110,18 +172,30 @@ const AdvancedOptionsSection = () => {
     }));
   };
 
+  /**
+   * Testa a configuração do webhook
+   */
   const handleTestWebhook = () => {
     alert('Testando webhook... Verifique os logs para confirmar o recebimento.');
   };
 
+  /**
+   * Gera o sitemap do site
+   */
   const handleGenerateSitemap = () => {
     alert('Sitemap gerado com sucesso! Disponível em: /sitemap.xml');
   };
 
+  /**
+   * Valida dados estruturados para SEO
+   */
   const handleValidateStructuredData = () => {
     alert('Dados estruturados validados com sucesso! Compatível com Google Rich Snippets.');
   };
 
+  /**
+   * Salva todas as configurações avançadas
+   */
   const handleSave = () => {
     console.log('Saving advanced settings:', { 
       seoSettings, 
