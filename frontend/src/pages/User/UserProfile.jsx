@@ -47,7 +47,7 @@ const UserProfile = () => {
     const [isLoading, setIsLoading] = useState(true); // Controla o "Carregando..."
     const [isSaving, setIsSaving] = useState(false); // Controla o botão "Salvar"
 
-    // ESTE BLOCO BUSCA OS DADOS QUANDO A PÁGINA CARREGA
+
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
@@ -90,6 +90,16 @@ const UserProfile = () => {
         return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
     };
 
+    const handleAddressChange = (field, value) => {
+        setProfile((prevProfile) => ({
+            ...prevProfile, // 1. Copia tudo do perfil (nome, email, etc.) para não perder nada
+            address: {
+                ...prevProfile.address, // 2. Copia tudo do endereço existente
+                [field]: value, // 3. Atualiza apenas o campo específico que mudou (ex: 'cep', 'numero')
+            },
+        }));
+    };
+
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -105,6 +115,8 @@ const UserProfile = () => {
             </div>
         );
     }
+
+
 
     return (
         <div className="min-h-screen bg-background">
@@ -149,10 +161,76 @@ const UserProfile = () => {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        {/* Campos do endereço agora usam dados da API */}
-                        <div><Label htmlFor="cep">CEP</Label><Input id="cep" value={profile.address?.cep || ''} readOnly /></div>
-                        <div><Label htmlFor="rua">Rua</Label><Input id="rua" value={profile.address?.logradouro || ''} readOnly /></div>
-                        {/* Adicione os outros campos de endereço aqui se necessário */}
+                        {/* Campo do CEP */}
+                        <div>
+                            <Label htmlFor="cep">CEP</Label>
+                            <Input
+                                id="cep"
+                                value={profile.address?.cep || ''}
+                                onChange={(e) => handleAddressChange('cep', e.target.value)}
+                            />
+                        </div>
+
+                        {/* Rua e Número */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="md:col-span-2">
+                                <Label htmlFor="rua">Rua / Logradouro</Label>
+                                <Input
+                                    id="rua"
+                                    value={profile.address?.logradouro || ''}
+                                    onChange={(e) => handleAddressChange('logradouro', e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <Label htmlFor="numero">Número</Label>
+                                <Input
+                                    id="numero"
+                                    value={profile.address?.numero || ''}
+                                    onChange={(e) => handleAddressChange('numero', e.target.value)}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Complemento e Bairro */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <Label htmlFor="complemento">Complemento</Label>
+                                <Input
+                                    id="complemento"
+                                    value={profile.address?.complemento || ''}
+                                    onChange={(e) => handleAddressChange('complemento', e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <Label htmlFor="bairro">Bairro</Label>
+                                <Input
+                                    id="bairro"
+                                    value={profile.address?.bairro || ''}
+                                    onChange={(e) => handleAddressChange('bairro', e.target.value)}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Cidade e Estado */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="md:col-span-2">
+                                <Label htmlFor="cidade">Cidade</Label>
+                                <Input
+                                    id="cidade"
+                                    value={profile.address?.cidade || ''}
+                                    onChange={(e) => handleAddressChange('cidade', e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <Label htmlFor="estado">Estado (UF)</Label>
+                                <Input
+                                    id="estado"
+                                    value={profile.address?.estado || ''}
+                                    onChange={(e) => handleAddressChange('estado', e.target.value)}
+                                    maxLength={2}
+                                />
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
 

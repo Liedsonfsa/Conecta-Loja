@@ -29,10 +29,9 @@ app.use((req, res, next) => {
     next();
 });
 
-// Configuração do CORS para permitir requisições do frontend
 // Em produção, deve ser configurado para aceitar apenas origens específicas
 app.use(cors({
-    origin: "http://localhost:4028", // Ou a porta correta do seu frontend
+    origin: "http://localhost:4028",
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     allowedHeaders: "Content-Type, Authorization",
     credentials: true
