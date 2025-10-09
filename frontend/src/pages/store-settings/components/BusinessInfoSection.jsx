@@ -4,6 +4,39 @@ import Button from '../../../components/ui/ButtonDash';
 import { Checkbox } from '../../../components/ui/Checkbox';
 import Icon from '../../../components/AppIcon';
 
+/**
+ * BusinessInfoSection - Seção de informações do negócio - Conecta-Loja
+ *
+ * Componente que gerencia todas as informações básicas do estabelecimento,
+ * incluindo dados de contato, endereço completo, horário de funcionamento
+ * e configurações de entrega. Permite configuração completa do perfil
+ * comercial da loja para exibição aos clientes.
+ *
+ * Funcionalidades principais:
+ * - Dados cadastrais (nome, CNPJ, email, telefones)
+ * - Endereço completo do estabelecimento
+ * - Descrição detalhada do negócio
+ * - Configuração de horário de funcionamento por dia da semana
+ * - Configurações de entrega (taxas, distâncias, tempos)
+ *
+ * Estados gerenciados:
+ * - businessInfo: Informações básicas do estabelecimento
+ * - operatingHours: Horário de funcionamento por dia
+ * - deliverySettings: Configurações de entrega e frete
+ *
+ * @example
+ * // Uso na página de configurações da loja
+ * import BusinessInfoSection from './components/BusinessInfoSection';
+ *
+ * function StoreSettings() {
+ *   return (
+ *     <div>
+ *       <BusinessInfoSection />
+ *     </div>
+ *   );
+ * }
+ *
+ */
 const BusinessInfoSection = () => {
   const [businessInfo, setBusinessInfo] = useState({
     name: "Pizzaria Bella Vista",
@@ -36,9 +69,13 @@ const BusinessInfoSection = () => {
     estimatedDeliveryTime: "45"
   });
 
+  /**
+   * Mapeamento dos dias da semana para português
+   * @type {Object<string, string>}
+   */
   const dayLabels = {
     monday: "Segunda-feira",
-    tuesday: "Terça-feira", 
+    tuesday: "Terça-feira",
     wednesday: "Quarta-feira",
     thursday: "Quinta-feira",
     friday: "Sexta-feira",
@@ -46,6 +83,11 @@ const BusinessInfoSection = () => {
     sunday: "Domingo"
   };
 
+  /**
+   * Manipula mudanças nas informações do negócio
+   * @param {string} field - Campo a ser alterado
+   * @param {any} value - Novo valor do campo
+   */
   const handleBusinessInfoChange = (field, value) => {
     setBusinessInfo(prev => ({
       ...prev,
@@ -53,6 +95,12 @@ const BusinessInfoSection = () => {
     }));
   };
 
+  /**
+   * Manipula mudanças no horário de funcionamento
+   * @param {string} day - Dia da semana
+   * @param {string} field - Campo a ser alterado (open, close, closed)
+   * @param {any} value - Novo valor do campo
+   */
   const handleOperatingHoursChange = (day, field, value) => {
     setOperatingHours(prev => ({
       ...prev,
@@ -63,6 +111,11 @@ const BusinessInfoSection = () => {
     }));
   };
 
+  /**
+   * Manipula mudanças nas configurações de entrega
+   * @param {string} field - Campo a ser alterado
+   * @param {any} value - Novo valor do campo
+   */
   const handleDeliverySettingsChange = (field, value) => {
     setDeliverySettings(prev => ({
       ...prev,
@@ -70,6 +123,9 @@ const BusinessInfoSection = () => {
     }));
   };
 
+  /**
+   * Salva todas as informações do negócio
+   */
   const handleSave = () => {
     console.log('Saving business info:', { businessInfo, operatingHours, deliverySettings });
     // Mock save success

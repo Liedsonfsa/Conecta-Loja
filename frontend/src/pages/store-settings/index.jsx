@@ -11,10 +11,41 @@ import PaymentCurrencySection from './components/PaymentCurrencySection';
 import ImportExportSection from './components/ImportExportSection';
 import AdvancedOptionsSection from './components/AdvancedOptionsSection';
 
+/**
+ * StoreSettings - Página de configurações da loja - Conecta-Loja
+ *
+ * Página central de configurações da loja que permite gerenciar diversos aspectos
+ * do negócio através de uma interface organizada em abas. Oferece navegação intuitiva
+ * entre diferentes seções de configuração como cargos, funcionários e outras
+ * funcionalidades administrativas.
+ *
+ * Funcionalidades disponíveis:
+ * - Gerenciamento de cargos e responsabilidades
+ * - Administração de funcionários e permissões
+ * - Configurações do sistema (planejado)
+ * - Informações do negócio (planejado)
+ * - Personalização de marca (planejado)
+ * - Configurações de pagamento (planejado)
+ * - Importação/exportação de dados (planejado)
+ * - Opções avançadas (planejado)
+ *
+ * @example
+ * // Rota configurada em Routes.jsx
+ * <Route path="/store-settings" element={<StoreSettings />} />
+ *
+ * @example
+ * // Navegação através do menu lateral
+ * <Link to="/store-settings">Configurações</Link>
+ *
+ */
 const StoreSettings = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState('roles');
 
+  /**
+   * Configuração das abas disponíveis na página de configurações
+   * @type {Array<{id: string, label: string, icon: string, description: string}>}
+   */
   const tabs = [
     // {
     //   id: 'business',
@@ -67,10 +98,17 @@ const StoreSettings = () => {
     // }
   ];
 
+  /**
+   * Alterna o estado de colapso da sidebar
+   */
   const handleSidebarToggle = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);
   };
 
+  /**
+   * Renderiza o componente da aba ativa baseada no estado activeTab
+   * @returns {JSX.Element} Componente da seção ativa
+   */
   const renderActiveSection = () => {
     switch (activeTab) {
       // case 'business':
@@ -94,6 +132,10 @@ const StoreSettings = () => {
     }
   };
 
+  /**
+   * Retorna as informações da aba ativa atualmente
+   * @returns {Object} Informações da aba ativa (id, label, icon, description)
+   */
   const getActiveTabInfo = () => {
     return tabs?.find(tab => tab?.id === activeTab) || tabs?.[0];
   };

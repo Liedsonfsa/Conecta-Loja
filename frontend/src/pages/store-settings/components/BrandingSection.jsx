@@ -5,6 +5,39 @@ import Select from '../../../components/ui/Select';
 import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 
+/**
+ * BrandingSection - Seção de marca e visual - Conecta-Loja
+ *
+ * Componente que gerencia todas as configurações visuais e de identidade da loja,
+ * permitindo personalização completa da marca através de logo, esquema de cores,
+ * tema visual e mensagens personalizadas. Oferece prévia em tempo real das
+ * alterações para melhor experiência do usuário.
+ *
+ * Funcionalidades principais:
+ * - Upload e gerenciamento de logo da loja
+ * - Configuração de esquema de cores (primária, secundária, destaque)
+ * - Seleção de temas visuais pré-definidos
+ * - Personalização de mensagens de boas-vindas e rodapé
+ * - CSS personalizado para usuários avançados
+ * - Prévia em tempo real das configurações
+ *
+ * Estados gerenciados:
+ * - branding: Objeto com todas as configurações de marca
+ * - previewMode: Controle da visualização da prévia
+ *
+ * @example
+ * // Uso na página de configurações da loja
+ * import BrandingSection from './components/BrandingSection';
+ *
+ * function StoreSettings() {
+ *   return (
+ *     <div>
+ *       <BrandingSection />
+ *     </div>
+ *   );
+ * }
+ *
+ */
 const BrandingSection = () => {
   const [branding, setBranding] = useState({
     logo: "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=200&h=200&fit=crop&crop=center",
@@ -19,6 +52,10 @@ const BrandingSection = () => {
 
   const [previewMode, setPreviewMode] = useState(false);
 
+  /**
+   * Opções de cores pré-definidas para o esquema de cores
+   * @type {Array<{value: string, label: string}>}
+   */
   const colorOptions = [
     { value: "#2563EB", label: "Azul Clássico" },
     { value: "#059669", label: "Verde Esmeralda" },
@@ -28,6 +65,10 @@ const BrandingSection = () => {
     { value: "#0891B2", label: "Ciano Profissional" }
   ];
 
+  /**
+   * Opções de temas visuais disponíveis
+   * @type {Array<{value: string, label: string, description: string}>}
+   */
   const themeOptions = [
     { value: "modern", label: "Moderno", description: "Design limpo e minimalista" },
     { value: "classic", label: "Clássico", description: "Estilo tradicional e elegante" },
@@ -35,6 +76,11 @@ const BrandingSection = () => {
     { value: "dark", label: "Escuro", description: "Tema escuro sofisticado" }
   ];
 
+  /**
+   * Manipula mudanças nas configurações de marca
+   * @param {string} field - Campo a ser alterado
+   * @param {any} value - Novo valor do campo
+   */
   const handleBrandingChange = (field, value) => {
     setBranding(prev => ({
       ...prev,
@@ -42,6 +88,10 @@ const BrandingSection = () => {
     }));
   };
 
+  /**
+   * Processa o upload de uma nova logo
+   * @param {Event} event - Evento do input file
+   */
   const handleLogoUpload = (event) => {
     const file = event?.target?.files?.[0];
     if (file) {
@@ -56,11 +106,17 @@ const BrandingSection = () => {
     }
   };
 
+  /**
+   * Salva as configurações de marca
+   */
   const handleSave = () => {
     console.log('Saving branding:', branding);
     alert('Configurações de marca salvas com sucesso!');
   };
 
+  /**
+   * Restaura as configurações de marca para os valores padrão
+   */
   const resetToDefault = () => {
     setBranding({
       logo: "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=200&h=200&fit=crop&crop=center",
