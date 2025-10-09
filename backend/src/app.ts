@@ -24,11 +24,18 @@ import routes from './routes';
 
 const app = express();
 
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] >>> REQUISIÇÃO RECEBIDA: ${req.method} ${req.originalUrl}`);
+    next();
+});
+
 // Configuração do CORS para permitir requisições do frontend
 // Em produção, deve ser configurado para aceitar apenas origens específicas
 app.use(cors({
-  origin: "http://localhost:4028", // URL padrão do Vite em desenvolvimento
-  credentials: true // Permite envio de cookies e headers de autorização
+    origin: "http://localhost:4028", // Ou a porta correta do seu frontend
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    allowedHeaders: "Content-Type, Authorization",
+    credentials: true
 }));
 
 // Middleware para parsing de JSON no corpo das requisições

@@ -39,3 +39,43 @@ export const createUser = async (req: Request, res: Response) => {
     });
   }
 };
+/**
+ * Controller para buscar o perfil do usuário logado.
+ * Chama o serviço que busca os dados no banco.
+ */
+export const getProfile = async (req: Request, res: Response) => {
+    console.log("--- [CONTROLLER] A função getProfile foi chamada. ---");
+    try {
+        // O ID do usuário é injetado na requisição pelo seu middleware de autenticação
+        const userId = (req as any).user.id;
+
+        const userProfile = await UserService.getProfile(userId);
+        res.status(200).json(userProfile);
+    } catch (error) {
+        const errorMessage = (error as Error).message;
+        // Retorna erros específicos vindos do serviço
+        if (errorMessage === "Usuário não encontrado") {
+            return res.status(404).json({ success: false, error: errorMessage });
+        }
+        // Retorna um erro genérico para outros casos
+        res.status(500).json({ success: false, error: 'Erro interno do servidor' });
+    }
+};
+
+/**
+ * Controller para atualizar o perfil do usuário logado.
+ * Chama o serviço que salva os dados no banco.
+ */
+export const updateProfile = async (req: Request, res: Response) => {
+    try {
+        const userId = (req as any).user.id;
+        const profileData = req.body;
+        // Chama o serviço para atualizar os dados
+        await UserService.updateProfile(userId, profileData);
+        res.status(200).json({ success: true, message: 'Perfil atualizado com sucesso' });
+    } catch (error)
+    {
+        console.error("Controller Error - updateProfile:", error); // Log para ajudar na depuração
+        res.status(500).json({ success: false, error: 'Erro interno do servidor ao atualizar perfil' });
+    }
+};
