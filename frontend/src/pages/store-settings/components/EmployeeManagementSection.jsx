@@ -71,9 +71,19 @@ const EmployeeManagementSection = () => {
     { value: "employees", label: "Gerenciar Funcionários", description: "Adicionar e remover funcionários" }
   ];
 
-  const getRoleLabel = (role) => {
-    const roleOption = roleOptions?.find(r => r?.value === role);
-    return roleOption ? roleOption?.label : role;
+  const getRoleLabel = (employee) => {
+    // Primeiro tenta usar o nome do cargo da relação
+    if (employee?.cargo?.name) {
+      return employee.cargo.name;
+    }
+
+    // Fallback para o campo role antigo (compatibilidade)
+    if (employee?.role) {
+      const roleOption = roleOptions?.find(r => r?.value === employee.role);
+      return roleOption ? roleOption?.label : employee.role;
+    }
+
+    return 'Cargo não definido';
   };
 
 
@@ -389,7 +399,7 @@ const EmployeeManagementSection = () => {
                         </div>
                       </td>
                       <td className="p-4">
-                        <span className="text-sm text-foreground">{getRoleLabel(employee?.role)}</span>
+                        <span className="text-sm text-foreground">{getRoleLabel(employee)}</span>
                       </td>
                       <td className="p-4">
                         <span className="text-sm text-muted-foreground">{employee?.loja?.name || 'N/A'}</span>

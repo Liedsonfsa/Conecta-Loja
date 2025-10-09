@@ -54,11 +54,14 @@ export class EmployeeService {
             const saltRounds = 12;
             const hashedPassword = await bcrypt.hash(data.password, saltRounds);
 
+            // Mapear role para cargoId
+            const cargoId = data.role === 'ADMIN' ? 2 : 1; // 2 = Administrador, 1 = Funcionário padrão
+
             const employee = await EmployeeRepository.createEmployee({
                 name: data.name,
                 email: data.email,
                 password: hashedPassword,
-                role: data.role,
+                cargoId: cargoId,
                 storeId: data.storeId
             });
 
@@ -113,6 +116,12 @@ export class EmployeeService {
             if (data.password) {
                 const saltRounds = 12;
                 updatedData.password = await bcrypt.hash(data.password, saltRounds);
+            }
+
+            // Mapear role para cargoId se fornecido
+            if (data.role) {
+                updatedData.cargoId = data.role === 'ADMIN' ? 2 : 1;
+                delete updatedData.role; // Remover o campo role antigo
             }
 
             const updatedEmployee = await EmployeeRepository.updateEmployee(id, updatedData);
