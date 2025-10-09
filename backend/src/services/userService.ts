@@ -84,8 +84,8 @@ export class UserService {
         // Se não encontrou como cliente, tentar como funcionário
         foundUser = await EmployeeRepository.findEmployeeByEmail(email);
         if (foundUser) {
-          // Verificar se é admin baseado no role
-          userType = foundUser.role === 'ADMIN' ? 'admin' : 'funcionario';
+          // Verificar se é admin baseado no cargo (id 2 = Administrador)
+          userType = foundUser.cargoId === 2 ? 'admin' : 'funcionario';
         }
       }
 
@@ -100,14 +100,15 @@ export class UserService {
         throw new Error('Email ou senha incorretos');
       }
 
-      // Gerar token JWT (24 horas) incluindo o tipo de usuário
+      // Gerar token JWT (24 horas) incluindo o tipo de usuário e cargo (se funcionário)
       const secret = process.env.JWT_SECRET || 'fallback-secret-change-in-production';
       const token = jwt.sign(
         {
           id: foundUser.id,
           email: foundUser.email,
           name: foundUser.name,
-          userType: userType
+          userType: userType,
+          cargoId: 'cargoId' in foundUser ? foundUser.cargoId : null // Incluir cargoId se existir (para funcionários)
         },
         secret,
         { expiresIn: '24h' }
