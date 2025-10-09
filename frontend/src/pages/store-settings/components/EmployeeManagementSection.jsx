@@ -29,7 +29,6 @@ const EmployeeManagementSection = () => {
     email: "",
     password: "",
     role: "cashier",
-    permissions: []
   });
 
   // Estados para dialog de confirmação de exclusão
@@ -93,13 +92,6 @@ const EmployeeManagementSection = () => {
     }
   };
 
-  const permissionOptions = [
-    { value: "orders", label: "Gerenciar Pedidos", description: "Criar, editar e visualizar pedidos" },
-    { value: "products", label: "Gerenciar Produtos", description: "Adicionar e editar produtos" },
-    { value: "reports", label: "Relatórios", description: "Visualizar relatórios e analytics" },
-    { value: "settings", label: "Configurações", description: "Alterar configurações da loja" },
-    { value: "employees", label: "Gerenciar Funcionários", description: "Adicionar e remover funcionários" }
-  ];
 
   const getRoleLabel = (employee) => {
     // Primeiro tenta usar o nome do cargo da relação
@@ -124,14 +116,6 @@ const EmployeeManagementSection = () => {
     }));
   };
 
-  const handlePermissionChange = (permission, checked) => {
-    setNewEmployee(prev => ({
-      ...prev,
-      permissions: checked 
-        ? [...prev?.permissions, permission]
-        : prev?.permissions?.filter(p => p !== permission)
-    }));
-  };
 
   const handleAddEmployee = async () => {
     if (!newEmployee?.name?.trim()) {
@@ -192,7 +176,6 @@ const EmployeeManagementSection = () => {
         email: "",
         password: "",
         role: "",
-        permissions: []
       });
       setShowAddForm(false);
 
@@ -226,7 +209,7 @@ const EmployeeManagementSection = () => {
       email: employee.email || "",
       password: "", // Não preencher senha por segurança
       role: roleValue,
-      permissions: [] // TODO: implementar permissões se necessário
+ // TODO: implementar permissões se necessário
     });
 
     // Abrir modal de edição
@@ -268,7 +251,6 @@ const EmployeeManagementSection = () => {
         email: "",
         password: "",
         role: "",
-        permissions: []
       });
       setShowEditForm(false);
       setEmployeeToEdit(null);
@@ -418,22 +400,6 @@ const EmployeeManagementSection = () => {
               />
             </div>
 
-            <div className="col-span-1 md:col-span-2">
-              <label className="block text-sm font-medium text-foreground mb-3">
-                Permissões
-              </label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {permissionOptions?.map(permission => (
-                  <Checkbox
-                    key={permission?.value}
-                    label={permission?.label}
-                    description={permission?.description}
-                    checked={newEmployee?.permissions?.includes(permission?.value)}
-                    onChange={(e) => handlePermissionChange(permission?.value, e?.target?.checked)}
-                  />
-                ))}
-              </div>
-            </div>
           </div>
 
           <div className="flex justify-end space-x-3 mt-6">
@@ -471,7 +437,6 @@ const EmployeeManagementSection = () => {
                   email: "",
                   password: "",
                   role: "cashier",
-                  permissions: []
                 });
               }}
             >
@@ -496,27 +461,10 @@ const EmployeeManagementSection = () => {
                 options={roles}
                 value={newEmployee?.role}
                 onChange={(value) => handleNewEmployeeChange('role', value)}
-                description="Defina o nível de acesso do funcionário"
                 disabled={loadingRoles}
               />
             </div>
 
-            <div className="col-span-1 md:col-span-2">
-              <label className="block text-sm font-medium text-foreground mb-3">
-                Permissões
-              </label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {permissionOptions?.map(permission => (
-                  <Checkbox
-                    key={permission?.value}
-                    label={permission?.label}
-                    description={permission?.description}
-                    checked={newEmployee?.permissions?.includes(permission?.value)}
-                    onChange={(e) => handlePermissionChange(permission?.value, e?.target?.checked)}
-                  />
-                ))}
-              </div>
-            </div>
           </div>
 
           <div className="flex justify-end space-x-3 mt-6">
@@ -530,7 +478,6 @@ const EmployeeManagementSection = () => {
                   email: "",
                   password: "",
                   role: "cashier",
-                  permissions: []
                 });
               }}
             >
