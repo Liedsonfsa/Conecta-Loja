@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import Button from '../../../components/ui/ButtonDash';
 import Icon from '../../../components/AppIcon';
+import ConfirmDialog from '../../../components/ui/ConfirmDialog';
 import { roleService } from '../../../api';
+import { useToast } from '../../../hooks/use-toast';
 
 /**
  * RoleManagementSection - Seção de gerenciamento de cargos
@@ -16,8 +18,14 @@ const RoleManagementSection = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Hook para notificações toast
+  const { toast } = useToast();
+
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingRole, setEditingRole] = useState(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [roleToDelete, setRoleToDelete] = useState(null);
+  const [deletingRole, setDeletingRole] = useState(false);
   const [newRole, setNewRole] = useState({
     name: "",
     description: ""
@@ -54,7 +62,11 @@ const RoleManagementSection = () => {
 
   const handleAddRole = async () => {
     if (!newRole?.name?.trim()) {
-      alert('Por favor, preencha o nome do cargo.');
+      toast({
+        title: "Campo obrigatório",
+        description: "Por favor, preencha o nome do cargo.",
+        duration: 4000,
+      });
       return;
     }
 
@@ -65,14 +77,22 @@ const RoleManagementSection = () => {
           name: newRole.name.trim(),
           description: newRole.description?.trim() || undefined
         });
-        alert('Cargo atualizado com sucesso!');
+        toast({
+          title: "Cargo atualizado",
+          description: "O cargo foi atualizado com sucesso.",
+          duration: 3000,
+        });
       } else {
         // Adicionando novo cargo
         await roleService.createRole({
           name: newRole.name.trim(),
           description: newRole.description?.trim() || undefined
         });
-        alert('Cargo adicionado com sucesso!');
+        toast({
+          title: "Cargo criado",
+          description: "O cargo foi criado com sucesso.",
+          duration: 3000,
+        });
       }
 
       // Reset form
@@ -88,7 +108,11 @@ const RoleManagementSection = () => {
     } catch (error) {
       console.error('Erro ao salvar cargo:', error);
       const errorMessage = error.response?.data?.error || 'Erro ao salvar cargo. Tente novamente.';
-      alert(errorMessage);
+      toast({
+        title: "Erro ao salvar",
+        description: errorMessage,
+        duration: 5000,
+      });
     }
   };
 
@@ -101,33 +125,53 @@ const RoleManagementSection = () => {
     setShowAddForm(true);
   };
 
-  const handleDeleteRole = async (roleId) => {
+  const handleDeleteRole = (roleId) => {
     const role = roles?.find(r => r?.id === roleId);
     if (!role) return;
 
     const employeeCount = role?.funcionarios?.length || 0;
 
     if (employeeCount > 0) {
-      alert(`Não é possível remover este cargo pois existem ${employeeCount} funcionário(s) associados a ele.`);
+      toast({
+        title: "Não é possível remover",
+        description: `Este cargo possui ${employeeCount} funcionário(s) associado(s). Remova os funcionários primeiro.`,
+        duration: 5000,
+      });
       return;
     }
 
-    const confirmMessage = `Tem certeza que deseja remover o cargo "${role?.name}"?`;
+    // Abrir dialog de confirmação
+    setRoleToDelete(role);
+    setShowDeleteDialog(true);
+  };
 
-    if (!confirm(confirmMessage)) {
-      return;
-    }
+  const confirmDeleteRole = async () => {
+    if (!roleToDelete) return;
+
+    setDeletingRole(true);
 
     try {
-      await roleService.deleteRole(roleId);
-      alert('Cargo removido com sucesso!');
+      await roleService.deleteRole(roleToDelete.id);
+      toast({
+        title: "Cargo removido",
+        description: "O cargo foi removido com sucesso.",
+        duration: 3000,
+      });
 
       // Recarregar lista
       await loadRoles();
     } catch (error) {
       console.error('Erro ao remover cargo:', error);
       const errorMessage = error.response?.data?.error || 'Erro ao remover cargo. Tente novamente.';
-      alert(errorMessage);
+      toast({
+        title: "Erro ao remover",
+        description: errorMessage,
+        duration: 5000,
+      });
+    } finally {
+      setDeletingRole(false);
+      setShowDeleteDialog(false);
+      setRoleToDelete(null);
     }
   };
 
@@ -331,6 +375,18 @@ const RoleManagementSection = () => {
           </>
         )}
       </div>
+
+      {/* Dialog de confirmação de exclusão */}
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={confirmDeleteRole}
+        title="Remover cargo"
+        description={`Tem certeza que deseja remover o cargo "${roleToDelete?.name}"? Esta ação não pode ser desfeita.`}
+        confirmText={deletingRole ? "Removendo..." : "Remover"}
+        cancelText="Cancelar"
+        variant="destructive"
+      />
     </div>
   );
 };
