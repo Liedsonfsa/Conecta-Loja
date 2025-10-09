@@ -13,13 +13,12 @@ export class EmployeeService {
      *
      * Recebe os dados do funcionário, faz o hash da senha usando bcrypt,
      * e cria o registro no banco de dados através do repositório.
-     * O role pode ser 'FUNCIONARIO' ou 'ADMIN'.
      *
      * @param data - Dados do funcionário a ser criado
      * @param data.name - Nome completo do funcionário
      * @param data.email - Email único do funcionário
      * @param data.password - Senha em texto plano (será hasheada)
-     * @param data.role - Função/cargo: 'FUNCIONARIO' ou 'ADMIN'
+     * @param data.cargoId - ID do cargo/função do funcionário
      * @param data.storeId - ID da loja onde o funcionário trabalha
      * @returns Promise com o funcionário criado (sem senha)
      *
@@ -30,14 +29,14 @@ export class EmployeeService {
      *   name: "Maria Santos",
      *   email: "maria@empresa.com",
      *   password: "senha123",
-     *   role: "FUNCIONARIO",
+     *   cargoId: 1,
      *   storeId: 1
      * };
      * const adminData = {
      *   name: "João Admin",
      *   email: "admin@empresa.com",
      *   password: "admin123",
-     *   role: "ADMIN",
+     *   cargoId: 2,
      *   storeId: 1
      * };
      * const employee = await EmployeeService.createEmployee(employeeData);
@@ -47,21 +46,18 @@ export class EmployeeService {
         name: string,
         email: string,
         password: string,
-        role: 'FUNCIONARIO' | 'ADMIN',
+        cargoId: number,
         storeId: number
     }) {
         try {
             const saltRounds = 12;
             const hashedPassword = await bcrypt.hash(data.password, saltRounds);
 
-            // Mapear role para cargoId
-            const cargoId = data.role === 'ADMIN' ? 2 : 1; // 2 = Administrador, 1 = Funcionário padrão
-
             const employee = await EmployeeRepository.createEmployee({
                 name: data.name,
                 email: data.email,
                 password: hashedPassword,
-                cargoId: cargoId,
+                cargoId: data.cargoId,
                 storeId: data.storeId
             });
 

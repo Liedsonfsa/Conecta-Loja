@@ -28,7 +28,7 @@ const EmployeeManagementSection = () => {
     name: "",
     email: "",
     password: "",
-    role: "cashier",
+    role: "",
   });
 
   // Estados para dialog de confirmação de exclusão
@@ -136,6 +136,25 @@ const EmployeeManagementSection = () => {
       return;
     }
 
+    if (!newEmployee?.role?.trim()) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Por favor, selecione um cargo para o funcionário.",
+        duration: 4000,
+      });
+      return;
+    }
+
+    const cargoId = parseInt(newEmployee.role);
+    if (isNaN(cargoId) || cargoId <= 0) {
+      toast({
+        title: "Cargo inválido",
+        description: "Por favor, selecione um cargo válido.",
+        duration: 4000,
+      });
+      return;
+    }
+
     if (!newEmployee?.password?.trim()) {
       toast({
         title: "Campo obrigatório",
@@ -155,12 +174,12 @@ const EmployeeManagementSection = () => {
     }
 
     try {
-      // Preparar dados para a API - usar cargoId diretamente
+      // Preparar dados para a API - usar cargoId validado
       await employeeService.createEmployee({
         name: newEmployee.name.trim(),
         email: newEmployee.email.trim(),
         password: newEmployee.password,
-        cargoId: parseInt(newEmployee.role), // O value do select já é o ID do cargo
+        cargoId: cargoId,
         storeId: 1 // TODO: implementar seleção de loja
       });
 
