@@ -1,44 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import Button from '../../../components/ui/ButtonDash';
 import Select from '../../../components/ui/Select';
 import { Checkbox } from '../../../components/ui/Checkbox';
 import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
+import ConfirmDialog from '../../../components/ui/ConfirmDialog';
+import { employeeService } from '../../../api';
+import { useToast } from '../../../hooks/use-toast';
 
 const EmployeeManagementSection = () => {
-  const [employees, setEmployees] = useState([
-    {
-      id: 1,
-      name: "Carlos Silva",
-      email: "carlos@pizzariabellavista.com.br",
-      role: "manager",
-      avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-      permissions: ["orders", "products", "reports"],
-      lastLogin: "2025-01-09 14:30",
-      createdAt: "2024-12-15"
-    },
-    {
-      id: 2,
-      name: "Maria Santos",
-      email: "maria@pizzariabellavista.com.br",
-      role: "cashier",
-      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-      permissions: ["orders"],
-      lastLogin: "2025-01-09 16:45",
-      createdAt: "2025-01-02"
-    },
-    {
-      id: 3,
-      name: "João Oliveira",
-      email: "joao@pizzariabellavista.com.br",
-      role: "delivery",
-      avatar: "https://randomuser.me/api/portraits/men/56.jpg",
-      permissions: ["orders"],
-      lastLogin: "2025-01-08 12:15",
-      createdAt: "2024-11-20"
-    }
-  ]);
+  // Estados para dados e loading
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Hook para notificações toast
+  const { toast } = useToast();
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -49,6 +27,33 @@ const EmployeeManagementSection = () => {
     role: "cashier",
     permissions: []
   });
+
+  // Estados para dialog de confirmação de exclusão
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [employeeToDelete, setEmployeeToDelete] = useState(null);
+  const [deletingEmployee, setDeletingEmployee] = useState(false);
+
+  // Carregar funcionários da API ao montar o componente
+  useEffect(() => {
+    loadEmployees();
+  }, []);
+
+  /**
+   * Carrega a lista de funcionários da API
+   */
+  const loadEmployees = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await employeeService.getAllEmployees();
+      setEmployees(response.employees || []);
+    } catch (err) {
+      console.error('Erro ao carregar funcionários:', err);
+      setError('Erro ao carregar funcionários. Tente novamente.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const roleOptions = [
     { value: "admin", label: "Administrador", description: "Acesso total ao sistema" },
@@ -88,42 +93,121 @@ const EmployeeManagementSection = () => {
     }));
   };
 
-  const handleAddEmployee = () => {
-    if (!newEmployee?.name || !newEmployee?.email || !newEmployee?.password) {
-      alert('Por favor, preencha todos os campos obrigatórios.');
+  const handleAddEmployee = async () => {
+    if (!newEmployee?.name?.trim()) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Por favor, preencha o nome do funcionário.",
+        duration: 4000,
+      });
+      return;
+    }
+
+    if (!newEmployee?.email?.trim()) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Por favor, preencha o email do funcionário.",
+        duration: 4000,
+      });
+      return;
+    }
+
+    if (!newEmployee?.password?.trim()) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Por favor, preencha a senha do funcionário.",
+        duration: 4000,
+      });
       return;
     }
 
     if (newEmployee?.password?.length < 6) {
-      alert('A senha deve ter pelo menos 6 caracteres.');
+      toast({
+        title: "Senha muito curta",
+        description: "A senha deve ter pelo menos 6 caracteres.",
+        duration: 4000,
+      });
       return;
     }
 
-    const employee = {
-      id: employees?.length + 1,
-      ...newEmployee,
-      avatar: `https://randomuser.me/api/portraits/${Math.random() > 0.5 ? 'men' : 'women'}/${Math.floor(Math.random() * 99)}.jpg`,
-      lastLogin: "Nunca",
-      createdAt: new Date()?.toISOString()?.split('T')?.[0]
-    };
+    try {
+      // Preparar dados para a API (role precisa ser 'FUNCIONARIO' ou 'ADMIN', não os valores do frontend)
+      const apiRole = newEmployee.role === 'admin' ? 'ADMIN' : 'FUNCIONARIO';
 
-    setEmployees(prev => [...prev, employee]);
-    setNewEmployee({
-      name: "",
-      email: "",
-      password: "",
-      role: "cashier",
-      permissions: []
-    });
-    setShowAddForm(false);
-    alert('Funcionário adicionado com sucesso!');
+      await employeeService.createEmployee({
+        name: newEmployee.name.trim(),
+        email: newEmployee.email.trim(),
+        password: newEmployee.password,
+        role: apiRole,
+        storeId: 1 // TODO: implementar seleção de loja
+      });
+
+      toast({
+        title: "Funcionário criado",
+        description: "O funcionário foi criado com sucesso.",
+        duration: 3000,
+      });
+
+      // Reset form
+      setNewEmployee({
+        name: "",
+        email: "",
+        password: "",
+        role: "cashier",
+        permissions: []
+      });
+      setShowAddForm(false);
+
+      // Recarregar lista
+      await loadEmployees();
+    } catch (error) {
+      console.error('Erro ao criar funcionário:', error);
+      const errorMessage = error.response?.data?.error || 'Erro ao criar funcionário. Tente novamente.';
+      toast({
+        title: "Erro ao criar",
+        description: errorMessage,
+        duration: 5000,
+      });
+    }
   };
 
 
   const handleDeleteEmployee = (employeeId) => {
-    if (confirm('Tem certeza que deseja remover este funcionário?')) {
-      setEmployees(prev => prev?.filter(emp => emp?.id !== employeeId));
-      alert('Funcionário removido com sucesso!');
+    const employee = employees?.find(emp => emp?.id === employeeId);
+    if (!employee) return;
+
+    // Abrir dialog de confirmação
+    setEmployeeToDelete(employee);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDeleteEmployee = async () => {
+    if (!employeeToDelete) return;
+
+    setDeletingEmployee(true);
+
+    try {
+      await employeeService.deleteEmployee(employeeToDelete.id);
+      toast({
+        title: "Funcionário removido",
+        description: "O funcionário foi removido com sucesso.",
+        duration: 3000,
+      });
+
+      // Recarregar lista
+      await loadEmployees();
+    } catch (error) {
+      console.error('Erro ao remover funcionário:', error);
+      const errorMessage = error.response?.data?.error || 'Erro ao remover funcionário. Tente novamente.';
+      toast({
+        title: "Erro ao remover",
+        description: errorMessage,
+        duration: 5000,
+      });
+    } finally {
+      setDeletingEmployee(false);
+      setShowDeleteDialog(false);
+      setEmployeeToDelete(null);
     }
   };
 
@@ -136,7 +220,7 @@ const EmployeeManagementSection = () => {
           <div>
             <h3 className="text-lg font-semibold text-foreground">Gerenciamento de Funcionários</h3>
             <p className="text-sm text-muted-foreground">
-              {employees?.length} funcionário{employees?.length !== 1 ? 's' : ''} cadastrado{employees?.length !== 1 ? 's' : ''}
+              {loading ? 'Carregando...' : `${employees?.length} funcionário${employees?.length !== 1 ? 's' : ''} cadastrado${employees?.length !== 1 ? 's' : ''}`}
             </p>
           </div>
         </div>
@@ -255,68 +339,121 @@ const EmployeeManagementSection = () => {
       )}
       {/* Employees List */}
       <div className="bg-card rounded-lg border border-border overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-muted">
-              <tr>
-                <th className="text-left p-4 font-medium text-foreground">Funcionário</th>
-                <th className="text-left p-4 font-medium text-foreground">Cargo</th>
-                <th className="text-left p-4 font-medium text-foreground">Último Acesso</th>
-                <th className="text-left p-4 font-medium text-foreground">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {employees?.map((employee, index) => (
-                <tr key={employee?.id} className={index % 2 === 0 ? 'bg-background' : 'bg-muted/30'}>
-                  <td className="p-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 rounded-full overflow-hidden bg-muted flex-shrink-0">
-                        <Image
-                          src={employee?.avatar}
-                          alt={employee?.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div>
-                        <div className="font-medium text-foreground">{employee?.name}</div>
-                        <div className="text-sm text-muted-foreground">{employee?.email}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="p-4">
-                    <span className="text-sm text-foreground">{getRoleLabel(employee?.role)}</span>
-                  </td>
-                  <td className="p-4">
-                    <span className="text-sm text-muted-foreground">{employee?.lastLogin}</span>
-                  </td>
-                  <td className="p-4">
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => alert(`Editando ${employee?.name}`)}
-                        title="Editar"
-                      >
-                        <Icon name="Edit" size={16} />
-                      </Button>
+        {loading ? (
+          <div className="p-8 text-center">
+            <Icon name="Loader2" size={48} className="text-muted-foreground mx-auto mb-4 animate-spin" />
+            <p className="text-sm text-muted-foreground">Carregando funcionários...</p>
+          </div>
+        ) : error ? (
+          <div className="p-8 text-center">
+            <Icon name="AlertCircle" size={48} className="text-destructive mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-foreground mb-2">Erro ao carregar funcionários</h3>
+            <p className="text-sm text-muted-foreground mb-4">{error}</p>
+            <Button
+              variant="outline"
+              onClick={loadEmployees}
+              iconName="RefreshCw"
+              iconPosition="left"
+            >
+              Tentar Novamente
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-muted">
+                  <tr>
+                    <th className="text-left p-4 font-medium text-foreground">Funcionário</th>
+                    <th className="text-left p-4 font-medium text-foreground">Cargo</th>
+                    <th className="text-left p-4 font-medium text-foreground">Loja</th>
+                    <th className="text-left p-4 font-medium text-foreground">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {employees?.map((employee, index) => (
+                    <tr key={employee?.id} className={index % 2 === 0 ? 'bg-background' : 'bg-muted/30'}>
+                      <td className="p-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 rounded-full overflow-hidden bg-muted flex-shrink-0">
+                            <Image
+                              src={`https://randomuser.me/api/portraits/${Math.random() > 0.5 ? 'men' : 'women'}/${Math.floor(Math.random() * 99)}.jpg`}
+                              alt={employee?.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div>
+                            <div className="font-medium text-foreground">{employee?.name}</div>
+                            <div className="text-sm text-muted-foreground">{employee?.email}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="p-4">
+                        <span className="text-sm text-foreground">{getRoleLabel(employee?.role)}</span>
+                      </td>
+                      <td className="p-4">
+                        <span className="text-sm text-muted-foreground">{employee?.loja?.name || 'N/A'}</span>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => alert(`Editando ${employee?.name}`)}
+                            title="Editar"
+                          >
+                            <Icon name="Edit" size={16} />
+                          </Button>
 
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteEmployee(employee?.id)}
-                        title="Remover"
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Icon name="Trash2" size={16} />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteEmployee(employee?.id)}
+                            title="Remover"
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Icon name="Trash2" size={16} />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {employees?.length === 0 && (
+              <div className="p-8 text-center">
+                <Icon name="Users" size={48} className="text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-foreground mb-2">Nenhum funcionário cadastrado</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Comece criando seu primeiro funcionário para organizar sua equipe.
+                </p>
+                <Button
+                  variant="default"
+                  onClick={() => setShowAddForm(true)}
+                  iconName="UserPlus"
+                  iconPosition="left"
+                >
+                  Criar Primeiro Funcionário
+                </Button>
+              </div>
+            )}
+          </>
+        )}
       </div>
+
+      {/* Dialog de confirmação de exclusão */}
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={confirmDeleteEmployee}
+        title="Remover funcionário"
+        description={`Tem certeza que deseja remover o funcionário "${employeeToDelete?.name}"? Esta ação não pode ser desfeita.`}
+        confirmText={deletingEmployee ? "Removendo..." : "Remover"}
+        cancelText="Cancelar"
+        variant="destructive"
+      />
     </div>
   );
 };

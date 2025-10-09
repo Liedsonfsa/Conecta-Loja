@@ -125,4 +125,114 @@ export class EmployeeService {
         }
     }
 
+    /**
+     * Busca um funcionário pelo ID
+     *
+     * @param id - ID do funcionário a ser buscado
+     * @returns Promise com o funcionário encontrado (sem senha)
+     *
+     * @throws Error se o funcionário não for encontrado
+     *
+     * @example
+     * const employee = await EmployeeService.getEmployeeById(1);
+     */
+    static async getEmployeeById(id: number) {
+        try {
+            const employee = await EmployeeRepository.findEmployeeById(id);
+            if (!employee) {
+                throw new Error("Funcionário não encontrado");
+            }
+
+            const { password, ...employeeWithoutPassword } = employee;
+            return employeeWithoutPassword;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    /**
+     * Lista todos os funcionários com paginação e filtros
+     *
+     * @param options - Opções de busca
+     * @param options.page - Página atual (padrão: 1)
+     * @param options.limit - Limite de itens por página (padrão: 10)
+     * @param options.search - Termo de busca por nome ou email
+     * @returns Promise com lista de funcionários e metadados de paginação
+     *
+     * @example
+     * const result = await EmployeeService.getAllEmployees({
+     *   page: 1,
+     *   limit: 10,
+     *   search: "João"
+     * });
+     */
+    static async getAllEmployees(options?: {
+        page?: number;
+        limit?: number;
+        search?: string;
+    }) {
+        try {
+            const { page = 1, limit = 10, search } = options || {};
+
+            // Construir filtros
+            const where: any = {};
+
+            if (search) {
+                where.OR = [
+                    { name: { contains: search, mode: 'insensitive' } },
+                    { email: { contains: search, mode: 'insensitive' } }
+                ];
+            }
+
+            const skip = (page - 1) * limit;
+
+            const [employees, total] = await Promise.all([
+                EmployeeRepository.findAllEmployees({ skip, take: limit, where }),
+                EmployeeRepository.countEmployees(where),
+            ]);
+
+            // Remover senha de todos os funcionários
+            const employeesWithoutPassword = employees.map(employee => {
+                const { password, ...employeeWithoutPassword } = employee;
+                return employeeWithoutPassword;
+            });
+
+            return {
+                employees: employeesWithoutPassword,
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    totalPages: Math.ceil(total / limit),
+                },
+            };
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    /**
+     * Remove um funcionário do banco de dados
+     *
+     * @param id - ID do funcionário a ser removido
+     * @returns Promise<void>
+     *
+     * @throws Error se o funcionário não for encontrado
+     *
+     * @example
+     * await EmployeeService.deleteEmployee(1);
+     */
+    static async deleteEmployee(id: number) {
+        try {
+            const employee = await EmployeeRepository.findEmployeeById(id);
+            if (!employee) {
+                throw new Error("Funcionário não encontrado");
+            }
+
+            await EmployeeRepository.deleteEmployee(id);
+        } catch (error) {
+            throw error;
+        }
+    }
+
 }
