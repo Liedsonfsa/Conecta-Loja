@@ -12,6 +12,9 @@ export { authService } from "./auth";
 export { productService } from "./products";
 export { categoryService } from "./categories";
 
+// Serviços de carrinho
+export { cartService } from "./cart";
+
 // Serviços de cargos e funcionários
 export { roleService } from "./roles";
 export { employeeService } from "./employees";
