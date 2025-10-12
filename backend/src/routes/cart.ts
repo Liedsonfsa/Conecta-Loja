@@ -14,7 +14,7 @@
  * - DELETE /api/cart - Limpar carrinho completamente
  */
 import { Router } from 'express';
-import { authMiddleware } from '../middlewares/authMiddleware';
+import { authenticateToken } from '../middlewares/authMiddleware';
 import {
   getCart,
   addToCart,
@@ -27,7 +27,7 @@ import {
 const router = Router();
 
 // Aplicar middleware de autenticação em todas as rotas
-router.use(authMiddleware);
+router.use(authenticateToken);
 
 /**
  * @route GET /api/cart
