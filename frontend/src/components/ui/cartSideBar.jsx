@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Plus, Minus, Trash2, MessageCircle } from "lucide-react";
+import { Plus, Minus, Trash2, MessageCircle, Trash } from "lucide-react";
 
 const CartSidebar = ({
   isOpen,
@@ -16,6 +16,7 @@ const CartSidebar = ({
   cartItems,
   onUpdateQuantity,
   onRemoveItem,
+  onClearCart,
   onCheckout,
 }) => {
   const formatPrice = (price) => {
@@ -58,14 +59,30 @@ const CartSidebar = ({
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent className="w-full sm:max-w-lg flex flex-col h-full">
         <SheetHeader className="shrink-0">
-          <SheetTitle className="flex items-center gap-2">
-            Carrinho de Compras
-            {totalItems > 0 && (
-              <Badge variant="secondary">
-                {totalItems} {totalItems === 1 ? "item" : "itens"}
-              </Badge>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <SheetTitle>Carrinho de Compras</SheetTitle>
+              {totalItems > 0 && (
+                <Badge variant="secondary">
+                  {totalItems} {totalItems === 1 ? "item" : "itens"}
+                </Badge>
+              )}
+            </div>
+            {cartItems.length > 0 && (
+              <button
+                onClick={() => {
+                  if (window.confirm('Tem certeza que deseja limpar todo o carrinho?')) {
+                    onClearCart();
+                  }
+                }}
+                className="flex items-center gap-1 px-2 py-1 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors"
+                title="Limpar carrinho"
+              >
+                <Trash className="h-3 w-3" />
+                <span className="hidden sm:inline">Limpar</span>
+              </button>
             )}
-          </SheetTitle>
+          </div>
           <SheetDescription>
             Revise seus itens antes de finalizar o pedido
           </SheetDescription>
