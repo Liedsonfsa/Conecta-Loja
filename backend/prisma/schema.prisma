@@ -25,6 +25,7 @@ model usuario {
 
   enderecos endereco[] // UM usuário pode ter VÁRIOS endereços
   pedidos   pedido[] // UM usuário pode ter VÁRIOS pedidos
+  carrinho  carrinho? // UM usuário pode ter UM carrinho ativo
 
   @@map("usuarios")
 }
@@ -188,8 +189,38 @@ model product {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
-  category category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  pedidos  pedido_produto[] // UM produto pode estar em VÁRIOS pedidos
+  category  category           @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  pedidos   pedido_produto[] // UM produto pode estar em VÁRIOS pedidos
+  carrinhos carrinho_produto[] // UM produto pode estar em VÁRIOS carrinhos
 
   @@map("produto")
+}
+
+// Cart model - Carrinho de compras por usuário
+model carrinho {
+  id        Int      @id @default(autoincrement())
+  usuarioId Int      @unique // Cada usuário pode ter apenas um carrinho ativo
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  usuario usuario            @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  itens   carrinho_produto[]
+
+  @@map("carrinhos")
+}
+
+// Junction table for cart-product relationship
+model carrinho_produto {
+  id         Int @id @default(autoincrement())
+  carrinhoId Int
+  produtoId  Int
+  quantidade Int @default(1)
+
+  // Relations
+  carrinho carrinho @relation(fields: [carrinhoId], references: [id], onDelete: Cascade)
+  produto  product  @relation(fields: [produtoId], references: [id])
+
+  @@unique([carrinhoId, produtoId]) // Um produto pode aparecer apenas uma vez por carrinho
+  @@map("carrinho_produto")
 }
