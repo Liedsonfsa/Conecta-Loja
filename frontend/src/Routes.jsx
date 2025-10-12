@@ -16,6 +16,7 @@ import OrderManagement from "./pages/OrderManagement";
 import ProductManagement from "./pages/product-management";
 import UserProfile from "./pages/User/UserProfile";
 import StoreSettings from './pages/store-settings';
+import OrderHistory from "./pages/OrderHistory/OrderHistory";
 /**
  * Routes - Componente principal de configuração de roteamento da aplicação
  *
@@ -51,6 +52,7 @@ const AppRoutes = () => {
               <StoreSettings />
             </AdminRoute>
           } />
+          <Route path="/history" element={<OrderHistory />} />
           <Route path="*" element={<NotFoundPage />} />
         </RouterRoutes>
         <Toaster />

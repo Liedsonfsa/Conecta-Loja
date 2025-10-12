@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User, LogOut, LayoutDashboard } from "lucide-react";
+import { User, LogOut, LayoutDashboard, History } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
@@ -20,6 +20,11 @@ const UserProfileDropdown = ({ user, onLogout }) => {
 
   const handleProfileClick = () => {
     navigate("/profile");
+    setIsOpen(false);
+  };
+
+  const handleHistoryClick = () => {
+    navigate("/history"); 
     setIsOpen(false);
   };
 
@@ -76,6 +81,14 @@ const UserProfileDropdown = ({ user, onLogout }) => {
               >
                 <User className="mr-3 h-4 w-4" />
                 Meu Perfil
+              </button>
+
+              <button
+                onClick={handleHistoryClick}
+                className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+              >
+                <History className="mr-3 h-4 w-4" />
+                Histórico de Pedidos
               </button>
 
               {/* Opção de Dashboard para funcionários */}
