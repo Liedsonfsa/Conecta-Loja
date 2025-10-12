@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useCallback, useRef } from 'react';
+import { cartService } from '@/api';
 
 /**
  * CartContext - Contexto para gerenciar o estado do carrinho de compras
- * 
+ *
  * Fornece funcionalidades para:
  * - Adicionar itens ao carrinho
  * - Remover itens do carrinho
@@ -11,19 +12,39 @@ import React, { createContext, useContext, useReducer, useEffect } from 'react';
  * - Persistir dados no localStorage
  */
 
+/**
+ * Transforma dados do carrinho do backend para o formato esperado pelo frontend
+ * @param {Array} backendItems - Itens retornados pelo backend
+ * @returns {Array} Itens no formato esperado pelo frontend
+ */
+const transformBackendCartItems = (backendItems) => {
+  if (!backendItems || !Array.isArray(backendItems)) return [];
+
+  return backendItems.map(item => ({
+    product: item.produto || item.product,
+    quantity: item.quantidade || item.quantity
+  }));
+};
+
 // Tipos de ações do reducer
 const CART_ACTIONS = {
   ADD_ITEM: 'ADD_ITEM',
   REMOVE_ITEM: 'REMOVE_ITEM',
   UPDATE_QUANTITY: 'UPDATE_QUANTITY',
   CLEAR_CART: 'CLEAR_CART',
-  LOAD_CART: 'LOAD_CART'
+  LOAD_CART: 'LOAD_CART',
+  SYNC_WITH_SERVER: 'SYNC_WITH_SERVER',
+  SET_USER_LOGGED_IN: 'SET_USER_LOGGED_IN',
+  SET_USER_LOGGED_OUT: 'SET_USER_LOGGED_OUT'
 };
 
 // Estado inicial do carrinho
 const initialState = {
   items: [],
-  isOpen: false
+  isOpen: false,
+  isLoggedIn: false,
+  isServerCartLoaded: false,
+  isSyncing: false
 };
 
 // Reducer para gerenciar as ações do carrinho
@@ -94,6 +115,33 @@ const cartReducer = (state, action) => {
       };
     }
 
+    case CART_ACTIONS.SYNC_WITH_SERVER: {
+      return {
+        ...state,
+        items: action.payload.items || [],
+        isServerCartLoaded: true,
+        isSyncing: false
+      };
+    }
+
+    case CART_ACTIONS.SET_USER_LOGGED_IN: {
+      return {
+        ...state,
+        isLoggedIn: true,
+        isSyncing: action.payload.isSyncing || false
+      };
+    }
+
+    case CART_ACTIONS.SET_USER_LOGGED_OUT: {
+      return {
+        ...state,
+        items: [], // Limpa itens da interface ao fazer logout
+        isLoggedIn: false,
+        isServerCartLoaded: false,
+        isSyncing: false
+      };
+    }
+
     default:
       return state;
   }
@@ -112,6 +160,10 @@ export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState);
   const [isCartOpen, setIsCartOpen] = React.useState(false);
 
+  // Refs para controlar updates e debounce
+  const serverUpdateTimeoutRef = useRef(null);
+  const pendingUpdatesRef = useRef(new Map()); // Armazena updates pendentes por productId
+
   // Carrega o carrinho do localStorage quando o componente monta
   useEffect(() => {
     try {
@@ -128,17 +180,51 @@ export const CartProvider = ({ children }) => {
     }
   }, []);
 
-  // Salva o carrinho no localStorage sempre que o estado mudar
+  // Salva o carrinho no localStorage apenas quando não está logado ou sincronizado
   useEffect(() => {
-    try {
-      localStorage.setItem('conecta-loja-cart', JSON.stringify({
-        items: state.items,
-        timestamp: new Date().toISOString()
-      }));
-    } catch (error) {
-      console.error('Erro ao salvar carrinho no localStorage:', error);
+    // Só salva no localStorage se não estiver logado OU se estiver logado mas ainda não sincronizado com servidor
+    const shouldSaveLocally = !state.isLoggedIn || !state.isServerCartLoaded;
+
+    if (shouldSaveLocally) {
+      try {
+        localStorage.setItem('conecta-loja-cart', JSON.stringify({
+          items: state.items,
+          timestamp: new Date().toISOString()
+        }));
+      } catch (error) {
+        console.error('Erro ao salvar carrinho no localStorage:', error);
+      }
     }
-  }, [state.items]);
+  }, [state.items, state.isLoggedIn, state.isServerCartLoaded]);
+
+  // Verifica se usuário está logado baseado no token JWT
+  useEffect(() => {
+    const checkAuthStatus = () => {
+      const token = localStorage.getItem('authToken');
+      const isLoggedIn = !!token;
+
+      if (isLoggedIn && !state.isLoggedIn) {
+        // Usuário acabou de fazer login
+        handleUserLogin();
+      } else if (!isLoggedIn && state.isLoggedIn) {
+        // Usuário acabou de fazer logout
+        handleUserLogout();
+      }
+    };
+
+    // Verifica status inicial
+    checkAuthStatus();
+
+    // Adiciona listener para mudanças no localStorage (outros tabs)
+    const handleStorageChange = (e) => {
+      if (e.key === 'authToken') {
+        checkAuthStatus();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   /**
    * Adiciona um item ao carrinho
@@ -197,6 +283,197 @@ export const CartProvider = ({ children }) => {
   };
 
   /**
+   * Sincroniza carrinho local com servidor quando usuário faz login
+   */
+  const syncCartWithServer = useCallback(async () => {
+    try {
+      // Define que está sincronizando
+      dispatch({
+        type: CART_ACTIONS.SET_USER_LOGGED_IN,
+        payload: { isSyncing: true }
+      });
+
+      const localCartData = localStorage.getItem('conecta-loja-cart');
+      const localCart = JSON.parse(localCartData || '{"items":[]}');
+      const localItems = localCart.items || [];
+
+      if (localItems.length > 0) {
+        // Sincroniza itens locais com servidor
+        const result = await cartService.syncLocalCart(localItems);
+
+        if (result.success && result.cart) {
+          const transformedItems = transformBackendCartItems(result.cart.itens || result.cart.items || []);
+          dispatch({
+            type: CART_ACTIONS.SYNC_WITH_SERVER,
+            payload: { items: transformedItems }
+          });
+
+          // Limpa localStorage após sincronização bem-sucedida
+          localStorage.removeItem('conecta-loja-cart');
+        }
+      } else {
+        // Se não há itens locais, carrega carrinho do servidor
+        const result = await cartService.getCart();
+        if (result.success && result.cart) {
+          const transformedItems = transformBackendCartItems(result.cart.itens || result.cart.items || []);
+          dispatch({
+            type: CART_ACTIONS.SYNC_WITH_SERVER,
+            payload: { items: transformedItems }
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao sincronizar carrinho:', error);
+
+      // Em caso de erro, continua com carrinho local
+      dispatch({
+        type: CART_ACTIONS.SET_USER_LOGGED_IN,
+        payload: { isSyncing: false }
+      });
+    }
+  }, []);
+
+  /**
+   * Função chamada quando usuário faz login
+   */
+  const handleUserLogin = useCallback(() => {
+    // Define usuário como logado e inicia sincronização
+    syncCartWithServer();
+  }, [syncCartWithServer]);
+
+  /**
+   * Função chamada quando usuário faz logout
+   */
+  const handleUserLogout = useCallback(() => {
+    dispatch({ type: CART_ACTIONS.SET_USER_LOGGED_OUT });
+
+    // Limpa localStorage
+    localStorage.removeItem('conecta-loja-cart');
+  }, []);
+
+  /**
+   * Operações do carrinho que funcionam tanto local quanto com servidor
+   */
+  const addItemToCart = useCallback(async (product, quantity = 1) => {
+    if (state.isLoggedIn && state.isServerCartLoaded) {
+      // Se usuário está logado e carrinho do servidor carregado, usa API
+      try {
+        const result = await cartService.addToCart(product.id, quantity);
+        if (result.success && result.cart) {
+          const transformedItems = transformBackendCartItems(result.cart.itens || result.cart.items || []);
+          dispatch({
+            type: CART_ACTIONS.SYNC_WITH_SERVER,
+            payload: { items: transformedItems }
+          });
+        }
+      } catch (error) {
+        console.error('Erro ao adicionar item ao carrinho do servidor:', error);
+        // Fallback para localStorage em caso de erro
+        dispatch({
+          type: CART_ACTIONS.ADD_ITEM,
+          payload: { product, quantity }
+        });
+      }
+    } else {
+      // Se não está logado ou carrinho do servidor não carregado, usa localStorage
+      dispatch({
+        type: CART_ACTIONS.ADD_ITEM,
+        payload: { product, quantity }
+      });
+    }
+  }, [state.isLoggedIn, state.isServerCartLoaded]);
+
+  const removeItemFromCart = useCallback(async (productId) => {
+    if (state.isLoggedIn && state.isServerCartLoaded) {
+      try {
+        const result = await cartService.removeFromCart(productId);
+        if (result.success && result.cart) {
+          const transformedItems = transformBackendCartItems(result.cart.itens || result.cart.items || []);
+          dispatch({
+            type: CART_ACTIONS.SYNC_WITH_SERVER,
+            payload: { items: transformedItems }
+          });
+        }
+      } catch (error) {
+        console.error('Erro ao remover item do carrinho do servidor:', error);
+        dispatch({
+          type: CART_ACTIONS.REMOVE_ITEM,
+          payload: { productId }
+        });
+      }
+    } else {
+      dispatch({
+        type: CART_ACTIONS.REMOVE_ITEM,
+        payload: { productId }
+      });
+    }
+  }, [state.isLoggedIn, state.isServerCartLoaded]);
+
+  const updateItemQuantity = useCallback((productId, quantity) => {
+    // Atualiza localmente primeiro (update otimista)
+    dispatch({
+      type: CART_ACTIONS.UPDATE_QUANTITY,
+      payload: { productId, quantity }
+    });
+
+    // Armazena a última quantidade desejada para este produto
+    pendingUpdatesRef.current.set(productId, quantity);
+
+    // Se estiver logado, sincroniza com servidor em background com debounce
+    if (state.isLoggedIn && state.isServerCartLoaded) {
+      // Cancela timeout anterior se existir
+      if (serverUpdateTimeoutRef.current) {
+        clearTimeout(serverUpdateTimeoutRef.current);
+      }
+
+      // Cria novo timeout com debounce
+      serverUpdateTimeoutRef.current = setTimeout(async () => {
+        try {
+          // Processa todos os updates pendentes
+          const updatesToProcess = Array.from(pendingUpdatesRef.current.entries());
+
+          // Limpa updates pendentes
+          pendingUpdatesRef.current.clear();
+
+          // Processa cada update (normalmente será apenas o último)
+          for (const [pid, qty] of updatesToProcess) {
+            const result = await cartService.updateCartItem(pid, qty);
+            if (result.success && result.cart) {
+              const transformedItems = transformBackendCartItems(result.cart.itens || result.cart.items || []);
+              dispatch({
+                type: CART_ACTIONS.SYNC_WITH_SERVER,
+                payload: { items: transformedItems }
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Erro ao atualizar quantidade no carrinho do servidor:', error);
+          // Em caso de erro, o estado local já foi atualizado, então não precisa fazer rollback
+        }
+      }, 300); // 300ms de debounce
+    }
+  }, [state.isLoggedIn, state.isServerCartLoaded]);
+
+  const clearCartItems = useCallback(async () => {
+    if (state.isLoggedIn && state.isServerCartLoaded) {
+      try {
+        const result = await cartService.clearCart();
+        if (result.success) {
+          dispatch({
+            type: CART_ACTIONS.SYNC_WITH_SERVER,
+            payload: { items: [] }
+          });
+        }
+      } catch (error) {
+        console.error('Erro ao limpar carrinho do servidor:', error);
+        dispatch({ type: CART_ACTIONS.CLEAR_CART });
+      }
+    } else {
+      dispatch({ type: CART_ACTIONS.CLEAR_CART });
+    }
+  }, [state.isLoggedIn, state.isServerCartLoaded]);
+
+  /**
    * Gera mensagem para WhatsApp com os itens do carrinho
    */
   const generateWhatsAppMessage = () => {
@@ -252,22 +529,40 @@ export const CartProvider = ({ children }) => {
   const totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = state.items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
 
+  // Cleanup dos timeouts e refs quando componente desmonta
+  useEffect(() => {
+    return () => {
+      if (serverUpdateTimeoutRef.current) {
+        clearTimeout(serverUpdateTimeoutRef.current);
+      }
+      // Limpa updates pendentes
+      pendingUpdatesRef.current.clear();
+    };
+  }, []);
+
   const value = {
     // Estado
     items: state.items,
     totalItems,
     totalPrice,
     isCartOpen,
-    
+    isLoggedIn: state.isLoggedIn,
+    isServerCartLoaded: state.isServerCartLoaded,
+    isSyncing: state.isSyncing,
+
     // Ações
-    addItem,
-    removeItem,
-    updateQuantity,
-    clearCart,
+    addItem: addItemToCart,
+    removeItem: removeItemFromCart,
+    updateQuantity: updateItemQuantity,
+    clearCart: clearCartItems,
     openCart,
     closeCart,
     checkout,
-    
+
+    // Ações de autenticação (para integração com sistema de login)
+    handleUserLogin,
+    handleUserLogout,
+
     // Utilitários
     formatPrice
   };

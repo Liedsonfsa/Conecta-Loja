@@ -31,6 +31,7 @@ const Home = () => {
     closeCart,
     updateQuantity,
     removeItem,
+    clearCart,
     checkout,
   } = useCart();
 
@@ -60,6 +61,7 @@ const Home = () => {
           cartItems={cartItems}
           onUpdateQuantity={updateQuantity}
           onRemoveItem={removeItem}
+          onClearCart={clearCart}
           onCheckout={checkout}
         />
       </div>

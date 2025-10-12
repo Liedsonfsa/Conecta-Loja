@@ -36,7 +36,7 @@ const Header = () => {
   const [apiOffline, setApiOffline] = useState(false);
 
   // Hook do carrinho
-  const { totalItems, openCart } = useCart();
+  const { totalItems, openCart, handleUserLogin, handleUserLogout } = useCart();
 
   // Verificar se há token válido quando o componente monta
   useEffect(() => {
@@ -109,6 +109,8 @@ const Header = () => {
    */
   const handleLogin = (userData) => {
     setUser(userData);
+    // Notifica o hook do carrinho sobre o login
+    handleUserLogin();
   };
 
   /**
@@ -118,6 +120,8 @@ const Header = () => {
     setUser(null);
     setApiOffline(false);
     localStorage.removeItem("authToken");
+    // Notifica o hook do carrinho sobre o logout
+    handleUserLogout();
   };
 
   // Função para tentar reconectar quando API volta

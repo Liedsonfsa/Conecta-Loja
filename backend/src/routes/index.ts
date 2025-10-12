@@ -12,6 +12,7 @@
  * - /api/product/* - Operações relacionadas a produtos
  * - /api/category/* - Operações relacionadas a categorias
  * - /api/store/* - Operações relacionadas a loja
+ * - /api/cart/* - Operações relacionadas ao carrinho de compras
  */
 import { Router } from 'express';
 import userRoutes from './user';
@@ -22,6 +23,7 @@ import productRoutes from './product';
 import categoryRoutes from './category';
 import storeRoutes from './store';
 import profileRoutes from './profile';
+import cartRoutes from './cart';
 
 const router = Router();
 
@@ -33,7 +35,7 @@ router.use('/auth', authRoutes);
 router.use('/product', productRoutes);
 router.use('/category', categoryRoutes);
 router.use('/store', storeRoutes);
-router.use('/user', userRoutes);
+router.use('/cart', cartRoutes);
 router.use('/profile', profileRoutes);
 
 export default router;
