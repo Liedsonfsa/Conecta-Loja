@@ -1,100 +1,109 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Button from "../../components/ui/Button";
 import { useCart } from "../../hooks/useCart.jsx";
 import { useToast } from "../../hooks/use-toast";
+import { productService } from "../../api/products";
+import { categoryService } from "../../api/categories";
 
 /**
- * MenuSection - Seção de apresentação do cardápio na página inicial
+ * MenuSection - Seção dinâmica de apresentação do cardápio na página inicial
  *
- * Exibe uma prévia do cardápio com filtros por categoria,
- * mostrando itens organizados em grid responsivo. Permite
- * ao usuário explorar diferentes categorias de produtos
- * antes de acessar a página completa do menu.
- * Integra funcionalidade de adicionar itens ao carrinho.
+ * Exibe uma prévia dinâmica do cardápio com filtros por categoria,
+ * mostrando produtos organizados em grid responsivo. Carrega dados
+ * diretamente da API, incluindo produtos disponíveis e categorias ativas.
+ * Permite ao usuário explorar diferentes categorias de produtos antes
+ * de acessar a página completa do menu. Integra funcionalidade de
+ * adicionar itens ao carrinho com estados de loading e tratamento de erros.
  *
- * @returns {JSX.Element} Seção de menu com filtros e grid de produtos
+ * @returns {JSX.Element} Seção de menu dinâmica com filtros e grid de produtos
  *
  * @example
  * // Usado na página inicial após a seção hero
  * <MenuSection />
+ *
+ * @features
+ * - Carregamento dinâmico de produtos da API
+ * - Filtros por categoria dinâmicos
+ * - Estados de loading com spinner
+ * - Tratamento de erros com botão de retry
+ * - Integração com sistema de carrinho
+ * - Formatação automática de preços
  */
 
 const MenuSection = () => {
   const [selectedCategory, setSelectedCategory] = useState("Todos");
   const [quantities, setQuantities] = useState({});
+  const [menuItems, setMenuItems] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Hooks do carrinho e toast
   const { addItem } = useCart();
   const { toast } = useToast();
 
-  const categories = ["Todos", "Pizzas", "Burgers", "Bebidas", "Sobremesas"];
+  /**
+   * Busca produtos disponíveis da API
+   */
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await productService.getAvailableProducts();
+      if (response.success) {
+        // Mapeia os dados da API para o formato esperado pelo componente
+        const formattedProducts = response.products.map(product => ({
+          id: product.id,
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          priceFormatted: new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+          }).format(product.price),
+          category: product.category?.name || 'Sem categoria',
+          categoryId: product.categoryId,
+          image: product.image || '/images/placeholder.png',
+          available: product.available,
+        }));
+        setMenuItems(formattedProducts);
+      } else {
+        setError('Erro ao carregar produtos');
+      }
+    } catch (err) {
+      console.error('Erro ao buscar produtos:', err);
+      setError('Não foi possível conectar ao servidor. Tente novamente mais tarde.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const menuItems = [
-    {
-      id: 1,
-      name: "Pizza Margherita",
-      description:
-        "Molho de tomate, mussarela, manjericão fresco e azeite de oliva",
-      price: 45.9,
-      priceFormatted: "R$ 45,90",
-      category: "Pizzas",
-      image: "/images/img_pizza_margherita.png",
-      available: true,
-    },
-    {
-      id: 2,
-      name: "Burger Clássico",
-      description:
-        "Hambúrguer artesanal, queijo, alface, tomate, cebola e molho especial",
-      price: 32.9,
-      priceFormatted: "R$ 32,90",
-      category: "Burgers",
-      image: "/images/img_burger_cl_ssico.png",
-      available: true,
-    },
-    {
-      id: 3,
-      name: "Pizza Pepperoni",
-      description: "Molho de tomate, mussarela e generosas fatias de pepperoni",
-      price: 52.9,
-      priceFormatted: "R$ 52,90",
-      category: "Pizzas",
-      image: "/images/img_pizza_margherita.png",
-      available: true,
-    },
-    {
-      id: 4,
-      name: "Coca-Cola 350ml",
-      description: "Refrigerante gelado",
-      price: 6.9,
-      priceFormatted: "R$ 6,90",
-      category: "Bebidas",
-      image: "/images/img_coca_cola_350ml.png",
-      available: true,
-    },
-    {
-      id: 5,
-      name: "Burger Bacon",
-      description:
-        "Hambúrguer artesanal, queijo, bacon crocante, alface e molho barbecue",
-      price: 38.9,
-      priceFormatted: "R$ 38,90",
-      category: "Burgers",
-      image: "/images/img_burger_cl_ssico.png",
-      available: true,
-    },
-    {
-      id: 6,
-      name: "Brownie com Sorvete",
-      description:
-        "Brownie quentinho com sorvete de baunilha e calda de chocolate",
-      price: 18.9,
-      priceFormatted: "R$ 18,90",
-      category: "Sobremesas",
-      image: "/images/img_brownie_com_sorvete.png",
-      available: false,
-    },
-  ];
+  /**
+   * Busca categorias da API
+   */
+  const fetchCategories = async () => {
+    try {
+      const response = await categoryService.getAllCategories();
+      if (response.success) {
+        // Adiciona "Todos" no início da lista
+        const formattedCategories = [
+          "Todos",
+          ...response.categories.map(category => category.name)
+        ];
+        setCategories(formattedCategories);
+      }
+    } catch (err) {
+      console.error('Erro ao buscar categorias:', err);
+      // Mantém as categorias padrão em caso de erro
+      setCategories(["Todos", "Pizzas", "Burgers", "Bebidas", "Sobremesas"]);
+    }
+  };
+
+  // Busca dados ao montar o componente
+  useEffect(() => {
+    fetchProducts();
+    fetchCategories();
+  }, []);
 
   /**
    * Manipula a mudança de quantidade de um item do menu
@@ -136,6 +145,93 @@ const MenuSection = () => {
     selectedCategory === "Todos"
       ? menuItems
       : menuItems?.filter((item) => item?.category === selectedCategory);
+
+  // Renderiza estado de loading
+  if (loading) {
+    return (
+      <section className="w-full bg-[#f8f7f74c]">
+        <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-[60px]">
+          <div className="flex flex-col gap-[8px] items-center mb-11 w-full sm:w-[90%] md:w-[70%] lg:w-[50%] mx-auto">
+            <h2 className="text-[24px] sm:text-[28px] md:text-[32px] lg:text-[35px] font-bold leading-[28px] sm:leading-[32px] md:leading-[38px] lg:leading-[44px] text-center text-[#2a2622] font-['Inter']">
+              <span>Nosso </span>
+              <span
+                className="bg-gradient-to-r from-[#ff6600] to-[#ff531a] bg-clip-text text-transparent"
+                style={{
+                  background: "linear-gradient(166deg, #ff6600 0%, #ff531a 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                Cardápio
+              </span>
+            </h2>
+            <p className="text-[16px] font-normal leading-[28px] text-center text-[#928c87] font-['Inter'] max-w-none">
+              Carregando produtos deliciosos...
+            </p>
+          </div>
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#ff6600]"></div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Renderiza estado de erro
+  if (error) {
+    return (
+      <section className="w-full bg-[#f8f7f74c]">
+        <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-[60px]">
+          <div className="flex flex-col gap-[8px] items-center mb-11 w-full sm:w-[90%] md:w-[70%] lg:w-[50%] mx-auto">
+            <h2 className="text-[24px] sm:text-[28px] md:text-[32px] lg:text-[35px] font-bold leading-[28px] sm:leading-[32px] md:leading-[38px] lg:leading-[44px] text-center text-[#2a2622] font-['Inter']">
+              <span>Nosso </span>
+              <span
+                className="bg-gradient-to-r from-[#ff6600] to-[#ff531a] bg-clip-text text-transparent"
+                style={{
+                  background: "linear-gradient(166deg, #ff6600 0%, #ff531a 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                Cardápio
+              </span>
+            </h2>
+            <p className="text-[16px] font-normal leading-[28px] text-center text-[#928c87] font-['Inter'] max-w-none">
+              {error}
+            </p>
+          </div>
+          <div className="flex justify-center">
+            <Button
+              text="Tentar Novamente"
+              text_font_size="13"
+              text_font_family="Inter"
+              text_font_weight="400"
+              text_line_height="17px"
+              text_text_align="center"
+              text_color="#ffffff"
+              fill_background="#ff6600"
+              fill_background_color="#ff6600"
+              border_border="none"
+              border_border_radius="10px"
+              effect_box_shadow="0px 2px 8px #2a262219"
+              layout_width="auto"
+              layout_gap="0"
+              position="relative"
+              variant="default"
+              size="medium"
+              leftImage=""
+              padding="12px 24px"
+              onClick={() => {
+                fetchProducts();
+                fetchCategories();
+              }}
+              className="mt-8"
+            />
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="w-full bg-[#f8f7f74c]">
