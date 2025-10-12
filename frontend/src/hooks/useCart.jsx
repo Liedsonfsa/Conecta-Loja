@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useCallback, useRef } from 'react';
 import { cartService } from '@/api';
 
 /**
@@ -159,6 +159,10 @@ const CartContext = createContext();
 export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState);
   const [isCartOpen, setIsCartOpen] = React.useState(false);
+
+  // Refs para controlar updates e debounce
+  const serverUpdateTimeoutRef = useRef(null);
+  const pendingUpdatesRef = useRef(new Map()); // Armazena updates pendentes por productId
 
   // Carrega o carrinho do localStorage quando o componente monta
   useEffect(() => {
@@ -405,29 +409,48 @@ export const CartProvider = ({ children }) => {
     }
   }, [state.isLoggedIn, state.isServerCartLoaded]);
 
-  const updateItemQuantity = useCallback(async (productId, quantity) => {
+  const updateItemQuantity = useCallback((productId, quantity) => {
+    // Atualiza localmente primeiro (update otimista)
+    dispatch({
+      type: CART_ACTIONS.UPDATE_QUANTITY,
+      payload: { productId, quantity }
+    });
+
+    // Armazena a última quantidade desejada para este produto
+    pendingUpdatesRef.current.set(productId, quantity);
+
+    // Se estiver logado, sincroniza com servidor em background com debounce
     if (state.isLoggedIn && state.isServerCartLoaded) {
-      try {
-        const result = await cartService.updateCartItem(productId, quantity);
-        if (result.success && result.cart) {
-          const transformedItems = transformBackendCartItems(result.cart.itens || result.cart.items || []);
-          dispatch({
-            type: CART_ACTIONS.SYNC_WITH_SERVER,
-            payload: { items: transformedItems }
-          });
-        }
-      } catch (error) {
-        console.error('Erro ao atualizar quantidade no carrinho do servidor:', error);
-        dispatch({
-          type: CART_ACTIONS.UPDATE_QUANTITY,
-          payload: { productId, quantity }
-        });
+      // Cancela timeout anterior se existir
+      if (serverUpdateTimeoutRef.current) {
+        clearTimeout(serverUpdateTimeoutRef.current);
       }
-    } else {
-      dispatch({
-        type: CART_ACTIONS.UPDATE_QUANTITY,
-        payload: { productId, quantity }
-      });
+
+      // Cria novo timeout com debounce
+      serverUpdateTimeoutRef.current = setTimeout(async () => {
+        try {
+          // Processa todos os updates pendentes
+          const updatesToProcess = Array.from(pendingUpdatesRef.current.entries());
+
+          // Limpa updates pendentes
+          pendingUpdatesRef.current.clear();
+
+          // Processa cada update (normalmente será apenas o último)
+          for (const [pid, qty] of updatesToProcess) {
+            const result = await cartService.updateCartItem(pid, qty);
+            if (result.success && result.cart) {
+              const transformedItems = transformBackendCartItems(result.cart.itens || result.cart.items || []);
+              dispatch({
+                type: CART_ACTIONS.SYNC_WITH_SERVER,
+                payload: { items: transformedItems }
+              });
+            }
+          }
+        } catch (error) {
+          console.error('Erro ao atualizar quantidade no carrinho do servidor:', error);
+          // Em caso de erro, o estado local já foi atualizado, então não precisa fazer rollback
+        }
+      }, 300); // 300ms de debounce
     }
   }, [state.isLoggedIn, state.isServerCartLoaded]);
 
@@ -505,6 +528,17 @@ export const CartProvider = ({ children }) => {
   // Calcula totais
   const totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = state.items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+
+  // Cleanup dos timeouts e refs quando componente desmonta
+  useEffect(() => {
+    return () => {
+      if (serverUpdateTimeoutRef.current) {
+        clearTimeout(serverUpdateTimeoutRef.current);
+      }
+      // Limpa updates pendentes
+      pendingUpdatesRef.current.clear();
+    };
+  }, []);
 
   const value = {
     // Estado
