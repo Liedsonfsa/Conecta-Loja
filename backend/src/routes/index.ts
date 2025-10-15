@@ -24,6 +24,7 @@ import categoryRoutes from './category';
 import storeRoutes from './store';
 import profileRoutes from './profile';
 import cartRoutes from './cart';
+import orderRoutes from './order';
 
 const router = Router();
 
@@ -37,5 +38,6 @@ router.use('/category', categoryRoutes);
 router.use('/store', storeRoutes);
 router.use('/cart', cartRoutes);
 router.use('/profile', profileRoutes);
+router.use('/order', orderRoutes);
 
 export default router;
