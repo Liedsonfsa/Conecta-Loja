@@ -111,14 +111,38 @@ model cargo {
 }
 
 model store {
-  id          Int     @id @default(autoincrement())
-  name        String
-  contact     String
-  email       String
-  description String
-  image       String?
-
+  id           Int           @id @default(autoincrement())
+  name         String
+  contact      String
+  email        String
+  description  String
+  image        String?
   funcionarios funcionario[] // UMA loja pode ter VÁRIOS funcionários
+
+  // Imagens da Marca
+  logoUrl        String? @map("logo_url")
+  bannerImageUrl String? @map("banner_image_url")
+
+  // Esquema de Cores
+  primaryColor   String? @default("#2563EB") @map("primary_color")
+  secondaryColor String? @default("#059669") @map("secondary_color")
+  accentColor    String? @default("#F59E0B") @map("accent_color")
+
+  // Tema e Mensagens
+  theme          String? @default("modern")
+  welcomeMessage String? @map("welcome_message")
+  footerMessage  String? @map("footer_message")
+
+  // Avançado
+  customCSS String? @map("custom_css")
+
+  // Endereço do Rodapé
+  street  String?
+  city    String?
+  state   String?
+  zipCode String? @map("zip_code")
+
+  @@map("store")
 }
 
 // Enum for discount type

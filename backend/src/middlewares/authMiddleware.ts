@@ -95,3 +95,22 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
     });
   }
 };
+/**
+ * Middleware para verificar se o usuário é um administrador.
+ * DEVE ser usado DEPOIS do middleware authenticateToken.
+ */
+export const adminOnly = (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+
+    if (user && user.userType === 'admin') {
+        // Se o usuário existe e é um admin, continue.
+        next();
+    } else {
+        // Se não, retorne um erro de Acesso Proibido.
+        return res.status(403).json({
+            success: false,
+            error: 'Acesso negado. Rota exclusiva para administradores.',
+            code: 'FORBIDDEN_ACCESS'
+        });
+    }
+};

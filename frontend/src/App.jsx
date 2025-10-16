@@ -1,6 +1,7 @@
 import React from "react";
 import Routes from "./Routes";
 import { CartProvider } from "./hooks/useCart.jsx";
+import { StoreProvider } from "./contexts/StoreContext";
 
 /**
  * App - Componente raiz da aplicação Conecta-Loja
@@ -17,9 +18,12 @@ import { CartProvider } from "./hooks/useCart.jsx";
  */
 function App() {
   return (
-    <CartProvider>
-      <Routes />
-    </CartProvider>
+      <StoreProvider>
+          <CartProvider>
+              <Routes />
+          </CartProvider>
+      </StoreProvider>
+
   );
 }
 
