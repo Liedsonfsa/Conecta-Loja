@@ -3,7 +3,7 @@ import { cartService } from '@/api';
 
 /**
  * CartContext - Contexto para gerenciar o estado do carrinho de compras
- *
+ * 
  * Fornece funcionalidades para:
  * - Adicionar itens ao carrinho
  * - Remover itens do carrinho
@@ -47,7 +47,22 @@ const initialState = {
   isSyncing: false
 };
 
-// Reducer para gerenciar as ações do carrinho
+/**
+ * Reducer para gerenciar o estado do carrinho de compras
+ *
+ * @param {Object} state - Estado atual do carrinho
+ * @param {Object} action - Ação a ser executada
+ * @param {string} action.type - Tipo da ação
+ * @param {*} action.payload - Dados da ação
+ * @returns {Object} Novo estado do carrinho
+ *
+ * @example
+ * // Adicionar item
+ * cartReducer(state, { type: 'ADD_ITEM', payload: { product, quantity: 1 } });
+ *
+ * // Atualizar quantidade
+ * cartReducer(state, { type: 'UPDATE_QUANTITY', payload: { productId: 1, quantity: 3 } });
+ */
 const cartReducer = (state, action) => {
   switch (action.type) {
     case CART_ACTIONS.ADD_ITEM: {
@@ -185,14 +200,14 @@ export const CartProvider = ({ children }) => {
     const shouldSaveLocally = !state.isLoggedIn || !state.isServerCartLoaded;
 
     if (shouldSaveLocally) {
-      try {
-        localStorage.setItem('conecta-loja-cart', JSON.stringify({
-          items: state.items,
-          timestamp: new Date().toISOString()
-        }));
-      } catch (error) {
-        console.error('Erro ao salvar carrinho no localStorage:', error);
-      }
+    try {
+      localStorage.setItem('conecta-loja-cart', JSON.stringify({
+        items: state.items,
+        timestamp: new Date().toISOString()
+      }));
+    } catch (error) {
+      console.error('Erro ao salvar carrinho no localStorage:', error);
+    }
     }
   }, [state.items, state.isLoggedIn, state.isServerCartLoaded]);
 
@@ -226,9 +241,20 @@ export const CartProvider = ({ children }) => {
   }, []);
 
   /**
-   * Adiciona um item ao carrinho
+   * Adiciona um item ao carrinho (versão síncrona local)
+   *
    * @param {Object} product - Produto a ser adicionado
-   * @param {number} quantity - Quantidade (padrão: 1)
+   * @param {Object} product.id - ID único do produto
+   * @param {string} product.name - Nome do produto
+   * @param {number} product.price - Preço do produto
+   * @param {string} product.image - URL da imagem do produto
+   * @param {string} product.description - Descrição do produto
+   * @param {number} [quantity=1] - Quantidade a adicionar (padrão: 1)
+   * @returns {void}
+   *
+   * @example
+   * const product = { id: 1, name: "Produto A", price: 10.99 };
+   * addItem(product, 2); // Adiciona 2 unidades
    */
   const addItem = (product, quantity = 1) => {
     dispatch({
@@ -238,8 +264,14 @@ export const CartProvider = ({ children }) => {
   };
 
   /**
-   * Remove um item do carrinho
-   * @param {string|number} productId - ID do produto a ser removido
+   * Remove um item específico do carrinho (versão síncrona local)
+   *
+   * @param {string|number} productId - ID único do produto a ser removido
+   * @returns {void}
+   *
+   * @example
+   * removeItem(1); // Remove o produto com ID 1
+   * removeItem("abc-123"); // Remove o produto com ID string
    */
   const removeItem = (productId) => {
     dispatch({
@@ -249,9 +281,15 @@ export const CartProvider = ({ children }) => {
   };
 
   /**
-   * Atualiza a quantidade de um item no carrinho
-   * @param {string|number} productId - ID do produto
-   * @param {number} quantity - Nova quantidade
+   * Atualiza a quantidade de um item no carrinho (versão síncrona local)
+   *
+   * @param {string|number} productId - ID único do produto
+   * @param {number} quantity - Nova quantidade desejada
+   * @returns {void}
+   *
+   * @example
+   * updateQuantity(1, 5); // Define quantidade do produto 1 para 5
+   * updateQuantity("abc-123", 0); // Remove o produto (quantidade 0)
    */
   const updateQuantity = (productId, quantity) => {
     dispatch({
@@ -261,21 +299,36 @@ export const CartProvider = ({ children }) => {
   };
 
   /**
-   * Limpa todos os itens do carrinho
+   * Limpa todos os itens do carrinho (versão síncrona local)
+   *
+   * @returns {void}
+   *
+   * @example
+   * clearCart(); // Remove todos os itens do carrinho
    */
   const clearCart = () => {
     dispatch({ type: CART_ACTIONS.CLEAR_CART });
   };
 
   /**
-   * Abre o sidebar do carrinho
+   * Abre o sidebar/modal do carrinho
+   *
+   * @returns {void}
+   *
+   * @example
+   * openCart(); // Exibe o carrinho lateral/dropdown
    */
   const openCart = () => {
     setIsCartOpen(true);
   };
 
   /**
-   * Fecha o sidebar do carrinho
+   * Fecha o sidebar/modal do carrinho
+   *
+   * @returns {void}
+   *
+   * @example
+   * closeCart(); // Oculta o carrinho lateral/dropdown
    */
   const closeCart = () => {
     setIsCartOpen(false);
@@ -283,6 +336,16 @@ export const CartProvider = ({ children }) => {
 
   /**
    * Sincroniza carrinho local com servidor quando usuário faz login
+   *
+   * Estratégia:
+   * 1. Se há itens no localStorage → sincroniza com servidor (merge)
+   * 2. Se não há itens locais → carrega carrinho do servidor
+   * 3. Em caso de erro → mantém estado local
+   *
+   * @returns {Promise<void>}
+   *
+   * @example
+   * await syncCartWithServer(); // Sincroniza automaticamente baseado no contexto
    */
   const syncCartWithServer = useCallback(async () => {
     try {
@@ -333,7 +396,15 @@ export const CartProvider = ({ children }) => {
   }, []);
 
   /**
-   * Função chamada quando usuário faz login
+   * Manipula o login do usuário no contexto do carrinho
+   *
+   * Define o estado como logado e inicia a sincronização automática
+   * do carrinho local com o servidor.
+   *
+   * @returns {void}
+   *
+   * @example
+   * handleUserLogin(); // Chamado automaticamente quando usuário faz login
    */
   const handleUserLogin = useCallback(() => {
     // Define usuário como logado e inicia sincronização
@@ -341,7 +412,15 @@ export const CartProvider = ({ children }) => {
   }, [syncCartWithServer]);
 
   /**
-   * Função chamada quando usuário faz logout
+   * Manipula o logout do usuário no contexto do carrinho
+   *
+   * Limpa o estado do carrinho da interface e remove dados locais,
+   * mantendo os dados salvos no servidor para o próximo login.
+   *
+   * @returns {void}
+   *
+   * @example
+   * handleUserLogout(); // Chamado automaticamente quando usuário faz logout
    */
   const handleUserLogout = useCallback(() => {
     dispatch({ type: CART_ACTIONS.SET_USER_LOGGED_OUT });
@@ -351,7 +430,25 @@ export const CartProvider = ({ children }) => {
   }, []);
 
   /**
-   * Operações do carrinho que funcionam tanto local quanto com servidor
+   * Adiciona um item ao carrinho (com sincronização automática)
+   *
+   * Estratégia híbrida:
+   * - Usuário logado: Usa API do servidor diretamente
+   * - Usuário não logado: Usa localStorage
+   * - Fallback: Em caso de erro na API, usa localStorage
+   *
+   * @param {Object} product - Produto a ser adicionado
+   * @param {Object} product.id - ID único do produto
+   * @param {string} product.name - Nome do produto
+   * @param {number} product.price - Preço do produto
+   * @param {string} product.image - URL da imagem do produto
+   * @param {string} product.description - Descrição do produto
+   * @param {number} [quantity=1] - Quantidade a adicionar (padrão: 1)
+   * @returns {Promise<void>}
+   *
+   * @example
+   * const product = { id: 1, name: "Produto A", price: 10.99 };
+   * await addItemToCart(product, 2); // Adiciona 2 unidades
    */
   const addItemToCart = useCallback(async (product, quantity = 1) => {
     if (state.isLoggedIn) {
@@ -382,6 +479,21 @@ export const CartProvider = ({ children }) => {
     }
   }, [state.isLoggedIn]);
 
+  /**
+   * Remove um item específico do carrinho (com sincronização automática)
+   *
+   * Estratégia híbrida:
+   * - Usuário logado: Usa API do servidor diretamente
+   * - Usuário não logado: Usa localStorage
+   * - Fallback: Em caso de erro na API, usa localStorage
+   *
+   * @param {string|number} productId - ID único do produto a ser removido
+   * @returns {Promise<void>}
+   *
+   * @example
+   * await removeItemFromCart(1); // Remove o produto com ID 1
+   * await removeItemFromCart("abc-123"); // Remove o produto com ID string
+   */
   const removeItemFromCart = useCallback(async (productId) => {
     if (state.isLoggedIn) {
       try {
@@ -408,9 +520,24 @@ export const CartProvider = ({ children }) => {
     }
   }, [state.isLoggedIn]);
 
+  /**
+   * Atualiza a quantidade de um item no carrinho (com debounce e sincronização)
+   *
+   * Estratégia híbrida com otimização:
+   * - Update otimista: Interface responde instantaneamente
+   * - Debounce por produto: Evita requisições excessivas (300ms)
+   * - Sincronização background: Atualiza servidor após pausa
+   * - Fallback: Em caso de erro na API, mantém estado local
+   *
+   * @param {string|number} productId - ID único do produto
+   * @param {number} quantity - Nova quantidade desejada
+   * @returns {void}
+   *
+   * @example
+   * updateItemQuantity(1, 5); // Atualiza produto 1 para quantidade 5
+   * updateItemQuantity("abc-123", 0); // Remove produto (quantidade 0)
+   */
   const updateItemQuantity = useCallback((productId, quantity) => {
-    console.log(`🛒 updateItemQuantity chamado: produto ${productId}, quantidade ${quantity}, logado: ${state.isLoggedIn}`);
-
     // Atualiza localmente primeiro (update otimista)
     dispatch({
       type: CART_ACTIONS.UPDATE_QUANTITY,
@@ -419,49 +546,51 @@ export const CartProvider = ({ children }) => {
 
     // Se estiver logado, sincroniza com servidor em background com debounce por produto
     if (state.isLoggedIn) {
-      console.log(`⏰ Configurando timeout para produto ${productId}`);
-
       // Cancela timeout anterior para este produto específico
       const existingTimeout = serverUpdateTimeoutsRef.current.get(productId);
       if (existingTimeout) {
-        console.log(`🛑 Cancelando timeout anterior para produto ${productId}`);
         clearTimeout(existingTimeout);
       }
 
       // Cria novo timeout específico para este produto
       const newTimeout = setTimeout(async () => {
-        console.log(`🚀 Executando atualização para produto ${productId}, quantidade ${quantity}`);
         try {
           // Remove este timeout da lista
           serverUpdateTimeoutsRef.current.delete(productId);
 
           // Processa apenas este produto específico
           const result = await cartService.updateCartItem(productId, quantity);
-          console.log(`📡 Resultado da API para produto ${productId}:`, result);
           if (result.success && result.cart) {
             const transformedItems = transformBackendCartItems(result.cart.itens || result.cart.items || []);
-            console.log(`✅ Atualizando estado com itens transformados:`, transformedItems);
             dispatch({
               type: CART_ACTIONS.SYNC_WITH_SERVER,
               payload: { items: transformedItems }
             });
-          } else {
-            console.warn(`⚠️ API falhou para produto ${productId}:`, result);
           }
         } catch (error) {
-          console.error(`❌ Erro ao atualizar quantidade do produto ${productId} no carrinho do servidor:`, error);
+          console.error(`Erro ao atualizar quantidade do produto ${productId} no carrinho do servidor:`, error);
           // Em caso de erro, o estado local já foi atualizado, então não precisa fazer rollback
         }
       }, 300); // 300ms de debounce por produto
 
       // Armazena o timeout para este produto
       serverUpdateTimeoutsRef.current.set(productId, newTimeout);
-      console.log(`💾 Timeout armazenado para produto ${productId}`);
-    } else {
-      console.log(`🚫 Usuário não logado, pulando sincronização com servidor`);
     }
   }, [state.isLoggedIn]);
 
+  /**
+   * Limpa todos os itens do carrinho (com sincronização automática)
+   *
+   * Estratégia híbrida:
+   * - Usuário logado: Usa API do servidor diretamente
+   * - Usuário não logado: Usa localStorage
+   * - Fallback: Em caso de erro na API, usa localStorage
+   *
+   * @returns {Promise<void>}
+   *
+   * @example
+   * await clearCartItems(); // Remove todos os itens do carrinho
+   */
   const clearCartItems = useCallback(async () => {
     if (state.isLoggedIn) {
       try {
@@ -482,7 +611,19 @@ export const CartProvider = ({ children }) => {
   }, [state.isLoggedIn]);
 
   /**
-   * Gera mensagem para WhatsApp com os itens do carrinho
+   * Gera mensagem formatada para WhatsApp com todos os itens do carrinho
+   *
+   * Formato da mensagem:
+   * - Cabeçalho com nome da loja
+   * - Lista numerada de produtos (nome, quantidade, preço unitário, subtotal)
+   * - Total final
+   * - Mensagem de finalização
+   *
+   * @returns {string} Mensagem completa formatada para WhatsApp
+   *
+   * @example
+   * const message = generateWhatsAppMessage();
+   * // "*🛒 Pedido - Conecta Loja*\n\n*1.* Produto A\n   Qtd: 2x\n   Valor: R$ 10,99\n   Subtotal: R$ 21,98\n\n*💰 Total: R$ 21,98*\n\nGostaria de finalizar este pedido! 😊"
    */
   const generateWhatsAppMessage = () => {
     if (state.items.length === 0) return '';
@@ -512,8 +653,18 @@ export const CartProvider = ({ children }) => {
   };
 
   /**
-   * Formata preço para exibição
-   * @param {number} price - Preço a ser formatado
+   * Formata preço numérico para moeda brasileira (BRL)
+   *
+   * Converte qualquer formato de preço para a formatação padrão brasileira
+   * com símbolo de moeda e separadores corretos.
+   *
+   * @param {number|string} price - Preço a ser formatado
+   * @returns {string} Preço formatado em reais (ex: "R$ 1.299,99")
+   *
+   * @example
+   * formatPrice(1299.99); // "R$ 1.299,99"
+   * formatPrice("1299.99"); // "R$ 1.299,99"
+   * formatPrice(100); // "R$ 100,00"
    */
   const formatPrice = (price) => {
     const numericPrice = typeof price === 'number' ? price : parseFloat(price.toString().replace(/[^\d,.-]/g, '').replace(',', '.'));
@@ -525,7 +676,15 @@ export const CartProvider = ({ children }) => {
   };
 
   /**
-   * Finaliza pedido via WhatsApp
+   * Finaliza o pedido enviando mensagem para WhatsApp
+   *
+   * Gera automaticamente uma mensagem formatada com todos os itens do carrinho
+   * e abre o WhatsApp com o número configurado da loja.
+   *
+   * @returns {void}
+   *
+   * @example
+   * checkout(); // Abre WhatsApp com pedido formatado
    */
   const checkout = () => {
     const message = generateWhatsAppMessage();
@@ -557,7 +716,7 @@ export const CartProvider = ({ children }) => {
     isLoggedIn: state.isLoggedIn,
     isServerCartLoaded: state.isServerCartLoaded,
     isSyncing: state.isSyncing,
-
+    
     // Ações
     addItem: addItemToCart,
     removeItem: removeItemFromCart,
@@ -570,7 +729,7 @@ export const CartProvider = ({ children }) => {
     // Ações de autenticação (para integração com sistema de login)
     handleUserLogin,
     handleUserLogout,
-
+    
     // Utilitários
     formatPrice
   };
@@ -579,8 +738,51 @@ export const CartProvider = ({ children }) => {
 };
 
 /**
- * Hook para usar o contexto do carrinho
- * @returns {Object} Contexto do carrinho com estado e ações
+ * Hook personalizado para acessar o contexto do carrinho de compras
+ *
+ * Fornece acesso completo ao estado e ações do carrinho, incluindo:
+ * - Estado atual (itens, totais, status de autenticação)
+ * - Ações principais (adicionar, remover, atualizar, limpar)
+ * - Utilitários (formatação de preço, checkout)
+ * - Callbacks de autenticação (para integração com sistema de login)
+ *
+ * @returns {Object} Contexto completo do carrinho
+ * @returns {Array} returns.items - Itens atuais do carrinho
+ * @returns {number} returns.totalItems - Total de itens no carrinho
+ * @returns {number} returns.totalPrice - Preço total do carrinho
+ * @returns {boolean} returns.isCartOpen - Se o carrinho está aberto
+ * @returns {boolean} returns.isLoggedIn - Se usuário está autenticado
+ * @returns {boolean} returns.isServerCartLoaded - Se carrinho do servidor foi carregado
+ * @returns {boolean} returns.isSyncing - Se está sincronizando com servidor
+ * @returns {Function} returns.addItem - Adiciona item ao carrinho
+ * @returns {Function} returns.removeItem - Remove item do carrinho
+ * @returns {Function} returns.updateQuantity - Atualiza quantidade
+ * @returns {Function} returns.clearCart - Limpa carrinho
+ * @returns {Function} returns.openCart - Abre carrinho
+ * @returns {Function} returns.closeCart - Fecha carrinho
+ * @returns {Function} returns.checkout - Finaliza pedido
+ * @returns {Function} returns.handleUserLogin - Callback de login
+ * @returns {Function} returns.handleUserLogout - Callback de logout
+ * @returns {Function} returns.formatPrice - Formata preços
+ *
+ * @throws {Error} Quando usado fora de um CartProvider
+ *
+ * @example
+ * const {
+ *   items,
+ *   totalItems,
+ *   totalPrice,
+ *   addItem,
+ *   removeItem,
+ *   updateQuantity,
+ *   clearCart
+ * } = useCart();
+ *
+ * // Adicionar produto
+ * addItem(product, 2);
+ *
+ * // Atualizar quantidade
+ * updateQuantity(1, 5);
  */
 export const useCart = () => {
   const context = useContext(CartContext);
