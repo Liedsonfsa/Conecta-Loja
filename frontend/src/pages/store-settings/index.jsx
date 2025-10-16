@@ -53,12 +53,12 @@ const StoreSettings = () => {
     //   icon: 'Building2',
     //   description: 'Dados básicos e horário de funcionamento'
     // },
-    // {
-    //   id: 'branding',
-    //   label: 'Marca e Visual',
-    //   icon: 'Palette',
-    //   description: 'Logo, cores e personalização'
-    // },
+     {
+       id: 'branding',
+       label: 'Marca e Visual',
+       icon: 'Palette',
+       description: 'Logo, cores e personalização'
+     },
     {
       id: 'roles',
       label: 'Cargos',
@@ -113,8 +113,8 @@ const StoreSettings = () => {
     switch (activeTab) {
       // case 'business':
       //   return <BusinessInfoSection />;
-      // case 'branding':
-      //   return <BrandingSection />;
+       case 'branding':
+         return <BrandingSection />;
       case 'roles':
         return <RoleManagementSection />;
       case 'employees':
