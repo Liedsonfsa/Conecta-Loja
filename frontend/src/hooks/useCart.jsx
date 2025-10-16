@@ -160,9 +160,8 @@ export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState);
   const [isCartOpen, setIsCartOpen] = React.useState(false);
 
-  // Refs para controlar updates e debounce
-  const serverUpdateTimeoutRef = useRef(null);
-  const pendingUpdatesRef = useRef(new Map()); // Armazena updates pendentes por productId
+  // Ref para controlar timeouts de debounce por produto
+  const serverUpdateTimeoutsRef = useRef(new Map()); // Timeouts por productId
 
   // Carrega o carrinho do localStorage quando o componente monta
   useEffect(() => {
@@ -355,8 +354,8 @@ export const CartProvider = ({ children }) => {
    * Operações do carrinho que funcionam tanto local quanto com servidor
    */
   const addItemToCart = useCallback(async (product, quantity = 1) => {
-    if (state.isLoggedIn && state.isServerCartLoaded) {
-      // Se usuário está logado e carrinho do servidor carregado, usa API
+    if (state.isLoggedIn) {
+      // Se usuário está logado, SEMPRE usa API (mesmo se carrinho ainda não foi carregado)
       try {
         const result = await cartService.addToCart(product.id, quantity);
         if (result.success && result.cart) {
@@ -375,16 +374,16 @@ export const CartProvider = ({ children }) => {
         });
       }
     } else {
-      // Se não está logado ou carrinho do servidor não carregado, usa localStorage
+      // Se não está logado, usa localStorage
       dispatch({
         type: CART_ACTIONS.ADD_ITEM,
         payload: { product, quantity }
       });
     }
-  }, [state.isLoggedIn, state.isServerCartLoaded]);
+  }, [state.isLoggedIn]);
 
   const removeItemFromCart = useCallback(async (productId) => {
-    if (state.isLoggedIn && state.isServerCartLoaded) {
+    if (state.isLoggedIn) {
       try {
         const result = await cartService.removeFromCart(productId);
         if (result.success && result.cart) {
@@ -407,55 +406,64 @@ export const CartProvider = ({ children }) => {
         payload: { productId }
       });
     }
-  }, [state.isLoggedIn, state.isServerCartLoaded]);
+  }, [state.isLoggedIn]);
 
   const updateItemQuantity = useCallback((productId, quantity) => {
+    console.log(`🛒 updateItemQuantity chamado: produto ${productId}, quantidade ${quantity}, logado: ${state.isLoggedIn}`);
+
     // Atualiza localmente primeiro (update otimista)
     dispatch({
       type: CART_ACTIONS.UPDATE_QUANTITY,
       payload: { productId, quantity }
     });
 
-    // Armazena a última quantidade desejada para este produto
-    pendingUpdatesRef.current.set(productId, quantity);
+    // Se estiver logado, sincroniza com servidor em background com debounce por produto
+    if (state.isLoggedIn) {
+      console.log(`⏰ Configurando timeout para produto ${productId}`);
 
-    // Se estiver logado, sincroniza com servidor em background com debounce
-    if (state.isLoggedIn && state.isServerCartLoaded) {
-      // Cancela timeout anterior se existir
-      if (serverUpdateTimeoutRef.current) {
-        clearTimeout(serverUpdateTimeoutRef.current);
+      // Cancela timeout anterior para este produto específico
+      const existingTimeout = serverUpdateTimeoutsRef.current.get(productId);
+      if (existingTimeout) {
+        console.log(`🛑 Cancelando timeout anterior para produto ${productId}`);
+        clearTimeout(existingTimeout);
       }
 
-      // Cria novo timeout com debounce
-      serverUpdateTimeoutRef.current = setTimeout(async () => {
+      // Cria novo timeout específico para este produto
+      const newTimeout = setTimeout(async () => {
+        console.log(`🚀 Executando atualização para produto ${productId}, quantidade ${quantity}`);
         try {
-          // Processa todos os updates pendentes
-          const updatesToProcess = Array.from(pendingUpdatesRef.current.entries());
+          // Remove este timeout da lista
+          serverUpdateTimeoutsRef.current.delete(productId);
 
-          // Limpa updates pendentes
-          pendingUpdatesRef.current.clear();
-
-          // Processa cada update (normalmente será apenas o último)
-          for (const [pid, qty] of updatesToProcess) {
-            const result = await cartService.updateCartItem(pid, qty);
-            if (result.success && result.cart) {
-              const transformedItems = transformBackendCartItems(result.cart.itens || result.cart.items || []);
-              dispatch({
-                type: CART_ACTIONS.SYNC_WITH_SERVER,
-                payload: { items: transformedItems }
-              });
-            }
+          // Processa apenas este produto específico
+          const result = await cartService.updateCartItem(productId, quantity);
+          console.log(`📡 Resultado da API para produto ${productId}:`, result);
+          if (result.success && result.cart) {
+            const transformedItems = transformBackendCartItems(result.cart.itens || result.cart.items || []);
+            console.log(`✅ Atualizando estado com itens transformados:`, transformedItems);
+            dispatch({
+              type: CART_ACTIONS.SYNC_WITH_SERVER,
+              payload: { items: transformedItems }
+            });
+          } else {
+            console.warn(`⚠️ API falhou para produto ${productId}:`, result);
           }
         } catch (error) {
-          console.error('Erro ao atualizar quantidade no carrinho do servidor:', error);
+          console.error(`❌ Erro ao atualizar quantidade do produto ${productId} no carrinho do servidor:`, error);
           // Em caso de erro, o estado local já foi atualizado, então não precisa fazer rollback
         }
-      }, 300); // 300ms de debounce
+      }, 300); // 300ms de debounce por produto
+
+      // Armazena o timeout para este produto
+      serverUpdateTimeoutsRef.current.set(productId, newTimeout);
+      console.log(`💾 Timeout armazenado para produto ${productId}`);
+    } else {
+      console.log(`🚫 Usuário não logado, pulando sincronização com servidor`);
     }
-  }, [state.isLoggedIn, state.isServerCartLoaded]);
+  }, [state.isLoggedIn]);
 
   const clearCartItems = useCallback(async () => {
-    if (state.isLoggedIn && state.isServerCartLoaded) {
+    if (state.isLoggedIn) {
       try {
         const result = await cartService.clearCart();
         if (result.success) {
@@ -471,7 +479,7 @@ export const CartProvider = ({ children }) => {
     } else {
       dispatch({ type: CART_ACTIONS.CLEAR_CART });
     }
-  }, [state.isLoggedIn, state.isServerCartLoaded]);
+  }, [state.isLoggedIn]);
 
   /**
    * Gera mensagem para WhatsApp com os itens do carrinho
@@ -529,14 +537,14 @@ export const CartProvider = ({ children }) => {
   const totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = state.items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
 
-  // Cleanup dos timeouts e refs quando componente desmonta
+  // Cleanup dos timeouts quando componente desmonta
   useEffect(() => {
     return () => {
-      if (serverUpdateTimeoutRef.current) {
-        clearTimeout(serverUpdateTimeoutRef.current);
+      // Limpa todos os timeouts ativos
+      for (const timeout of serverUpdateTimeoutsRef.current.values()) {
+        clearTimeout(timeout);
       }
-      // Limpa updates pendentes
-      pendingUpdatesRef.current.clear();
+      serverUpdateTimeoutsRef.current.clear();
     };
   }, []);
 
