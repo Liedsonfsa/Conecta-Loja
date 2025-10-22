@@ -21,4 +21,44 @@ export const getUserOrders = async (req: Request, res: Response) => {
             success: false
         });
     }
-}
+};
+
+/**
+ * Cria um novo pedido
+ *
+ * Recebe os dados do pedido via body da requisição, chama o service responsável
+ * pela criação e retorna o pedido cadastrado com sucesso ou um erro apropriado.
+ *
+ * @param req - Requisição Express contendo os dados do pedido no body
+ * @param res - Resposta Express
+ * @returns Promise<Response> - Retorna o pedido criado ou mensagem de erro
+ *
+ * @example
+ * POST /api/pedidos/cadastrar
+ * {
+ *   "usuarioId": 1,
+ *   "cupomId": 2,
+ *   "produtos": [
+ *     { "produtoId": 5, "quantidade": 2 },
+ *     { "produtoId": 8, "quantidade": 1}
+ *   ],
+ *   "precoTotal": 219.80,
+ *   "status": "RECEBIDO"
+ * }
+ */
+export const createOrder = async (req: Request, res: Response) => {
+    try {
+        const order = await OrderService.createOrder(req.body);
+        return res.status(201).json({
+            success: true,
+            message: "Pedido criado com sucesso!",
+            pedido: order
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Erro ao criar pedido"
+        });
+    }
+};

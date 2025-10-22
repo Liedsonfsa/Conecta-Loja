@@ -1,4 +1,4 @@
-import { PrismaClient } from "../generated/prisma";
+import { PrismaClient, OrderStatus } from "../generated/prisma";
 
 const prisma = new PrismaClient();
 
@@ -18,5 +18,44 @@ export class OrderRepository {
         return await prisma.pedido.findMany({
             where: { usuarioId },
         })
+    }
+
+    /**
+     * Cria um novo pedido e associa seus produtos.
+     *
+     * @param data - Dados do pedido, incluindo lista de produtos
+     * @returns Promise<object> - Pedido criado com relação aos produtos
+     */
+    static async createOrder(data: {
+        usuarioId: number,
+        cupomId?: number,
+        produtos: { produtoId: number, quantidade: number, precoUnitario: number }[],
+        precoTotal: number,
+        status?: string
+    }) {
+        const { usuarioId, cupomId, produtos, precoTotal, status } = data;
+
+        const orderStatus: OrderStatus = (status && status in OrderStatus)
+            ? (status as OrderStatus)
+            : OrderStatus.RECEBIDO;
+
+        return await prisma.pedido.create({
+            data: {
+                usuarioId,
+                cupomId,
+                precoTotal,
+                status: orderStatus,
+                produtos: {
+                    create: produtos.map(p => ({
+                        produtoId: p.produtoId,
+                        quantidade: p.quantidade,
+                        precoUnitario: p.precoUnitario
+                    }))
+                }
+            },
+            include: {
+                produtos: true
+            }
+        });
     }
 }

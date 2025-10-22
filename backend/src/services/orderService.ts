@@ -23,4 +23,26 @@ export class OrderService {
             throw error;
         }
     }
+
+    /**
+     * Cria um novo pedido no banco de dados.
+     *
+     * @param data - Dados do pedido (usuarioId, cupomId, produtos, precoTotal, status)
+     * @returns Promise<object> - Pedido criado com produtos associados
+     * @throws Error - Se ocorrer erro no repositório
+     */
+    static async createOrder(data: {
+        usuarioId: number,
+        cupomId?: number,
+        produtos: { produtoId: number, quantidade: number, precoUnitario: number }[],
+        precoTotal: number,
+        status?: string
+    }) {
+        try {
+            const order = await OrderRepository.createOrder(data);
+            return order;
+        } catch (error) {
+            throw error;
+        }
+    }
 }
