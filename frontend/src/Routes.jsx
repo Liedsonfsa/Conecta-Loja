@@ -11,11 +11,12 @@ import EmployeeRoute from "@/components/EmployeeRoute";
 // Import page components
 import HomePage from "./pages/Home";
 import Dashboard from "./pages/dashboard";
+import Reports from "./pages/dashboard/Reports";
 import NotFoundPage from "./pages/NotFound";
 import OrderManagement from "./pages/OrderManagement";
 import ProductManagement from "./pages/product-management";
 import UserProfile from "./pages/User/UserProfile";
-import StoreSettings from './pages/store-settings';
+import StoreSettings from "./pages/store-settings";
 import OrderHistory from "./pages/OrderHistory/OrderHistory";
 /**
  * Routes - Componente principal de configuração de roteamento da aplicação
@@ -39,19 +40,26 @@ const AppRoutes = () => {
         <ScrollToTop />
         <RouterRoutes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/dashboard" element={
-            <EmployeeRoute>
-              <Dashboard />
-            </EmployeeRoute>
-          } />
+          <Route
+            path="/dashboard"
+            element={
+              <EmployeeRoute>
+                <Dashboard />
+              </EmployeeRoute>
+            }
+          />
+          <Route path="/relatorios" element={<Reports />} />
           <Route path="/pedidos" element={<OrderManagement />} />
           <Route path="/produtos" element={<ProductManagement />} />
           <Route path="/profile" element={<UserProfile />} />
-          <Route path="/store-settings" element={
-            <AdminRoute>
-              <StoreSettings />
-            </AdminRoute>
-          } />
+          <Route
+            path="/store-settings"
+            element={
+              <AdminRoute>
+                <StoreSettings />
+              </AdminRoute>
+            }
+          />
           <Route path="/history" element={<OrderHistory />} />
           <Route path="*" element={<NotFoundPage />} />
         </RouterRoutes>
