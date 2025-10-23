@@ -45,4 +45,22 @@ export class OrderService {
             throw error;
         }
     }
+
+    /**
+     * Exclui um pedido
+     *
+     * Valida o ID e chama o repositório para remover o pedido do banco.
+     *
+     * @param id - ID do pedido a ser excluído
+     * @returns Promise<object> - Pedido excluído
+     * @throws Error - Se o ID for inválido ou não encontrado
+     */
+    static async deleteOrder(id: number) {
+        try {
+            const deletedOrder = await OrderRepository.deleteOrder(id);
+            return deletedOrder;
+        } catch (error) {
+            throw error;
+        }
+    }
 }

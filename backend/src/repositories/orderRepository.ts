@@ -58,4 +58,27 @@ export class OrderRepository {
             }
         });
     }
+
+    /**
+     * Exclui um pedido no banco de dados
+     *
+     * Utiliza o Prisma para remover um pedido a partir do ID informado.
+     *
+     * @param id - ID do pedido a ser excluído
+     * @returns Promise<object> - Pedido excluído
+     * @throws Error - Se o pedido não existir
+     */
+    static async deleteOrder(id: number) {
+        const existingOrder = await prisma.pedido.findUnique({
+            where: { id },
+        });
+
+        if (!existingOrder) {
+            throw new Error("Pedido não encontrado");
+        }
+
+        return await prisma.pedido.delete({
+            where: { id },
+        });
+    }
 }
