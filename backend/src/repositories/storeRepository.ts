@@ -1,5 +1,6 @@
 import { PrismaClient } from "../generated/prisma";
 
+
 const prisma = new PrismaClient();
 
 /**
@@ -55,4 +56,28 @@ export class StoreRepository {
             where: {id}
         });
     };
+
+    /**
+     * Repositório: busca as configurações da loja.
+     * Assume que as configurações pertencem à loja com ID 1.
+     * @returns Promise com as configurações encontradas ou null
+     */
+    static async findConfig() {
+        // Usando o nome do model 'store' como definido no schema.prisma
+        return await prisma.store.findUnique({
+            where: { id: 1 },
+        });
+    }
+
+    /**
+     * Repositório: atualiza as configurações da loja.
+     * @param data - Objeto com os campos a serem atualizados.
+     * @returns Promise com as configurações atualizadas
+     */
+    static async updateConfig(data: any) { // Use um tipo mais específico para 'data' se tiver
+        return await prisma.store.update({
+            where: { id: 1 },
+            data,
+        });
+    }
 };

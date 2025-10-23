@@ -2,12 +2,13 @@ import { StoreRepository } from "../repositories/storeRepository";
 import { EmployeeRepository } from "../repositories/employeeRepository";
 
 
+
 export class StoreService {
     /**
      * Serviço para listar os funcionários de uma loja
      *
      * Lista todos os funcionários da loja
-     *
+     * '../controllers/storeController
      * @param lojaId - ID da loja cujos funcionários devem ser listados
      * @returns Promise<object[]> - Lista de funcionários da loja
      *
@@ -44,5 +45,23 @@ export class StoreService {
         } catch (error) {
             throw error;
         }
+    }
+
+    /**
+     * Serviço: busca as configurações da loja.
+     */
+    static async getConfig() {
+        const config = await StoreRepository.findConfig();
+        if (!config) {
+            throw new Error("Configurações da loja não encontradas.");
+        }
+        return config;
+    }
+
+    /**
+     * Serviço: atualiza as configurações da loja.
+     */
+    static async updateConfig(data: any) {
+        return StoreRepository.updateConfig(data);
     }
 };

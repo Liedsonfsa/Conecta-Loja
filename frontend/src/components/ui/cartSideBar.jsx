@@ -10,6 +10,34 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Plus, Minus, Trash2, MessageCircle, Trash } from "lucide-react";
 
+/**
+ * Sidebar lateral do carrinho de compras
+ *
+ * Componente React que exibe um sidebar lateral com os itens do carrinho,
+ * controles de quantidade, remoção de itens e finalização de pedido.
+ * Inclui design responsivo e confirmações de segurança.
+ *
+ * @param {Object} props - Propriedades do componente
+ * @param {boolean} props.isOpen - Controla se o sidebar está aberto
+ * @param {Function} props.onClose - Callback para fechar o sidebar
+ * @param {Array} props.cartItems - Array de itens do carrinho
+ * @param {Function} props.onUpdateQuantity - Callback para atualizar quantidade
+ * @param {Function} props.onRemoveItem - Callback para remover item
+ * @param {Function} props.onClearCart - Callback para limpar carrinho
+ * @param {Function} props.onCheckout - Callback para finalizar pedido
+ * @returns {JSX.Element} Componente do sidebar do carrinho
+ *
+ * @example
+ * <CartSidebar
+ *   isOpen={isCartOpen}
+ *   onClose={closeCart}
+ *   cartItems={cartItems}
+ *   onUpdateQuantity={updateQuantity}
+ *   onRemoveItem={removeItem}
+ *   onClearCart={clearCart}
+ *   onCheckout={checkout}
+ * />
+ */
 const CartSidebar = ({
   isOpen,
   onClose,
@@ -19,6 +47,21 @@ const CartSidebar = ({
   onClearCart,
   onCheckout,
 }) => {
+  /**
+   * Formata preço numérico para moeda brasileira (BRL)
+   *
+   * Converte qualquer formato de preço para a formatação padrão brasileira
+   * com símbolo de moeda e separadores corretos, usado especificamente
+   * para exibição no sidebar do carrinho.
+   *
+   * @param {number|string} price - Preço a ser formatado
+   * @returns {string} Preço formatado em reais (ex: "R$ 1.299,99")
+   *
+   * @example
+   * formatPrice(1299.99); // "R$ 1.299,99"
+   * formatPrice("1299.99"); // "R$ 1.299,99"
+   * formatPrice(100); // "R$ 100,00"
+   */
   const formatPrice = (price) => {
     // Se o preço já é um número, usa diretamente
     const numericPrice =
@@ -37,12 +80,52 @@ const CartSidebar = ({
     }).format(numericPrice);
   };
 
+  /**
+   * Calcula o total de itens no carrinho
+   *
+   * Soma todas as quantidades dos produtos no carrinho
+   * para exibir o número total de itens.
+   *
+   * @type {number}
+   * @example
+   * // Se carrinho tem: Produto A (2 un) + Produto B (3 un)
+   * totalItems = 5;
+   */
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+  /**
+   * Calcula o preço total do carrinho
+   *
+   * Soma o valor total de todos os produtos no carrinho
+   * multiplicando preço unitário pela quantidade de cada item.
+   *
+   * @type {number}
+   * @example
+   * // Produto A: R$ 10 × 2 = R$ 20
+   * // Produto B: R$ 15 × 3 = R$ 45
+   * totalPrice = 65;
+   */
   const totalPrice = cartItems.reduce(
     (sum, item) => sum + item.product.price * item.quantity,
     0
   );
 
+  /**
+   * Manipula mudança de quantidade de um produto no carrinho
+   *
+   * Função auxiliar que calcula a nova quantidade baseada no delta
+   * e decide se deve atualizar a quantidade ou remover o item
+   * (quando quantidade chega a zero).
+   *
+   * @param {string|number} productId - ID único do produto
+   * @param {number} delta - Valor a ser adicionado/subtraído da quantidade atual
+   * @returns {void}
+   *
+   * @example
+   * handleQuantityChange(1, 1);  // Aumenta quantidade do produto 1 em 1
+   * handleQuantityChange(1, -1); // Diminui quantidade do produto 1 em 1
+   * handleQuantityChange(1, -5); // Diminui para zero e remove o produto
+   */
   const handleQuantityChange = (productId, delta) => {
     const item = cartItems.find((item) => item.product.id === productId);
     if (item) {

@@ -19,69 +19,69 @@
  *   className="lg:block"
  * />
  */
-import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import Icon from '../AppIcon';
-import Button from './ButtonDash';
-import { useAuth } from '../../hooks/use-auth';
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import Icon from "../AppIcon";
+import Button from "./ButtonDash";
+import { useAuth } from "../../hooks/use-auth";
 
-const Sidebar = ({ isCollapsed = false, onToggle, className = '' }) => {
+const Sidebar = ({ isCollapsed = false, onToggle, className = "" }) => {
   const location = useLocation();
   const { userType } = useAuth();
   const [notifications, setNotifications] = useState({
-    '/dashboard': 0,
-    '/pedidos': 0,
-    '/produtos': 0,
+    "/dashboard": 0,
+    "/pedidos": 0,
+    "/produtos": 0,
   });
 
   const navigationItems = [
     {
-      label: 'Dashboard',
-      path: '/dashboard',
-      icon: 'LayoutDashboard',
-      description: 'Visão geral do negócio'
+      label: "Dashboard",
+      path: "/dashboard",
+      icon: "LayoutDashboard",
+      description: "Visão geral do negócio",
     },
     {
-      label: 'Operações',
-      type: 'group',
+      label: "Operações",
+      type: "group",
       children: [
         {
-          label: 'Gestão de Produtos',
-          path: '/produtos',
-          icon: 'Package',
-          description: 'Catálogo e estoque'
+          label: "Gestão de Produtos",
+          path: "/produtos",
+          icon: "Package",
+          description: "Catálogo e estoque",
         },
         {
-          label: 'Gestão de Pedidos',
-          path: '/pedidos',
-          icon: 'ShoppingCart',
-          description: 'Pedidos e WhatsApp'
-        }
-      ]
+          label: "Gestão de Pedidos",
+          path: "/pedidos",
+          icon: "ShoppingCart",
+          description: "Pedidos e WhatsApp",
+        },
+      ],
     },
     {
-      label: 'Loja do Cliente',
-      path: '/customer-storefront',
-      icon: 'Store',
-      description: 'Vitrine online'
+      label: "Loja do Cliente",
+      path: "/customer-storefront",
+      icon: "Store",
+      description: "Vitrine online",
     },
     {
-      label: 'Analytics',
-      path: '/sales-analytics',
-      icon: 'BarChart3',
-      description: 'Relatórios de vendas'
+      label: "Relatórios",
+      path: "/relatorios",
+      icon: "BarChart3",
+      description: "Relatórios de vendas",
     },
     {
-      label: 'Funcionários',
-      path: '/store-settings',
-      icon: 'Settings',
-      description: 'Funcionários da loja'
-    }
+      label: "Funcionários",
+      path: "/store-settings",
+      icon: "Settings",
+      description: "Funcionários da loja",
+    },
   ];
 
   // Filtrar itens de navegação baseado no tipo de usuário (apenas admin vê configurações)
-  const filteredNavigationItems = navigationItems.filter(item => {
-    if (item.path === '/store-settings' && userType !== 'admin') {
+  const filteredNavigationItems = navigationItems.filter((item) => {
+    if (item.path === "/store-settings" && userType !== "admin") {
       return false;
     }
     return true;
@@ -114,9 +114,9 @@ const Sidebar = ({ isCollapsed = false, onToggle, className = '' }) => {
   useEffect(() => {
     // Simulate real-time notifications
     const interval = setInterval(() => {
-      setNotifications(prev => ({
+      setNotifications((prev) => ({
         ...prev,
-        '/pedidos': Math.floor(Math.random() * 10),
+        "/pedidos": Math.floor(Math.random() * 10),
       }));
     }, 30000);
 
@@ -138,22 +138,24 @@ const Sidebar = ({ isCollapsed = false, onToggle, className = '' }) => {
     const notificationCount = getNotificationCount(item?.path);
 
     return (
-      <div key={item?.path} className={isChild ? 'ml-4' : ''}>
+      <div key={item?.path} className={isChild ? "ml-4" : ""}>
         <Button
           variant={isActive ? "default" : "ghost"}
           onClick={() => handleNavigation(item?.path)}
           className={`w-full justify-start h-12 px-3 mb-1 relative group ${
-            isCollapsed ? 'px-2' : ''
+            isCollapsed ? "px-2" : ""
           }`}
-          title={isCollapsed ? `${item?.label} - ${item?.description}` : ''}
+          title={isCollapsed ? `${item?.label} - ${item?.description}` : ""}
         >
           <div className="flex items-center space-x-3 w-full">
-            <Icon 
-              name={item?.icon} 
-              size={20} 
-              className={`flex-shrink-0 ${isActive ? 'text-primary-foreground' : ''}`}
+            <Icon
+              name={item?.icon}
+              size={20}
+              className={`flex-shrink-0 ${
+                isActive ? "text-primary-foreground" : ""
+              }`}
             />
-            
+
             {!isCollapsed && (
               <>
                 <div className="flex-1 text-left">
@@ -162,18 +164,18 @@ const Sidebar = ({ isCollapsed = false, onToggle, className = '' }) => {
                     {item?.description}
                   </div>
                 </div>
-                
+
                 {notificationCount > 0 && (
                   <span className="bg-destructive text-destructive-foreground text-xs px-2 py-1 rounded-full min-w-[20px] text-center z-1001">
-                    {notificationCount > 99 ? '99+' : notificationCount}
+                    {notificationCount > 99 ? "99+" : notificationCount}
                   </span>
                 )}
               </>
             )}
-            
+
             {isCollapsed && notificationCount > 0 && (
               <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs w-5 h-5 rounded-full flex items-center justify-center z-1001">
-                {notificationCount > 9 ? '9+' : notificationCount}
+                {notificationCount > 9 ? "9+" : notificationCount}
               </span>
             )}
           </div>
@@ -200,7 +202,7 @@ const Sidebar = ({ isCollapsed = false, onToggle, className = '' }) => {
           </div>
         )}
         <div className="space-y-1">
-          {group?.children?.map(item => renderNavigationItem(item, true))}
+          {group?.children?.map((item) => renderNavigationItem(item, true))}
         </div>
       </div>
     );
@@ -210,17 +212,17 @@ const Sidebar = ({ isCollapsed = false, onToggle, className = '' }) => {
     <>
       {/* Mobile Backdrop */}
       {!isCollapsed && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-1010 lg:hidden"
           onClick={onToggle}
         />
       )}
       {/* Sidebar */}
-      <aside 
+      <aside
         className={`
           fixed left-0 top-0 h-full bg-card border-r border-border z-1020
           transition-all duration-300 ease-in-out
-          ${isCollapsed ? 'w-16' : 'w-60'}
+          ${isCollapsed ? "w-16" : "w-60"}
           ${className}
         `}
       >
@@ -267,22 +269,25 @@ const Sidebar = ({ isCollapsed = false, onToggle, className = '' }) => {
               </span>
             </div>
           )}
-          
+
           <Button
             variant="ghost"
             size="icon"
             onClick={onToggle}
             className="hidden lg:flex"
           >
-            <Icon name={isCollapsed ? "ChevronRight" : "ChevronLeft"} size={16} />
+            <Icon
+              name={isCollapsed ? "ChevronRight" : "ChevronLeft"}
+              size={16}
+            />
           </Button>
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto p-4">
           <div className="space-y-2">
-            {filteredNavigationItems?.map(item => {
-              if (item?.type === 'group') {
+            {filteredNavigationItems?.map((item) => {
+              if (item?.type === "group") {
                 return renderNavigationGroup(item);
               }
               return renderNavigationItem(item);
@@ -292,7 +297,11 @@ const Sidebar = ({ isCollapsed = false, onToggle, className = '' }) => {
 
         {/* Footer */}
         <div className="p-4 border-t border-border">
-          <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'}`}>
+          <div
+            className={`flex items-center ${
+              isCollapsed ? "justify-center" : "space-x-3"
+            }`}
+          >
             <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
               <Icon name="User" size={16} className="text-muted-foreground" />
             </div>
