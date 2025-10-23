@@ -1,4 +1,4 @@
-import { PrismaClient } from "../generated/prisma";
+import { PrismaClient, OrderStatus } from "../generated/prisma";
 
 const prisma = new PrismaClient();
 
@@ -18,5 +18,67 @@ export class OrderRepository {
         return await prisma.pedido.findMany({
             where: { usuarioId },
         })
+    }
+
+    /**
+     * Cria um novo pedido e associa seus produtos.
+     *
+     * @param data - Dados do pedido, incluindo lista de produtos
+     * @returns Promise<object> - Pedido criado com relação aos produtos
+     */
+    static async createOrder(data: {
+        usuarioId: number,
+        cupomId?: number,
+        produtos: { produtoId: number, quantidade: number, precoUnitario: number }[],
+        precoTotal: number,
+        status?: string
+    }) {
+        const { usuarioId, cupomId, produtos, precoTotal, status } = data;
+
+        const orderStatus: OrderStatus = (status && status in OrderStatus)
+            ? (status as OrderStatus)
+            : OrderStatus.RECEBIDO;
+
+        return await prisma.pedido.create({
+            data: {
+                usuarioId,
+                cupomId,
+                precoTotal,
+                status: orderStatus,
+                produtos: {
+                    create: produtos.map(p => ({
+                        produtoId: p.produtoId,
+                        quantidade: p.quantidade,
+                        precoUnitario: p.precoUnitario
+                    }))
+                }
+            },
+            include: {
+                produtos: true
+            }
+        });
+    }
+
+    /**
+     * Exclui um pedido no banco de dados
+     *
+     * Utiliza o Prisma para remover um pedido a partir do ID informado.
+     *
+     * @param id - ID do pedido a ser excluído
+     * @returns Promise<object> - Pedido excluído
+     * @throws Error - Se o pedido não existir
+     */
+    static async deleteOrder(id: number) {
+        const existingOrder = await prisma.pedido.findUnique({
+            where: { id },
+        });
+
+        if (!existingOrder) {
+            throw new Error("Pedido não encontrado");
+        }
+
+        return await prisma.pedido.delete({
+            where: { id },
+        });
     }
 }
