@@ -267,11 +267,12 @@ const CartSidebar = ({
               </div>
 
               <button
-                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 font-medium text-lg"
-                onClick={onCheckout}
+                className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 py-3 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 font-medium text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => onCheckout()}
+                disabled={!onCheckout}
               >
                 <MessageCircle className="h-4 w-4" />
-                Finalizar no WhatsApp
+                Finalizar Pedido
               </button>
             </div>
           </>

@@ -5,6 +5,66 @@ import OrderStatusBadge from './OrderStatusBadge';
 import { formatCurrency, formatDateTime } from 'src/utils';
 //../../../utils
 
+/**
+ * OrderTable - Componente de tabela para exibição de pedidos
+ *
+ * Exibe pedidos em formato de tabela responsiva com visualização
+ * desktop (tabela) e mobile (cards). Inclui informações completas
+ * dos pedidos, status visual, ações rápidas e indicadores de novos pedidos.
+ *
+ * Funcionalidades principais:
+ * - Visualização desktop em tabela com colunas organizadas
+ * - Visualização mobile em cards empilhados
+ * - Indicador visual para pedidos novos (badge vermelho pulsante)
+ * - Badge de status colorido para cada pedido
+ * - Ações rápidas: ver detalhes, contatar cliente, atualizar status
+ * - Estados de loading e lista vazia com mensagens apropriadas
+ * - Formatação automática de moeda e datas
+ *
+ * Informações exibidas:
+ * - ID do pedido com indicador de novo
+ * - Dados do cliente (nome e telefone)
+ * - Contagem e nomes dos itens
+ * - Valor total formatado
+ * - Status com badge colorido
+ * - Data/hora de criação formatada
+ * - Botões de ação (3 ações por linha)
+ *
+ * Estados especiais:
+ * - Loading: Spinner de carregamento
+ * - Lista vazia: Mensagem explicativa com ícone
+ * - Pedidos novos: Badge vermelho pulsante no ID
+ *
+ * @component
+ * @param {Object} props - Propriedades do componente
+ * @param {Array} props.orders - Lista de pedidos a serem exibidos
+ * @param {Function} props.onStatusUpdate - Callback para atualização de status
+ * @param {Function} props.onViewDetails - Callback para visualização de detalhes
+ * @param {Function} props.onContactCustomer - Callback para contato com cliente
+ * @param {boolean} [props.loading=false] - Estado de carregamento
+ *
+ * @example
+ * const orders = [
+ *   {
+ *     id: "0001",
+ *     customerName: "João Silva",
+ *     customerPhone: "(11) 99999-1234",
+ *     itemCount: 2,
+ *     total: 49.40,
+ *     status: "pending",
+ *     createdAt: "2025-01-09T20:30:00.000Z",
+ *     isNew: true
+ *   }
+ * ];
+ *
+ * <OrderTable
+ *   orders={orders}
+ *   onStatusUpdate={handleStatusUpdate}
+ *   onViewDetails={handleViewDetails}
+ *   onContactCustomer={handleContactCustomer}
+ *   loading={false}
+ * />
+ */
 const OrderTable = ({
                         orders,
                         onStatusUpdate,

@@ -5,9 +5,67 @@ import Image from '../../../components/AppImage';
 import OrderStatusBadge from './OrderStatusBadge';
 import { formatCurrency, formatDateTime } from 'src/utils';
 
+/**
+ * OrderDetailsModal - Modal de detalhes completos do pedido
+ *
+ * Modal responsivo que exibe informações completas de um pedido,
+ * incluindo dados do cliente, itens detalhados, resumo financeiro,
+ * timeline de status e ações rápidas para contato e atualização.
+ *
+ * Funcionalidades principais:
+ * - Visualização completa dos dados do cliente (nome, telefone, endereço)
+ * - Lista detalhada de itens com imagens, quantidades e personalizações
+ * - Resumo financeiro com subtotal, desconto, taxa de entrega e total
+ * - Timeline cronológica do histórico de status do pedido
+ * - Botões de ação para contato via WhatsApp e atualização de status
+ * - Indicadores visuais para pedidos novos
+ * - Layout responsivo com scroll interno
+ * - Overlay com backdrop para fechar modal
+ *
+ * Seções do modal:
+ * - Header: ID do pedido, status e badge de novo
+ * - Informações do Cliente: Dados pessoais e endereço
+ * - Itens do Pedido: Lista com imagens e detalhes
+ * - Resumo do Pedido: Quebramento financeiro
+ * - Histórico: Timeline de status
+ * - Footer: Data de criação e botões de ação
+ *
+ * @component
+ * @param {Object} props - Propriedades do componente
+ * @param {Object} props.order - Dados completos do pedido
+ * @param {boolean} props.isOpen - Controle de visibilidade do modal
+ * @param {Function} props.onClose - Callback para fechar o modal
+ * @param {Function} props.onStatusUpdate - Callback para atualização de status
+ * @param {Function} props.onContactCustomer - Callback para contato com cliente
+ *
+ * @example
+ * const order = {
+ *   id: "0001",
+ *   customerName: "João Silva",
+ *   customerPhone: "(11) 99999-1234",
+ *   customerAddress: "Rua das Flores, 123",
+ *   status: "preparing",
+ *   isNew: true,
+ *   items: [...],
+ *   total: 49.40,
+ *   timeline: [...]
+ * };
+ *
+ * <OrderDetailsModal
+ *   order={order}
+ *   isOpen={true}
+ *   onClose={() => setIsOpen(false)}
+ *   onStatusUpdate={handleStatusUpdate}
+ *   onContactCustomer={handleContact}
+ * />
+ */
 const OrderDetailsModal = ({ order, isOpen, onClose, onStatusUpdate, onContactCustomer }) => {
     if (!isOpen || !order) return null;
 
+    /**
+     * Manipula o contato via WhatsApp do cliente
+     * Abre uma nova aba com mensagem pré-formatada e notifica o callback
+     */
     const handleWhatsAppContact = () => {
         const message = `Olá ${order?.customerName}! Sobre seu pedido #${order?.id}...`;
         const whatsappUrl = `https://wa.me/55${order?.customerPhone?.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;

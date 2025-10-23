@@ -10,15 +10,96 @@ import OrderDetailsModal from './components/OrderDetailsModal';
 import StatusUpdateModal from './components/StatusUpdateModal';
 import { formatCurrency, debounce, exportToCSV } from 'src/utils';
 
+/**
+ * OrderManagement - Página principal de gestão de pedidos da aplicação Conecta-Loja
+ *
+ * Esta página fornece uma interface completa para gerenciar pedidos em tempo real,
+ * incluindo acompanhamento de status, filtros avançados, visualização de detalhes,
+ * atualização de status, contato com clientes e exportação de relatórios.
+ * Suporta tanto visualização desktop quanto mobile responsiva.
+ *
+ * Funcionalidades principais:
+ * - Visualização em tempo real de todos os pedidos
+ * - Filtros avançados (busca, status, período, ordenação)
+ * - Modal de detalhes do pedido com timeline completo
+ * - Atualização de status com notificações automáticas
+ * - Contato direto com clientes via WhatsApp
+ * - Estatísticas de pedidos e receita
+ * - Exportação de relatórios em CSV
+ * - Notificações em tempo real de novos pedidos
+ *
+ * Estados gerenciados:
+ * - Lista de pedidos com dados completos (itens, cliente, timeline)
+ * - Estados de modais (detalhes, atualização de status)
+ * - Estados de loading e operações assíncronas
+ * - Filtros aplicados à listagem de pedidos
+ * - Sistema de notificações toast
+ * - Dados de estatísticas (pedidos do dia, receita, etc.)
+ *
+ * Integrações:
+ * - API de pedidos (simulada com dados mock)
+ * - Sistema de notificações (toast notifications)
+ * - WhatsApp para contato com clientes
+ * - Utilitários de formatação (formatCurrency, exportToCSV)
+ * - Sistema de debounce para filtros de busca
+ *
+ * Tratamento de erros:
+ * - Mensagens específicas baseadas no tipo de operação
+ * - Tratamento de problemas de conectividade
+ * - Validações de permissões e dados
+ * - Fallback para estados de erro
+ *
+ * @component
+ * @example
+ * // Rota configurada em Routes.jsx
+ * <Route path="/orders" element={<OrderManagement />} />
+ *
+ * @example
+ * // Acesso através do menu lateral do dashboard
+ * <SidebarMenuItem to="/orders" icon="Package" label="Pedidos" />
+ */
 const OrderManagement = () => {
+    /**
+     * Estado do sidebar (recolhido/expandido)
+     * @type {[boolean, function]} isSidebarCollapsed
+     */
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+    /**
+     * Pedido atualmente selecionado para visualização/detalhes
+     * @type {[Object|null, function]} selectedOrder
+     */
     const [selectedOrder, setSelectedOrder] = useState(null);
+
+    /**
+     * Controle de visibilidade do modal de detalhes do pedido
+     * @type {[boolean, function]} isDetailsModalOpen
+     */
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+
+    /**
+     * Controle de visibilidade do modal de atualização de status
+     * @type {[boolean, function]} isStatusModalOpen
+     */
     const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+
+    /**
+     * Estado de loading para operações assíncronas
+     * @type {[boolean, function]} loading
+     */
     const [loading, setLoading] = useState(false);
+
+    /**
+     * Estado das notificações toast
+     * @type {[Object|null, function]} notification - { message: string, type: 'success'|'error'|'info' }
+     */
     const [notification, setNotification] = useState(null);
 
-    // Mock data for orders
+    /**
+     * Lista de pedidos com dados completos para simulação
+     * Cada pedido contém informações do cliente, itens, timeline e status
+     * @type {[Array, function]} orders
+     */
     const [orders, setOrders] = useState([
         {
             id: "0001",
@@ -245,6 +326,15 @@ const OrderManagement = () => {
         }
     ]);
 
+    /**
+     * Estado dos filtros aplicados à listagem de pedidos
+     * @type {[Object, function]} filters
+     * @property {string} search - Termo de busca por ID, nome ou telefone
+     * @property {string} status - Filtro por status do pedido
+     * @property {string} dateFrom - Data inicial do filtro
+     * @property {string} dateTo - Data final do filtro
+     * @property {string} sort - Ordenação ('newest', 'oldest', 'highest_value', 'lowest_value')
+     */
     const [filters, setFilters] = useState({
         search: '',
         status: '',
@@ -253,7 +343,16 @@ const OrderManagement = () => {
         sort: 'newest'
     });
 
-    // Mock stats data
+    /**
+     * Dados de estatísticas dos pedidos para exibição nos cards
+     * @type {Object} stats
+     * @property {number} todayOrders - Número de pedidos hoje
+     * @property {number} todayOrdersChange - Variação percentual nos pedidos
+     * @property {number} pendingOrders - Pedidos pendentes
+     * @property {number} preparingOrders - Pedidos em preparação
+     * @property {number} todayRevenue - Receita total do dia
+     * @property {number} todayRevenueChange - Variação percentual na receita
+     */
     const stats = {
         todayOrders: 12,
         todayOrdersChange: 15,
@@ -263,7 +362,11 @@ const OrderManagement = () => {
         todayRevenueChange: 8
     };
 
-    // Filter and sort orders
+    /**
+     * Lista de pedidos filtrada e ordenada baseada nos filtros aplicados
+     * Utiliza useMemo para otimizar performance evitando recálculos desnecessários
+     * @type {Array} filteredOrders - Array de pedidos filtrados
+     */
     const filteredOrders = React.useMemo(() => {
         let filtered = [...orders];
 
@@ -311,7 +414,11 @@ const OrderManagement = () => {
         return filtered;
     }, [orders, filters]);
 
-    // Debounced filter change
+    /**
+     * Função debounced para mudanças no filtro de busca
+     * Aplica debounce de 300ms para evitar múltiplas execuções durante digitação
+     * @type {Function} debouncedFilterChange
+     */
     const debouncedFilterChange = useCallback(
         debounce((key, value) => {
             setFilters(prev => ({ ...prev, [key]: value }));
@@ -319,6 +426,12 @@ const OrderManagement = () => {
         []
     );
 
+    /**
+     * Manipula mudanças nos filtros aplicados à listagem
+     * Para busca utiliza debounce, outros filtros são aplicados imediatamente
+     * @param {string} key - Chave do filtro ('search', 'status', 'dateFrom', 'dateTo', 'sort')
+     * @param {string} value - Valor do filtro
+     */
     const handleFilterChange = (key, value) => {
         if (key === 'search') {
             debouncedFilterChange(key, value);
@@ -327,6 +440,9 @@ const OrderManagement = () => {
         }
     };
 
+    /**
+     * Limpa todos os filtros aplicados, retornando à visualização padrão
+     */
     const handleClearFilters = () => {
         setFilters({
             search: '',
@@ -337,6 +453,10 @@ const OrderManagement = () => {
         });
     };
 
+    /**
+     * Exporta os pedidos filtrados para um arquivo CSV
+     * Converte os dados para formato adequado e utiliza exportToCSV utility
+     */
     const handleExport = () => {
         const exportData = filteredOrders?.map(order => ({
             ID: order?.id,
@@ -351,16 +471,29 @@ const OrderManagement = () => {
         showNotification('Relatório exportado com sucesso!', 'success');
     };
 
+    /**
+     * Abre o modal de detalhes do pedido selecionado
+     * @param {Object} order - Pedido a ser visualizado em detalhes
+     */
     const handleViewDetails = (order) => {
         setSelectedOrder(order);
         setIsDetailsModalOpen(true);
     };
 
+    /**
+     * Abre o modal de atualização de status do pedido selecionado
+     * @param {Object} order - Pedido para o qual o status será atualizado
+     */
     const handleStatusUpdate = (order) => {
         setSelectedOrder(order);
         setIsStatusModalOpen(true);
     };
 
+    /**
+     * Inicia contato com o cliente via WhatsApp
+     * Abre uma nova aba com mensagem pré-preenchida
+     * @param {Object} order - Pedido do cliente a ser contactado
+     */
     const handleContactCustomer = (order) => {
         const message = `Olá ${order?.customerName}! Sobre seu pedido #${order?.id}...`;
         const whatsappUrl = `https://wa.me/55${order?.customerPhone?.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`;
@@ -368,6 +501,17 @@ const OrderManagement = () => {
         showNotification(`Contato iniciado com ${order?.customerName}`, 'success');
     };
 
+    /**
+     * Atualiza o status de um pedido específico
+     * Simula chamada de API e atualiza o estado local
+     * @async
+     * @param {string} orderId - ID do pedido a ser atualizado
+     * @param {Object} updateData - Dados da atualização
+     * @param {string} updateData.status - Novo status do pedido
+     * @param {string} updateData.timestamp - Timestamp da atualização
+     * @param {string} [updateData.note] - Nota opcional da atualização
+     * @param {boolean} [updateData.notifyCustomer] - Se deve notificar o cliente
+     */
     const handleUpdateOrderStatus = async (orderId, updateData) => {
         setLoading(true);
 
@@ -418,6 +562,11 @@ const OrderManagement = () => {
         }
     };
 
+    /**
+     * Converte status técnico para label legível em português
+     * @param {string} status - Status técnico do pedido
+     * @returns {string} Label legível do status
+     */
     const getStatusLabel = (status) => {
         const labels = {
             pending: 'Pendente',
@@ -430,12 +579,20 @@ const OrderManagement = () => {
         return labels?.[status] || status;
     };
 
+    /**
+     * Exibe uma notificação toast temporária
+     * @param {string} message - Mensagem da notificação
+     * @param {string} type - Tipo da notificação ('success', 'error', 'info')
+     */
     const showNotification = (message, type = 'info') => {
         setNotification({ message, type });
         setTimeout(() => setNotification(null), 4000);
     };
 
-    // Simulate real-time order updates
+    /**
+     * Simula notificações de novos pedidos em tempo real
+     * Executa a cada 30 segundos com 10% de chance de notificar
+     */
     useEffect(() => {
         const interval = setInterval(() => {
             // Simulate new order notification

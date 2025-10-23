@@ -5,14 +5,84 @@ import {Input} from 'src/components/ui/input';
 import Icon from '../../../components/AppIcon';
 import OrderStatusBadge from './OrderStatusBadge';
 
+/**
+ * StatusUpdateModal - Modal para atualização de status do pedido
+ *
+ * Modal compacto para atualização rápida do status de pedidos,
+ * com formulário para seleção de novo status, observações opcionais
+ * e opção de notificação automática do cliente via WhatsApp.
+ *
+ * Funcionalidades principais:
+ * - Seleção de novo status através de dropdown
+ * - Campo opcional para observações da atualização
+ * - Checkbox para notificação automática via WhatsApp
+ * - Validação para prevenir seleção do mesmo status atual
+ * - Feedback visual com mensagens explicativas dos status
+ * - Estados de loading durante processamento
+ * - Reset automático dos campos ao abrir
+ *
+ * Campos do formulário:
+ * - Novo Status: Dropdown obrigatório com todos os status possíveis
+ * - Observação: Campo opcional para notas da atualização
+ * - Notificar Cliente: Checkbox para envio automático de WhatsApp
+ *
+ * Validações:
+ * - Status deve ser diferente do atual
+ * - Status é campo obrigatório
+ * - Observação limitada a 200 caracteres
+ *
+ * @component
+ * @param {Object} props - Propriedades do componente
+ * @param {Object} props.order - Dados do pedido atual
+ * @param {boolean} props.isOpen - Controle de visibilidade do modal
+ * @param {Function} props.onClose - Callback para fechar o modal
+ * @param {Function} props.onUpdateStatus - Callback para atualização do status
+ *
+ * @example
+ * const order = {
+ *   id: "0001",
+ *   customerName: "João Silva",
+ *   status: "pending"
+ * };
+ *
+ * <StatusUpdateModal
+ *   order={order}
+ *   isOpen={true}
+ *   onClose={() => setIsOpen(false)}
+ *   onUpdateStatus={handleUpdateStatus}
+ * />
+ */
 const StatusUpdateModal = ({ order, isOpen, onClose, onUpdateStatus }) => {
+    /**
+     * Estado do status selecionado para atualização
+     * @type {[string, function]} selectedStatus
+     */
     const [selectedStatus, setSelectedStatus] = useState(order?.status || '');
+
+    /**
+     * Estado da observação opcional da atualização
+     * @type {[string, function]} note
+     */
     const [note, setNote] = useState('');
+
+    /**
+     * Estado do checkbox de notificação do cliente
+     * @type {[boolean, function]} notifyCustomer
+     */
     const [notifyCustomer, setNotifyCustomer] = useState(true);
+
+    /**
+     * Estado de loading durante processamento da atualização
+     * @type {[boolean, function]} loading
+     */
     const [loading, setLoading] = useState(false);
 
     if (!isOpen || !order) return null;
 
+    /**
+     * Opções disponíveis para atualização de status
+     * @type {Array<Object>} statusOptions
+     */
     const statusOptions = [
         { value: 'pending', label: 'Pendente' },
         { value: 'preparing', label: 'Preparando' },
@@ -22,6 +92,12 @@ const StatusUpdateModal = ({ order, isOpen, onClose, onUpdateStatus }) => {
         { value: 'cancelled', label: 'Cancelado' }
     ];
 
+    /**
+     * Manipula o envio do formulário de atualização de status
+     * Valida os dados, chama o callback e fecha o modal em caso de sucesso
+     * @async
+     * @param {Event} e - Evento do formulário
+     */
     const handleSubmit = async (e) => {
         e?.preventDefault();
         setLoading(true);
@@ -41,6 +117,12 @@ const StatusUpdateModal = ({ order, isOpen, onClose, onUpdateStatus }) => {
         }
     };
 
+    /**
+     * Retorna mensagem explicativa para o status selecionado
+     * Usada para fornecer feedback ao usuário sobre o significado do status
+     * @param {string} status - Status do pedido
+     * @returns {string} Mensagem explicativa do status
+     */
     const getStatusMessage = (status) => {
         const messages = {
             pending: 'Pedido recebido e aguardando confirmação',
