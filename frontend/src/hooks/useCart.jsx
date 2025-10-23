@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback, useRef } from 'react';
 import { cartService, orderService } from '@/api';
 import { useAuth } from './use-auth.js';
+import { useToast } from './use-toast.js';
 
 /**
  * CartContext - Contexto para gerenciar o estado do carrinho de compras
@@ -176,6 +177,7 @@ export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState);
   const [isCartOpen, setIsCartOpen] = React.useState(false);
   const { user, isLoading: authLoading } = useAuth();
+  const { toast } = useToast();
 
   // Ref para controlar timeouts de debounce por produto
   const serverUpdateTimeoutsRef = useRef(new Map()); // Timeouts por productId
@@ -690,12 +692,20 @@ export const CartProvider = ({ children }) => {
    */
   const checkout = useCallback(async () => {
     if (!user || !user.id) {
-      alert('Você precisa estar logado para finalizar o pedido!');
+      toast({
+        title: 'Login necessário',
+        description: 'Você precisa estar logado para finalizar o pedido!',
+        variant: 'destructive'
+      });
       return;
     }
 
     if (state.items.length === 0) {
-      alert('Seu carrinho está vazio!');
+      toast({
+        title: 'Carrinho vazio',
+        description: 'Adicione produtos ao carrinho antes de finalizar o pedido!',
+        variant: 'destructive'
+      });
       return;
     }
 
@@ -729,15 +739,27 @@ export const CartProvider = ({ children }) => {
         // Fechar o carrinho
         closeCart();
 
-        alert('Pedido criado com sucesso! Em breve entraremos em contato.');
+        toast({
+          title: 'Pedido realizado!',
+          description: 'Seu pedido foi criado com sucesso. Em breve entraremos em contato.',
+          variant: 'default'
+        });
       } else {
-        alert('Erro ao criar pedido. Tente novamente.');
+        toast({
+          title: 'Erro ao criar pedido',
+          description: 'Ocorreu um erro ao processar seu pedido. Tente novamente.',
+          variant: 'destructive'
+        });
       }
     } catch (error) {
       console.error('Erro ao finalizar pedido:', error);
-      alert('Erro ao finalizar pedido. Tente novamente.');
+      toast({
+        title: 'Erro inesperado',
+        description: 'Ocorreu um erro ao finalizar seu pedido. Verifique sua conexão e tente novamente.',
+        variant: 'destructive'
+      });
     }
-  }, [user, state.items, closeCart]);
+  }, [user, state.items, closeCart, toast]);
 
   // Calcula totais
   const totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0);
