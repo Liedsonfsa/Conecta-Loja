@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback, useRef } from 'react';
-import { cartService } from '@/api';
+import { cartService, orderService } from '@/api';
+import { useAuth } from './use-auth.js';
 
 /**
  * CartContext - Contexto para gerenciar o estado do carrinho de compras
@@ -174,6 +175,7 @@ const CartContext = createContext();
 export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState);
   const [isCartOpen, setIsCartOpen] = React.useState(false);
+  const { user, isLoading: authLoading } = useAuth();
 
   // Ref para controlar timeouts de debounce por produto
   const serverUpdateTimeoutsRef = useRef(new Map()); // Timeouts por productId
@@ -676,21 +678,66 @@ export const CartProvider = ({ children }) => {
   };
 
   /**
-   * Finaliza o pedido enviando mensagem para WhatsApp
+   * Finaliza o pedido criando uma ordem no backend
    *
-   * Gera automaticamente uma mensagem formatada com todos os itens do carrinho
-   * e abre o WhatsApp com o número configurado da loja.
+   * Cria um novo pedido no sistema com todos os itens do carrinho.
+   * O usuário deve estar logado para realizar esta operação.
    *
-   * @returns {void}
+   * @returns {Promise<void>}
    *
    * @example
-   * checkout(); // Abre WhatsApp com pedido formatado
+   * await checkout(); // Cria pedido no backend
    */
-  const checkout = () => {
-    const message = generateWhatsAppMessage();
-    const whatsappUrl = `https://wa.me/5589999999999?text=${message}`;
-    window.open(whatsappUrl, '_blank');
-  };
+  const checkout = useCallback(async () => {
+    if (!user || !user.id) {
+      alert('Você precisa estar logado para finalizar o pedido!');
+      return;
+    }
+
+    if (state.items.length === 0) {
+      alert('Seu carrinho está vazio!');
+      return;
+    }
+
+    try {
+      // Formatar os produtos do carrinho para o formato esperado pela API
+      const produtos = state.items.map(item => ({
+        produtoId: item.product.id,
+        quantidade: item.quantity,
+        precoUnitario: item.product.price
+      }));
+
+      // Calcular o preço total
+      const precoTotal = state.items.reduce((total, item) =>
+        total + (item.product.price * item.quantity), 0
+      );
+
+      // Criar o pedido
+      const orderData = {
+        usuarioId: user.id,
+        produtos: produtos,
+        precoTotal: precoTotal,
+        status: 'RECEBIDO'
+      };
+
+      const result = await orderService.createOrder(orderData);
+
+      if (result.success) {
+        // Limpar o carrinho após pedido criado com sucesso
+        dispatch({ type: CART_ACTIONS.CLEAR_CART });
+
+        // Fechar o carrinho
+        closeCart();
+
+        alert('Pedido criado com sucesso! Em breve entraremos em contato.');
+      } else {
+        alert('Erro ao criar pedido. Tente novamente.');
+      }
+    } catch (error) {
+      console.error('Erro ao finalizar pedido:', error);
+      alert('Erro ao finalizar pedido. Tente novamente.');
+    }
+  }, [user, state.items, closeCart]);
 
   // Calcula totais
   const totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0);

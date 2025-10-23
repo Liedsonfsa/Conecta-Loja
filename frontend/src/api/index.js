@@ -15,10 +15,12 @@ export { categoryService } from "./categories";
 // Serviços de carrinho
 export { cartService } from "./cart";
 
+// Serviços de pedidos
+export { orderService } from "./orders";
+
 // Serviços de cargos e funcionários
 export { roleService } from "./roles";
 export { employeeService } from "./employees";
 
 // Futuramente, adicionar outros serviços:
-// export { orderService } from './orders';
 // export { userService } from './users';
