@@ -2,7 +2,54 @@ import React from 'react';
 import Icon from '../../../components/AppIcon';
 import { formatCurrency } from 'src/utils';
 
+/**
+ * OrderStats - Componente de exibição de estatísticas dos pedidos
+ *
+ * Exibe cards com métricas importantes sobre os pedidos em tempo real,
+ * incluindo número de pedidos do dia, pedidos pendentes, em preparação
+ * e faturamento. Suporta indicadores visuais de urgência e variações.
+ *
+ * Funcionalidades principais:
+ * - Cards responsivos com métricas de pedidos
+ * - Indicadores de variação percentual (positivo/negativo)
+ * - Badge de urgência para pedidos pendentes elevados
+ * - Ícones coloridos para identificação rápida das métricas
+ * - Layout responsivo (1 coluna mobile, 4 colunas desktop)
+ *
+ * Métricas exibidas:
+ * - Pedidos Hoje: Total de pedidos do dia com variação vs ontem
+ * - Pendentes: Pedidos aguardando processamento (com indicador urgente)
+ * - Em Preparo: Pedidos sendo preparados na cozinha
+ * - Faturamento Hoje: Receita total do dia com variação vs ontem
+ *
+ * @component
+ * @param {Object} props - Propriedades do componente
+ * @param {Object} props.stats - Dados das estatísticas
+ * @param {number} props.stats.todayOrders - Número de pedidos hoje
+ * @param {number} props.stats.todayOrdersChange - Variação percentual nos pedidos
+ * @param {number} props.stats.pendingOrders - Número de pedidos pendentes
+ * @param {number} props.stats.preparingOrders - Número de pedidos em preparação
+ * @param {number} props.stats.todayRevenue - Receita total do dia
+ * @param {number} props.stats.todayRevenueChange - Variação percentual na receita
+ *
+ * @example
+ * const stats = {
+ *   todayOrders: 12,
+ *   todayOrdersChange: 15,
+ *   pendingOrders: 2,
+ *   preparingOrders: 1,
+ *   todayRevenue: 485.60,
+ *   todayRevenueChange: 8
+ * };
+ *
+ * <OrderStats stats={stats} />
+ */
 const OrderStats = ({ stats }) => {
+    /**
+     * Configuração dos cards de estatísticas exibidos
+     * Cada card contém título, valor, ícone, cores e indicadores especiais
+     * @type {Array<Object>} statCards
+     */
     const statCards = [
         {
             title: 'Pedidos Hoje',
