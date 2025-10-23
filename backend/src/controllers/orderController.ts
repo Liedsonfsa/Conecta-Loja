@@ -10,20 +10,11 @@ import { OrderService } from '../services/orderService';
  */
 export const getUserOrders = async (req: Request, res: Response) => {
     try {
-        const { usuarioId } = req.query;
-
-        if (!usuarioId || isNaN(Number(usuarioId))) {
-            return res.status(400).json({
-                success: false,
-                message: "ID do usuário é obrigatório e deve ser numérico"
-            });
-        }
-
-        const orders = await OrderService.getUserOrders(Number(usuarioId));
+        const orders = await OrderService.getUserOrders(req.body.usuarioId);
 
         res.status(200).json({
             success: true,
-            orders: orders
+            orders
         })
     } catch (error) {
         return res.status(500).json({
