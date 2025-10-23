@@ -29,8 +29,8 @@ export class OrderRepository {
     static async createOrder(data: {
         usuarioId: number,
         cupomId?: number,
-        produtos: { produtoId: number, quantidade: number, precoUnitario: number }[],
-        precoTotal: number,
+        produtos: { produtoId: number, quantidade: number, precoUnitario: number | string }[],
+        precoTotal: number | string,
         status?: string
     }) {
         const { usuarioId, cupomId, produtos, precoTotal, status } = data;
@@ -43,13 +43,13 @@ export class OrderRepository {
             data: {
                 usuarioId,
                 cupomId,
-                precoTotal,
+                precoTotal: Number(precoTotal),
                 status: orderStatus,
                 produtos: {
                     create: produtos.map(p => ({
                         produtoId: p.produtoId,
                         quantidade: p.quantidade,
-                        precoUnitario: p.precoUnitario
+                        precoUnitario: Number(p.precoUnitario)
                     }))
                 }
             },

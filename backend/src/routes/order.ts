@@ -5,7 +5,9 @@
  * com pedidos, como CRUD completo de pedidos.
  *
  * Rotas disponíveis:
- * - GET /api/orders - Buscar todos os pedidos de um usuário
+ * - GET /api/order - Buscar todos os pedidos de um usuário
+ * - POST /api/order/cadastrar - Criar novo pedido
+ * - DELETE /api/order/:id - Excluir um pedido
  */
 import { Router } from 'express';
 import {
@@ -17,14 +19,14 @@ import {
 const router = Router();
 
 /**
- * @route GET /api/orders
+ * @route GET /api/order
  * @desc Rota para buscar os pedidos de um usuário
  * @access Privado
  */
 router.get('/', getUserOrders);
 
 /**
- * @route POST /api/pedidos/cadastrar
+ * @route POST /api/order/cadastrar
  * @desc Cria um novo pedido no sistema
  * @access Público (ou restrito conforme autenticação)
  * @body {usuarioId: number, cupomId?: number, produtos: [{produtoId: number, quantidade: number, precoUnitario: number}], precoTotal: number, status?: string}
@@ -33,7 +35,7 @@ router.get('/', getUserOrders);
 router.post('/cadastrar', createOrder);
 
 /**
- * @route DELETE /api/orders/:id
+ * @route DELETE /api/order/:id
  * @desc Exclui um pedido existente no sistema
  * @access Public
  * 

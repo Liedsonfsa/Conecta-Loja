@@ -72,8 +72,10 @@ model pedido {
 
 // Junction table for order-product relationship (N:M)
 model pedido_produto {
-  id         Int @id @default(autoincrement())
-  quantidade Int @default(1) // Quantidade do produto no pedido
+  id             Int      @id @default(autoincrement())
+  quantidade     Int      @default(1) // Quantidade do produto no pedido
+  precoUnitario Decimal @db.Decimal(10, 2) @default(0.00)
+ // Preço unitário do produto no momento do pedido
 
   // Foreign Keys
   pedidoId  Int
