@@ -7,12 +7,70 @@ import { ArrowLeft, Package, Clock, CheckCircle, XCircle, Search, Filter, Calend
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
+/**
+ * OrderHistory - Página de histórico de pedidos do cliente
+ *
+ * Página completa para visualização do histórico de pedidos realizados,
+ * com funcionalidades de busca, filtros por status e navegação intuitiva.
+ * Permite ao cliente acompanhar seus pedidos anteriores e fazer novos pedidos.
+ *
+ * Funcionalidades principais:
+ * - Lista completa de pedidos realizados com detalhes
+ * - Busca por número do pedido ou nome do item
+ * - Filtros por status (todos, entregues, preparando)
+ * - Visualização detalhada de itens, valores e endereços
+ * - Navegação para fazer novos pedidos
+ * - Estados vazios com mensagens explicativas
+ * - Design responsivo com cards organizados
+ *
+ * Informações exibidas por pedido:
+ * - ID único do pedido
+ * - Data e hora do pedido
+ * - Status com ícones e cores específicas
+ * - Lista completa de itens com quantidades e preços
+ * - Método de pagamento
+ * - Endereço de entrega
+ * - Valor total formatado
+ *
+ * Estados possíveis dos pedidos:
+ * - delivered (Entregue): Verde com ícone de check
+ * - preparing (Preparando): Amarelo com ícone de relógio
+ * - cancelled (Cancelado): Vermelho com ícone de X
+ *
+ * @component
+ *
+ * @example
+ * // Rota configurada em Routes.jsx
+ * <Route path="/orders/history" element={<OrderHistory />} />
+ *
+ * @example
+ * // Acesso através de link ou navegação programática
+ * <Link to="/orders/history">Ver Histórico</Link>
+ */
 const OrderHistory = () => {
+  /**
+   * Hook de navegação do React Router
+   * @type {Function} navigate
+   */
   const navigate = useNavigate();
+
+  /**
+   * Estado do termo de busca atual
+   * @type {[string, function]} searchTerm
+   */
   const [searchTerm, setSearchTerm] = useState("");
+
+  /**
+   * Estado do filtro selecionado (all, delivered, preparing)
+   * @type {[string, function]} selectedFilter
+   */
   const [selectedFilter, setSelectedFilter] = useState("all");
 
-  // Mock data - histórico de pedidos expandido
+  /**
+   * Dados mock dos pedidos históricos para demonstração
+   * Cada pedido contém informações completas para exibição
+   * @type {Array<Object>} orders
+   */
   const orders = [
     {
       id: "PED-2024-001",
@@ -80,6 +138,12 @@ const OrderHistory = () => {
     }
   ];
 
+  /**
+   * Retorna classes CSS de cor para o status do pedido
+   * Cada status tem cores semânticas específicas
+   * @param {string} status - Status do pedido
+   * @returns {string} Classes CSS para o badge do status
+   */
   const getStatusColor = (status) => {
     switch (status) {
       case "delivered": return "bg-green-100 text-green-800 border-green-200";
@@ -89,6 +153,12 @@ const OrderHistory = () => {
     }
   };
 
+  /**
+   * Retorna ícone React correspondente ao status do pedido
+   * Cada status tem um ícone semântico específico
+   * @param {string} status - Status do pedido
+   * @returns {React.Component} Componente de ícone do Lucide React
+   */
   const getStatusIcon = (status) => {
     switch (status) {
       case "delivered": return <CheckCircle className="h-4 w-4" />;
@@ -98,6 +168,11 @@ const OrderHistory = () => {
     }
   };
 
+  /**
+   * Retorna texto em português para o status do pedido
+   * @param {string} status - Status técnico do pedido
+   * @returns {string} Texto legível do status em português
+   */
   const getStatusText = (status) => {
     switch (status) {
       case "delivered": return "Entregue";
@@ -107,6 +182,11 @@ const OrderHistory = () => {
     }
   };
 
+  /**
+   * Formata valor numérico para moeda brasileira (R$)
+   * @param {number} price - Valor a ser formatado
+   * @returns {string} Valor formatado como moeda brasileira
+   */
   const formatPrice = (price) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -114,6 +194,11 @@ const OrderHistory = () => {
     }).format(price);
   };
 
+  /**
+   * Lista de pedidos filtrada baseada na busca e filtros selecionados
+   * Aplica filtros de busca por ID/item e filtro por status
+   * @type {Array} filteredOrders - Array de pedidos filtrados
+   */
   const filteredOrders = orders.filter(order => {
     const matchesSearch = order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.items.some(item => item.name.toLowerCase().includes(searchTerm.toLowerCase()));

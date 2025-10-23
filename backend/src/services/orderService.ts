@@ -34,8 +34,8 @@ export class OrderService {
     static async createOrder(data: {
         usuarioId: number,
         cupomId?: number,
-        produtos: { produtoId: number, quantidade: number, precoUnitario: number }[],
-        precoTotal: number,
+        produtos: { produtoId: number, quantidade: number, precoUnitario: number | string }[],
+        precoTotal: number | string,
         status?: string
     }) {
         try {

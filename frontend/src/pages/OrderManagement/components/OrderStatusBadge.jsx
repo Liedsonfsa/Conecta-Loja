@@ -1,6 +1,49 @@
 import React from 'react';
 
+/**
+ * OrderStatusBadge - Componente de badge para exibir status do pedido
+ *
+ * Badge colorido e responsivo que representa visualmente o status atual
+ * de um pedido através de cores e labels específicos para cada estado.
+ *
+ * Funcionalidades principais:
+ * - Mapeamento automático de status para cores e labels
+ * - Design consistente com cores semânticas
+ * - Suporte a classes CSS customizadas
+ * - Texto em português para melhor usabilidade
+ * - Fallback para status desconhecidos
+ *
+ * Mapeamento de status e cores:
+ * - pending (Pendente): Amarelo - Aguardando confirmação
+ * - preparing (Preparando): Azul - Em produção
+ * - ready (Pronto): Roxo - Pronto para entrega/retirada
+ * - en_route (A Caminho): Laranja - Em trânsito
+ * - delivered (Entregue): Verde - Concluído com sucesso
+ * - cancelled (Cancelado): Vermelho - Cancelado
+ * - default (Desconhecido): Cinza - Status não identificado
+ *
+ * @component
+ * @param {Object} props - Propriedades do componente
+ * @param {string} props.status - Status do pedido para exibir
+ * @param {string} [props.className=''] - Classes CSS adicionais
+ *
+ * @example
+ * // Badge para pedido pendente
+ * <OrderStatusBadge status="pending" />
+ *
+ * // Badge com classe customizada
+ * <OrderStatusBadge status="delivered" className="text-sm" />
+ *
+ * // Badge para status desconhecido
+ * <OrderStatusBadge status="unknown" />
+ */
 const OrderStatusBadge = ({ status, className = '' }) => {
+    /**
+     * Retorna configuração visual (label e classes CSS) para o status fornecido
+     * Cada status tem cores semânticas específicas para identificação rápida
+     * @param {string} status - Status do pedido
+     * @returns {Object} Configuração com label e className para o badge
+     */
     const getStatusConfig = (status) => {
         switch (status) {
             case 'pending':

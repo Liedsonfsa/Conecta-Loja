@@ -2,10 +2,10 @@ import { Request, Response } from 'express';
 import { OrderService } from '../services/orderService';
 
 /**
- * @route GET /api/orders
+ * @route GET /api/order
  * @desc Retorna todos os pedidos de um usuário
  * @access Público (ou ajuste conforme regras de autenticação)
- * @body {usuarioId: number} - ID do usuário que terá os pedidos buscados
+ * @query {usuarioId: number} - ID do usuário que terá os pedidos buscados
  * @returns {success: boolean, orders: object[]} - Lista de pedidos do usuário
  */
 export const getUserOrders = async (req: Request, res: Response) => {
@@ -18,7 +18,8 @@ export const getUserOrders = async (req: Request, res: Response) => {
         })
     } catch (error) {
         return res.status(500).json({
-            success: false
+            success: false,
+            message: "Erro ao buscar pedidos"
         });
     }
 };
@@ -34,7 +35,7 @@ export const getUserOrders = async (req: Request, res: Response) => {
  * @returns Promise<Response> - Retorna o pedido criado ou mensagem de erro
  *
  * @example
- * POST /api/pedidos/cadastrar
+ * POST /api/order/cadastrar
  * {
  *   "usuarioId": 1,
  *   "cupomId": 2,
@@ -64,7 +65,7 @@ export const createOrder = async (req: Request, res: Response) => {
 };
 
 /**
- * @route DELETE /api/orders/:id
+ * @route DELETE /api/order/:id
  * @desc Exclui um pedido existente
  * @access Public
  * @param {id: number} - ID do pedido a ser deletado (parâmetro de rota)
