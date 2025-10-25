@@ -11,6 +11,7 @@ import {
   FiShoppingCart,
 } from "react-icons/fi";
 import { authService } from "../../api/auth";
+import { userService } from "../../api/userService";
 import { useCart } from "../../hooks/useCart.jsx";
 
 /**
@@ -58,8 +59,21 @@ const Header = () => {
           console.log("✅ Resposta da verificação:", response);
 
           if (response.user) {
-            console.log("👤 Usuário válido, definindo estado:", response.user);
-            setUser(response.user);
+            console.log("👤 Usuário válido, buscando dados completos do perfil...");
+
+            // Buscar dados completos do perfil incluindo avatar
+            try {
+              const profileData = await userService.getProfile();
+              console.log("📄 Dados do perfil carregados:", profileData);
+              setUser({
+                ...response.user,
+                avatar: profileData.avatar
+              });
+            } catch (profileError) {
+              console.log("⚠️ Erro ao buscar perfil, usando dados básicos:", profileError.message);
+              // Mesmo com erro no perfil, mantém o usuário logado com dados básicos
+              setUser(response.user);
+            }
           } else {
             console.log("⚠️ Token válido mas sem dados do usuário");
           }
@@ -107,8 +121,19 @@ const Header = () => {
    * Manipula o login do usuário
    * @param {Object} userData - Dados do usuário logado
    */
-  const handleLogin = (userData) => {
-    setUser(userData);
+  const handleLogin = async (userData) => {
+    try {
+      // Buscar dados completos do perfil incluindo avatar
+      const profileData = await userService.getProfile();
+      setUser({
+        ...userData,
+        avatar: profileData.avatar
+      });
+    } catch (error) {
+      console.log("⚠️ Erro ao buscar perfil no login, usando dados básicos:", error.message);
+      // Mesmo com erro no perfil, mantém o usuário logado com dados básicos
+      setUser(userData);
+    }
     // Notifica o hook do carrinho sobre o login
     handleUserLogin();
   };
