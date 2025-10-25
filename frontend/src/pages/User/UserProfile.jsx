@@ -53,8 +53,10 @@ const UserProfile = () => {
     // Estados para os modais de edição
     const [isPersonalInfoModalOpen, setIsPersonalInfoModalOpen] = useState(false);
     const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+    const [isDeleteAvatarModalOpen, setIsDeleteAvatarModalOpen] = useState(false);
     const [isSavingPersonal, setIsSavingPersonal] = useState(false);
     const [isSavingContact, setIsSavingContact] = useState(false);
+    const [isDeletingAvatar, setIsDeletingAvatar] = useState(false);
 
     // Estados dos formulários
     const [personalForm, setPersonalForm] = useState({ name: "" });
@@ -240,16 +242,18 @@ const UserProfile = () => {
         reader.readAsDataURL(file);
     };
 
-    const handleAvatarDelete = async () => {
-        if (!confirm("Tem certeza que deseja remover sua foto de perfil?")) {
-            return;
-        }
+    const handleAvatarDelete = () => {
+        setIsDeleteAvatarModalOpen(true);
+    };
 
+    const confirmDeleteAvatar = async () => {
+        setIsDeletingAvatar(true);
         try {
             await userService.updatePersonalInfo({
                 avatar: null
             });
             setProfile(prev => ({ ...prev, avatar: null }));
+            setIsDeleteAvatarModalOpen(false);
             toast({
                 title: "Avatar removido",
                 description: "Sua foto de perfil foi removida com sucesso.",
@@ -261,6 +265,8 @@ const UserProfile = () => {
                 description: error.message || "Não foi possível remover a foto.",
                 variant: "destructive",
             });
+        } finally {
+            setIsDeletingAvatar(false);
         }
     };
 
@@ -305,18 +311,18 @@ const UserProfile = () => {
                     {/* Profile Summary */}
                     <div className="lg:col-span-1">
                         <Card className="shadow-sm">
-                            <CardContent className="pt-6">
-                                <div className="flex flex-col items-center gap-4">
-                                    <div className="relative">
+                    <CardContent className="pt-6">
+                        <div className="flex flex-col items-center gap-4">
+                            <div className="relative">
                                         <Avatar className="h-32 w-32">
                                             <AvatarImage
                                                 src={profile.avatar || ""}
                                                 alt={profile.name}
                                             />
                                             <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
-                                                {getInitials(profile.name)}
-                                            </AvatarFallback>
-                                        </Avatar>
+                                        {getInitials(profile.name)}
+                                    </AvatarFallback>
+                                </Avatar>
 
                                         {/* Botões de ação para avatar */}
                                         <div className="absolute -bottom-1 -right-1 flex gap-1">
@@ -357,14 +363,14 @@ const UserProfile = () => {
                                                 </ButtonDash>
                                             )}
                                         </div>
-                                    </div>
-                                    <div className="text-center">
+                            </div>
+                            <div className="text-center">
                                         <h2 className="text-xl font-semibold text-gray-900">{profile.name}</h2>
-                                        <p className="text-sm text-muted-foreground">{profile.email}</p>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
+                                <p className="text-sm text-muted-foreground">{profile.email}</p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
                     </div>
 
                     {/* Profile Details */}
@@ -372,10 +378,10 @@ const UserProfile = () => {
                         {/* Informações Pessoais */}
                         <Card className="shadow-sm">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                                <CardTitle className="flex items-center gap-2">
+                        <CardTitle className="flex items-center gap-2">
                                     <User className="h-5 w-5 text-primary" />
                                     Informações Pessoais
-                                </CardTitle>
+                        </CardTitle>
                                 <Dialog open={isPersonalInfoModalOpen} onOpenChange={setIsPersonalInfoModalOpen}>
                                     <DialogTrigger asChild>
                                         <ButtonDash
@@ -388,14 +394,14 @@ const UserProfile = () => {
                                         </ButtonDash>
                                     </DialogTrigger>
                                 </Dialog>
-                            </CardHeader>
+                    </CardHeader>
                             <CardContent>
                                 <div className="space-y-3">
-                                    <div>
+                        <div>
                                         <p className="text-sm font-medium text-gray-500">Nome completo</p>
                                         <p className="text-gray-900">{profile.name}</p>
-                                    </div>
-                                </div>
+                            </div>
+                        </div>
                             </CardContent>
                         </Card>
 
@@ -421,25 +427,25 @@ const UserProfile = () => {
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-3">
-                                    <div>
+                            <div>
                                         <p className="text-sm font-medium text-gray-500">Email</p>
                                         <p className="text-gray-900">{profile.email}</p>
-                                    </div>
-                                    <div>
+                            </div>
+                            <div>
                                         <p className="text-sm font-medium text-gray-500">Telefone</p>
                                         <p className="text-gray-900">{profile.contact || 'Não informado'}</p>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
 
                         {/* Endereços */}
                         <Card className="shadow-sm">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                                <CardTitle className="flex items-center gap-2">
+                        <CardTitle className="flex items-center gap-2">
                                     <MapPin className="h-5 w-5 text-primary" />
                                     Endereços de Entrega
-                                </CardTitle>
+                        </CardTitle>
                                 <div className="flex gap-2">
                                     <ButtonDash
                                         variant="outline"
@@ -458,8 +464,8 @@ const UserProfile = () => {
                                         Adicionar
                                     </ButtonDash>
                                 </div>
-                            </CardHeader>
-                            <CardContent>
+                    </CardHeader>
+                    <CardContent>
                                 {profile.address ? (
                                     <div className="space-y-2">
                                         <p className="text-gray-900 font-medium">
@@ -582,6 +588,50 @@ const UserProfile = () => {
                                 className="flex-1"
                             >
                                 {isSavingContact ? "Salvando..." : "Salvar"}
+                            </ButtonDash>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Modal de confirmação de exclusão de avatar */}
+            <Dialog open={isDeleteAvatarModalOpen} onOpenChange={setIsDeleteAvatarModalOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Remover Foto do Perfil</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-center">
+                            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center">
+                                <svg className="w-10 h-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div className="text-center">
+                            <p className="text-sm text-gray-600">
+                                Tem certeza que deseja remover sua foto de perfil?
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">
+                                Esta ação não pode ser desfeita.
+                            </p>
+                        </div>
+                        <div className="flex gap-3 pt-4">
+                            <Button
+                                variant="outline"
+                                onClick={() => setIsDeleteAvatarModalOpen(false)}
+                                className="flex-1"
+                            >
+                                Cancelar
+                            </Button>
+                            <ButtonDash
+                                variant="destructive"
+                                onClick={confirmDeleteAvatar}
+                                loading={isDeletingAvatar}
+                                disabled={isDeletingAvatar}
+                                className="flex-1"
+                            >
+                                {isDeletingAvatar ? "Removendo..." : "Remover"}
                             </ButtonDash>
                         </div>
                     </div>
