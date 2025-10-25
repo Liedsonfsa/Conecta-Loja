@@ -47,6 +47,9 @@ model endereco {
   usuarioId Int
   usuario   usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
 
+  // Relations
+  pedidos pedido[] // UM endereço pode ser usado em VÁRIOS pedidos
+
   @@map("enderecos")
 }
 
@@ -59,11 +62,13 @@ model pedido {
   updatedAt  DateTime    @updatedAt @map("updated_at")
 
   // Foreign Keys
-  usuarioId Int // ID do usuário que fez o pedido
-  cupomId   Int? // ID do cupom usado (opcional)
+  usuarioId  Int // ID do usuário que fez o pedido
+  enderecoId Int? // ID do endereço de entrega (opcional por enquanto)
+  cupomId    Int? // ID do cupom usado (opcional)
 
   // Relations
   usuario  usuario          @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  endereco endereco?        @relation(fields: [enderecoId], references: [id])
   cupom    cupom?           @relation(fields: [cupomId], references: [id])
   produtos pedido_produto[] // UM pedido pode ter VÁRIOS produtos
 

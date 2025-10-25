@@ -192,21 +192,26 @@ const ProductManagement = () => {
       const response = await productService.getAllProducts();
       if (response.success && response.products) {
         // Converter produtos da API para formato do frontend
-        const formattedProducts = response.products.map(product => ({
-          id: product.id.toString(),
-          name: product.name,
-          description: product.description,
-          price: parseFloat(product.price),
-          category: categoryMap[product.categoryId] || 'Categoria não encontrada',
-          stock: product.estoque || 0,
-          isAvailable: product.available,
-          image: product.image || '',
-          images: product.image ? [product.image] : [],
-          discount: product.discount || 0,
-          discountType: product.discountType === 'FIXED_VALUE' ? 'fixed' : 'percentage',
-          createdAt: product.createdAt,
-          updatedAt: product.updatedAt
-        }));
+        const formattedProducts = response.products.map(product => {
+          // Tentar encontrar a categoria no mapeamento
+          const categoryName = categoryMap[product.categoryId];
+          return {
+            id: product.id.toString(),
+            name: product.name,
+            description: product.description,
+            price: parseFloat(product.price),
+            category: categoryName || `Categoria ID: ${product.categoryId}`,
+            categoryId: product.categoryId, // Manter o ID para referência
+            stock: product.estoque || 0,
+            isAvailable: product.available,
+            image: product.image || '',
+            images: product.image ? [product.image] : [],
+            discount: product.discount || 0,
+            discountType: product.discountType === 'FIXED_VALUE' ? 'fixed' : 'percentage',
+            createdAt: product.createdAt,
+            updatedAt: product.updatedAt
+          };
+        });
         setProducts(formattedProducts);
       }
     } catch (err) {
@@ -238,14 +243,8 @@ const ProductManagement = () => {
   // Carregar dados na inicialização
   useEffect(() => {
     loadCategories();
+    loadProducts(); // Carregar produtos independentemente das categorias
   }, []);
-
-  // Carregar produtos quando as categorias estiverem disponíveis
-  useEffect(() => {
-    if (Object.keys(categoryMap).length > 0) {
-      loadProducts();
-    }
-  }, [categoryMap]);
 
   const handleSidebarToggle = () => {
     setIsSidebarCollapsed(!isSidebarCollapsed);

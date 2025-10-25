@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { cartService, orderService } from '@/api';
 import { useAuth } from './use-auth.js';
 import { useToast } from './use-toast.js';
@@ -178,6 +179,7 @@ export const CartProvider = ({ children }) => {
   const [isCartOpen, setIsCartOpen] = React.useState(false);
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Ref para controlar timeouts de debounce por produto
   const serverUpdateTimeoutsRef = useRef(new Map()); // Timeouts por productId
@@ -680,17 +682,18 @@ export const CartProvider = ({ children }) => {
   };
 
   /**
-   * Finaliza o pedido criando uma ordem no backend
+   * Inicia o processo de checkout redirecionando para a página de finalização
    *
-   * Cria um novo pedido no sistema com todos os itens do carrinho.
-   * O usuário deve estar logado para realizar esta operação.
+   * Verifica se o usuário está logado e se há itens no carrinho,
+   * então redireciona para a página de checkout onde será possível
+   * selecionar endereço e confirmar o pedido.
    *
-   * @returns {Promise<void>}
+   * @returns {void}
    *
    * @example
-   * await checkout(); // Cria pedido no backend
+   * checkout(); // Redireciona para página de checkout
    */
-  const checkout = useCallback(async () => {
+  const checkout = useCallback(() => {
     if (!user || !user.id) {
       toast({
         title: 'Login necessário',
@@ -709,57 +712,12 @@ export const CartProvider = ({ children }) => {
       return;
     }
 
-    try {
-      // Formatar os produtos do carrinho para o formato esperado pela API
-      const produtos = state.items.map(item => ({
-        produtoId: item.product.id,
-        quantidade: item.quantity,
-        precoUnitario: item.product.price
-      }));
+    // Fechar o carrinho antes de redirecionar
+    closeCart();
 
-      // Calcular o preço total
-      const precoTotal = state.items.reduce((total, item) =>
-        total + (item.product.price * item.quantity), 0
-      );
-
-      // Criar o pedido
-      const orderData = {
-        usuarioId: user.id,
-        produtos: produtos,
-        precoTotal: precoTotal,
-        status: 'RECEBIDO'
-      };
-
-      const result = await orderService.createOrder(orderData);
-
-      if (result.success) {
-        // Limpar o carrinho após pedido criado com sucesso
-        dispatch({ type: CART_ACTIONS.CLEAR_CART });
-
-        // Fechar o carrinho
-        closeCart();
-
-        toast({
-          title: 'Pedido realizado!',
-          description: 'Seu pedido foi criado com sucesso. Em breve entraremos em contato.',
-          variant: 'default'
-        });
-      } else {
-        toast({
-          title: 'Erro ao criar pedido',
-          description: 'Ocorreu um erro ao processar seu pedido. Tente novamente.',
-          variant: 'destructive'
-        });
-      }
-    } catch (error) {
-      console.error('Erro ao finalizar pedido:', error);
-      toast({
-        title: 'Erro inesperado',
-        description: 'Ocorreu um erro ao finalizar seu pedido. Verifique sua conexão e tente novamente.',
-        variant: 'destructive'
-      });
-    }
-  }, [user, state.items, closeCart, toast]);
+    // Redirecionar para página de checkout
+    navigate('/checkout');
+  }, [user, state.items, closeCart, toast, navigate]);
 
   // Calcula totais
   const totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0);

@@ -28,12 +28,13 @@ export class OrderRepository {
      */
     static async createOrder(data: {
         usuarioId: number,
+        enderecoId?: number,
         cupomId?: number,
         produtos: { produtoId: number, quantidade: number, precoUnitario: number | string }[],
         precoTotal: number | string,
         status?: string
     }) {
-        const { usuarioId, cupomId, produtos, precoTotal, status } = data;
+        const { usuarioId, enderecoId, cupomId, produtos, precoTotal, status } = data;
 
         const orderStatus: OrderStatus = (status && status in OrderStatus)
             ? (status as OrderStatus)
@@ -42,6 +43,7 @@ export class OrderRepository {
         return await prisma.pedido.create({
             data: {
                 usuarioId,
+                enderecoId,
                 cupomId,
                 precoTotal: Number(precoTotal),
                 status: orderStatus,
@@ -54,7 +56,8 @@ export class OrderRepository {
                 }
             },
             include: {
-                produtos: true
+                produtos: true,
+                endereco: true
             }
         });
     }
