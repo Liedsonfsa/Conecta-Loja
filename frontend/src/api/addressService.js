@@ -46,7 +46,10 @@ export const addressService = {
    * @returns {Promise<object>} Endereço atualizado.
    */
   async updateAddress(addressId, addressData) {
-    const response = await api.put(`/profile/addresses/${addressId}`, addressData);
+    const response = await api.put(
+      `/profile/addresses/${addressId}`,
+      addressData
+    );
     return response.data;
   },
 

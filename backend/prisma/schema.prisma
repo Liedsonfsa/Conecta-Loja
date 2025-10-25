@@ -20,6 +20,7 @@ model usuario {
   email     String   @unique @db.VarChar(255) // Email único e limite de 255 caracteres
   password  String   @db.VarChar(255) // Hash da senha (bcrypt)
   contact   String   @db.VarChar(20) // Contato/telefone com limite de 20 caracteres
+  avatar    String?  @db.Text // Foto do usuário em base64 (opcional)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 

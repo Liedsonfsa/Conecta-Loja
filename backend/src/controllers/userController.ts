@@ -71,8 +71,8 @@ export const updatePersonalInfo = async (req: Request, res: Response) => {
         const userId = (req as any).user.id;
         const personalData = req.body;
 
-        // Validar dados de entrada
-        const allowedFields = ['name', 'email', 'contact'];
+        // Validar dados de entrada - incluir avatar também
+        const allowedFields = ['name', 'email', 'contact', 'avatar'];
         const filteredData: any = {};
 
         for (const field of allowedFields) {

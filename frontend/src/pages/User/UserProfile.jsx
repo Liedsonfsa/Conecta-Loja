@@ -60,6 +60,9 @@ const UserProfile = () => {
     const [personalForm, setPersonalForm] = useState({ name: "" });
     const [contactForm, setContactForm] = useState({ email: "", contact: "" });
 
+    // Estado para upload de avatar
+    const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
@@ -173,6 +176,94 @@ const UserProfile = () => {
         }
     };
 
+    const handleAvatarUpload = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // Validar tipo do arquivo
+        if (!file.type.startsWith('image/')) {
+            toast({
+                title: "Tipo de arquivo inválido",
+                description: "Por favor, selecione uma imagem válida.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        // Validar tamanho (2MB)
+        if (file.size > 2 * 1024 * 1024) {
+            toast({
+                title: "Arquivo muito grande",
+                description: "A imagem deve ter no máximo 2MB.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        setIsUploadingAvatar(true);
+
+        // Converter arquivo para base64
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const base64String = e.target.result;
+                const result = await userService.updatePersonalInfo({
+                    avatar: base64String
+                });
+
+                setProfile(prev => ({ ...prev, avatar: base64String }));
+                toast({
+                    title: "Avatar atualizado",
+                    description: "Sua foto de perfil foi atualizada com sucesso.",
+                });
+            } catch (error) {
+                console.error("Erro ao salvar avatar:", error);
+                toast({
+                    title: "Erro ao salvar",
+                    description: error.message || "Não foi possível salvar a imagem.",
+                    variant: "destructive",
+                });
+            } finally {
+                setIsUploadingAvatar(false);
+            }
+        };
+
+        reader.onerror = () => {
+            toast({
+                title: "Erro ao processar imagem",
+                description: "Não foi possível processar a imagem selecionada.",
+                variant: "destructive",
+            });
+            setIsUploadingAvatar(false);
+        };
+
+        reader.readAsDataURL(file);
+    };
+
+    const handleAvatarDelete = async () => {
+        if (!confirm("Tem certeza que deseja remover sua foto de perfil?")) {
+            return;
+        }
+
+        try {
+            await userService.updatePersonalInfo({
+                avatar: null
+            });
+            setProfile(prev => ({ ...prev, avatar: null }));
+            toast({
+                title: "Avatar removido",
+                description: "Sua foto de perfil foi removida com sucesso.",
+            });
+        } catch (error) {
+            console.error("Erro ao remover avatar:", error);
+            toast({
+                title: "Erro ao remover",
+                description: error.message || "Não foi possível remover a foto.",
+                variant: "destructive",
+            });
+        }
+    };
+
     const handleManageAddresses = () => {
         navigate("/profile/addresses");
     };
@@ -218,14 +309,54 @@ const UserProfile = () => {
                                 <div className="flex flex-col items-center gap-4">
                                     <div className="relative">
                                         <Avatar className="h-32 w-32">
-                                            <AvatarImage src="" alt={profile.name} />
+                                            <AvatarImage
+                                                src={profile.avatar || ""}
+                                                alt={profile.name}
+                                            />
                                             <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
                                                 {getInitials(profile.name)}
                                             </AvatarFallback>
                                         </Avatar>
-                                        <ButtonDash size="icon" className="absolute -bottom-1 -right-1 h-10 w-10 rounded-full shadow-lg">
-                                            <Camera className="h-4 w-4" />
-                                        </ButtonDash>
+
+                                        {/* Botões de ação para avatar */}
+                                        <div className="absolute -bottom-1 -right-1 flex gap-1">
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleAvatarUpload}
+                                                className="hidden"
+                                                id="avatar-upload"
+                                                disabled={isUploadingAvatar}
+                                            />
+                                            <label
+                                                htmlFor="avatar-upload"
+                                                className={`inline-flex items-center justify-center rounded-full h-10 w-10 shadow-lg cursor-pointer transition-colors ${
+                                                    isUploadingAvatar
+                                                        ? 'bg-gray-400 cursor-not-allowed'
+                                                        : 'bg-primary hover:bg-primary/90'
+                                                }`}
+                                            >
+                                                {isUploadingAvatar ? (
+                                                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                                                ) : (
+                                                    <Camera className="h-4 w-4 text-white" />
+                                                )}
+                                            </label>
+
+                                            {profile.avatar && (
+                                                <ButtonDash
+                                                    size="icon"
+                                                    variant="destructive"
+                                                    className="h-10 w-10 rounded-full shadow-lg"
+                                                    onClick={handleAvatarDelete}
+                                                    disabled={isUploadingAvatar}
+                                                >
+                                                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </ButtonDash>
+                                            )}
+                                        </div>
                                     </div>
                                     <div className="text-center">
                                         <h2 className="text-xl font-semibold text-gray-900">{profile.name}</h2>

@@ -55,7 +55,8 @@ export class UserRepository {
                 id: true,
                 name: true,
                 email: true,
-                contact: true
+                contact: true,
+                avatar: true
             }
         });
     }
@@ -73,7 +74,7 @@ export class UserRepository {
     /**
      * Atualiza os dados de um usuário.
      */
-    static async updateUser(id: number, data: { name?: string; email?: string; contact?: string }) {
+    static async updateUser(id: number, data: { name?: string; email?: string; contact?: string; avatar?: string }) {
         return await prisma.usuario.update({
             where: { id },
             data,

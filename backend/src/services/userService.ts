@@ -104,15 +104,15 @@ export class UserService {
             throw new Error("Usuário não encontrado");
         }
         const address = await UserRepository.findAddressByUserId(userId);
-        return { ...user, address };
+        return { ...user, address, avatar: user.avatar };
     }
 
     /**
      * Atualiza as informações pessoais do perfil do usuário.
      * @param userId - ID do usuário autenticado.
-     * @param personalData - Dados pessoais a serem atualizados (name, email, contact).
+     * @param personalData - Dados pessoais a serem atualizados (name, email, contact, avatar).
      */
-    static async updatePersonalInfo(userId: number, personalData: { name?: string; email?: string; contact?: string }) {
+    static async updatePersonalInfo(userId: number, personalData: { name?: string; email?: string; contact?: string; avatar?: string | null | undefined }) {
         try {
             // Validações básicas
             if (personalData.name !== undefined && (!personalData.name || personalData.name.trim().length === 0)) {
@@ -141,7 +141,13 @@ export class UserService {
                 }
             }
 
-            return await UserRepository.updateUser(userId, personalData);
+            // Preparar dados para atualização, convertendo null para undefined
+            const updateData: any = { ...personalData };
+            if (updateData.avatar === null) {
+                updateData.avatar = undefined;
+            }
+
+            return await UserRepository.updateUser(userId, updateData);
         } catch (error) {
             throw error;
         }
