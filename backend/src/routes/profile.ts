@@ -2,7 +2,7 @@
 
 import { Router } from 'express';
 // Importa as funções do controller
-import { getProfile, updateProfile } from '../controllers/userController';
+import { getProfile, updateProfile, updatePersonalInfo } from '../controllers/userController';
 import { authenticateToken } from '../middlewares/authMiddleware';
 
 // Importações para endereços (vamos criar as funções do controller)
@@ -21,6 +21,9 @@ router.get('/', authenticateToken, getProfile);
 
 // Define a rota PUT /api/profile
 router.put('/', authenticateToken, updateProfile);
+
+// Define a rota PUT /api/profile/personal-info
+router.put('/personal-info', authenticateToken, updatePersonalInfo);
 
 // Rotas de endereços
 // GET /api/profile/addresses - Buscar todos os endereços do usuário

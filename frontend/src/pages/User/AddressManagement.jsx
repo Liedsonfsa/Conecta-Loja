@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import ButtonDash from "@/components/ui/ButtonDash";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { addressService } from "@/api/addressService";
 import {
   ArrowLeft,
   MapPin,
@@ -28,41 +29,15 @@ const AddressManagement = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // TODO: Carregar endereços da API
     const loadAddresses = async () => {
       try {
-        // Simulação de dados
-        const mockAddresses = [
-          {
-            id: 1,
-            cep: "12345-678",
-            logradouro: "Rua das Flores",
-            numero: "123",
-            complemento: "Apto 45",
-            bairro: "Centro",
-            cidade: "São Paulo",
-            estado: "SP",
-            referencia: "Próximo ao mercado",
-            isPrincipal: true,
-          },
-          {
-            id: 2,
-            cep: "98765-432",
-            logradouro: "Avenida Brasil",
-            numero: "456",
-            complemento: "",
-            bairro: "Jardim América",
-            cidade: "Rio de Janeiro",
-            estado: "RJ",
-            referencia: "Prédio comercial",
-            isPrincipal: false,
-          },
-        ];
-        setAddresses(mockAddresses);
+        const response = await addressService.getUserAddresses();
+        setAddresses(response.addresses || []);
       } catch (error) {
+        console.error("Erro ao carregar endereços:", error);
         toast({
           title: "Erro ao carregar endereços",
-          description: "Não foi possível carregar seus endereços.",
+          description: error.message || "Não foi possível carregar seus endereços.",
           variant: "destructive",
         });
       } finally {
@@ -87,28 +62,26 @@ const AddressManagement = () => {
     }
 
     try {
-      // TODO: Implementar chamada para API
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulação
-
+      await addressService.deleteAddress(addressId);
       setAddresses(prev => prev.filter(addr => addr.id !== addressId));
       toast({
         title: "Endereço excluído",
         description: "O endereço foi removido com sucesso.",
       });
     } catch (error) {
+      console.error("Erro ao excluir endereço:", error);
       toast({
         title: "Erro ao excluir",
-        description: "Não foi possível excluir o endereço.",
+        description: error.message || "Não foi possível excluir o endereço.",
         variant: "destructive",
       });
     }
   };
 
   const handleSetPrincipal = async (addressId) => {
+    // Por enquanto, vamos apenas marcar como principal no frontend
+    // TODO: Implementar no backend a lógica de endereço principal
     try {
-      // TODO: Implementar chamada para API
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulação
-
       setAddresses(prev => prev.map(addr => ({
         ...addr,
         isPrincipal: addr.id === addressId

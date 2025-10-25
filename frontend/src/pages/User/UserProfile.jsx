@@ -1,5 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import ButtonDash from "@/components/ui/ButtonDash";
 import {
   ArrowLeft,
@@ -12,7 +14,9 @@ import {
   Plus,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect  } from "react";
+import { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/Button";
 import { useToast } from "@/hooks/use-toast";
 import { userService } from "@/api/userService";
 
@@ -45,7 +49,16 @@ const UserProfile = () => {
 
     const [profile, setProfile] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [isEditMode, setIsEditMode] = useState(false);
+
+    // Estados para os modais de edição
+    const [isPersonalInfoModalOpen, setIsPersonalInfoModalOpen] = useState(false);
+    const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+    const [isSavingPersonal, setIsSavingPersonal] = useState(false);
+    const [isSavingContact, setIsSavingContact] = useState(false);
+
+    // Estados dos formulários
+    const [personalForm, setPersonalForm] = useState({ name: "" });
+    const [contactForm, setContactForm] = useState({ email: "", contact: "" });
 
     useEffect(() => {
         const fetchUserProfile = async () => {
@@ -70,19 +83,94 @@ const UserProfile = () => {
     };
 
     const handleEditPersonalInfo = () => {
-        // TODO: Implementar modal ou navegação para edição de dados pessoais
-        toast({
-            title: "Editar dados pessoais",
-            description: "Funcionalidade em desenvolvimento.",
-        });
+        // Preencher o formulário com os dados atuais
+        setPersonalForm({ name: profile.name });
+        setIsPersonalInfoModalOpen(true);
     };
 
     const handleEditContact = () => {
-        // TODO: Implementar modal ou navegação para edição de contato
-        toast({
-            title: "Editar contato",
-            description: "Funcionalidade em desenvolvimento.",
+        // Preencher o formulário com os dados atuais
+        setContactForm({
+            email: profile.email,
+            contact: profile.contact || ""
         });
+        setIsContactModalOpen(true);
+    };
+
+    const handleSavePersonalInfo = async () => {
+        if (!personalForm.name.trim()) {
+            toast({
+                title: "Nome obrigatório",
+                description: "Por favor, digite seu nome.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        setIsSavingPersonal(true);
+        try {
+            await userService.updatePersonalInfo({
+                name: personalForm.name.trim()
+            });
+            setProfile(prev => ({ ...prev, name: personalForm.name.trim() }));
+            setIsPersonalInfoModalOpen(false);
+            toast({
+                title: "Nome atualizado",
+                description: "Seu nome foi atualizado com sucesso.",
+            });
+        } catch (error) {
+            toast({
+                title: "Erro ao atualizar nome",
+                description: error.message || "Não foi possível atualizar seu nome.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsSavingPersonal(false);
+        }
+    };
+
+    const handleSaveContact = async () => {
+        if (!contactForm.email.trim()) {
+            toast({
+                title: "Email obrigatório",
+                description: "Por favor, digite seu email.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        const updates = {};
+
+        if (contactForm.email.trim() !== profile.email) {
+            updates.email = contactForm.email.trim();
+        }
+
+        if (contactForm.contact.trim() !== (profile.contact || "")) {
+            updates.contact = contactForm.contact.trim();
+        }
+
+        if (Object.keys(updates).length > 0) {
+            setIsSavingContact(true);
+            try {
+                await userService.updatePersonalInfo(updates);
+                setProfile(prev => ({ ...prev, ...updates }));
+                setIsContactModalOpen(false);
+                toast({
+                    title: "Contato atualizado",
+                    description: "Seus dados de contato foram atualizados com sucesso.",
+                });
+            } catch (error) {
+                toast({
+                    title: "Erro ao atualizar contato",
+                    description: error.message || "Não foi possível atualizar seus dados de contato.",
+                    variant: "destructive",
+                });
+            } finally {
+                setIsSavingContact(false);
+            }
+        } else {
+            setIsContactModalOpen(false);
+        }
     };
 
     const handleManageAddresses = () => {
@@ -157,14 +245,18 @@ const UserProfile = () => {
                                     <User className="h-5 w-5 text-primary" />
                                     Informações Pessoais
                                 </CardTitle>
-                                <ButtonDash
-                                    variant="outline"
-                                    size="sm"
-                                    iconName="Edit3"
-                                    onClick={handleEditPersonalInfo}
-                                >
-                                    Editar
-                                </ButtonDash>
+                                <Dialog open={isPersonalInfoModalOpen} onOpenChange={setIsPersonalInfoModalOpen}>
+                                    <DialogTrigger asChild>
+                                        <ButtonDash
+                                            variant="outline"
+                                            size="sm"
+                                            iconName="Edit3"
+                                            onClick={handleEditPersonalInfo}
+                                        >
+                                            Editar
+                                        </ButtonDash>
+                                    </DialogTrigger>
+                                </Dialog>
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-3">
@@ -183,14 +275,18 @@ const UserProfile = () => {
                                     <Phone className="h-5 w-5 text-primary" />
                                     Contato
                                 </CardTitle>
-                                <ButtonDash
-                                    variant="outline"
-                                    size="sm"
-                                    iconName="Edit3"
-                                    onClick={handleEditContact}
-                                >
-                                    Editar
-                                </ButtonDash>
+                                <Dialog open={isContactModalOpen} onOpenChange={setIsContactModalOpen}>
+                                    <DialogTrigger asChild>
+                                        <ButtonDash
+                                            variant="outline"
+                                            size="sm"
+                                            iconName="Edit3"
+                                            onClick={handleEditContact}
+                                        >
+                                            Editar
+                                        </ButtonDash>
+                                    </DialogTrigger>
+                                </Dialog>
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-3">
@@ -268,6 +364,98 @@ const UserProfile = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Modal de edição de informações pessoais */}
+            <Dialog open={isPersonalInfoModalOpen} onOpenChange={setIsPersonalInfoModalOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Editar Informações Pessoais</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div>
+                            <Label htmlFor="edit-name" className="text-sm font-medium">
+                                Nome completo
+                            </Label>
+                            <Input
+                                id="edit-name"
+                                value={personalForm.name}
+                                onChange={(e) => setPersonalForm(prev => ({ ...prev, name: e.target.value }))}
+                                placeholder="Digite seu nome completo"
+                            />
+                        </div>
+                        <div className="flex gap-3 pt-4">
+                            <Button
+                                variant="outline"
+                                onClick={() => setIsPersonalInfoModalOpen(false)}
+                                className="flex-1"
+                            >
+                                Cancelar
+                            </Button>
+                            <ButtonDash
+                                variant="default"
+                                onClick={handleSavePersonalInfo}
+                                loading={isSavingPersonal}
+                                disabled={isSavingPersonal}
+                                className="flex-1"
+                            >
+                                {isSavingPersonal ? "Salvando..." : "Salvar"}
+                            </ButtonDash>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Modal de edição de contato */}
+            <Dialog open={isContactModalOpen} onOpenChange={setIsContactModalOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Editar Contato</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div>
+                            <Label htmlFor="edit-email" className="text-sm font-medium">
+                                Email
+                            </Label>
+                            <Input
+                                id="edit-email"
+                                type="email"
+                                value={contactForm.email}
+                                onChange={(e) => setContactForm(prev => ({ ...prev, email: e.target.value }))}
+                                placeholder="Digite seu email"
+                            />
+                        </div>
+                        <div>
+                            <Label htmlFor="edit-phone" className="text-sm font-medium">
+                                Telefone
+                            </Label>
+                            <Input
+                                id="edit-phone"
+                                value={contactForm.contact}
+                                onChange={(e) => setContactForm(prev => ({ ...prev, contact: e.target.value }))}
+                                placeholder="Digite seu telefone"
+                            />
+                        </div>
+                        <div className="flex gap-3 pt-4">
+                            <Button
+                                variant="outline"
+                                onClick={() => setIsContactModalOpen(false)}
+                                className="flex-1"
+                            >
+                                Cancelar
+                            </Button>
+                            <ButtonDash
+                                variant="default"
+                                onClick={handleSaveContact}
+                                loading={isSavingContact}
+                                disabled={isSavingContact}
+                                className="flex-1"
+                            >
+                                {isSavingContact ? "Salvando..." : "Salvar"}
+                            </ButtonDash>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

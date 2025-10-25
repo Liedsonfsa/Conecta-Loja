@@ -1,10 +1,11 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import ButtonDash from "@/components/ui/ButtonDash";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { addressService } from "@/api/addressService";
 import {
   ArrowLeft,
   MapPin,
@@ -26,18 +27,53 @@ import {
  */
 const AddressForm = ({ address, onSave, onCancel }) => {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const location = useLocation();
   const { toast } = useToast();
 
+  const isEditing = !!id || !!address;
+  const existingAddress = location.state?.address || address;
+
   const [formData, setFormData] = useState({
-    cep: address?.cep || "",
-    logradouro: address?.logradouro || "",
-    numero: address?.numero || "",
-    complemento: address?.complemento || "",
-    bairro: address?.bairro || "",
-    cidade: address?.cidade || "",
-    estado: address?.estado || "",
-    referencia: address?.referencia || "",
+    cep: existingAddress?.cep || "",
+    logradouro: existingAddress?.logradouro || "",
+    numero: existingAddress?.numero || "",
+    complemento: existingAddress?.complemento || "",
+    bairro: existingAddress?.bairro || "",
+    cidade: existingAddress?.cidade || "",
+    estado: existingAddress?.estado || "",
+    referencia: existingAddress?.referencia || "",
   });
+
+  // Carregar dados do endereço se for edição
+  useEffect(() => {
+    if (isEditing && id && !existingAddress) {
+      const loadAddress = async () => {
+        try {
+          const response = await addressService.getAddressById(parseInt(id));
+          const addressData = response.address;
+          setFormData({
+            cep: addressData.cep || "",
+            logradouro: addressData.logradouro || "",
+            numero: addressData.numero || "",
+            complemento: addressData.complemento || "",
+            bairro: addressData.bairro || "",
+            cidade: addressData.cidade || "",
+            estado: addressData.estado || "",
+            referencia: addressData.referencia || "",
+          });
+        } catch (error) {
+          toast({
+            title: "Erro ao carregar endereço",
+            description: "Não foi possível carregar os dados do endereço.",
+            variant: "destructive",
+          });
+          navigate("/profile/addresses");
+        }
+      };
+      loadAddress();
+    }
+  }, [id, isEditing, existingAddress, toast, navigate]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -109,23 +145,31 @@ const AddressForm = ({ address, onSave, onCancel }) => {
 
     setIsSaving(true);
     try {
-      // TODO: Implementar chamada para API
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulação
+      let result;
+
+      if (isEditing && id) {
+        // Editar endereço existente
+        result = await addressService.updateAddress(parseInt(id), formData);
+      } else {
+        // Criar novo endereço
+        result = await addressService.createAddress(formData);
+      }
 
       toast({
-        title: "Endereço salvo",
-        description: "Seu endereço foi salvo com sucesso.",
+        title: isEditing ? "Endereço atualizado" : "Endereço criado",
+        description: `Seu endereço foi ${isEditing ? 'atualizado' : 'criado'} com sucesso.`,
       });
 
       if (onSave) {
-        onSave(formData);
+        onSave(result.address || result);
       } else {
-        navigate(-1);
+        navigate("/profile/addresses");
       }
     } catch (error) {
+      console.error("Erro ao salvar endereço:", error);
       toast({
         title: "Erro ao salvar",
-        description: "Não foi possível salvar o endereço.",
+        description: error.message || "Não foi possível salvar o endereço.",
         variant: "destructive",
       });
     } finally {
@@ -150,7 +194,7 @@ const AddressForm = ({ address, onSave, onCancel }) => {
             <ArrowLeft className="h-4 w-4" />
           </ButtonDash>
           <h1 className="text-3xl font-bold text-gray-900">
-            {address ? "Editar Endereço" : "Novo Endereço"}
+            {isEditing ? "Editar Endereço" : "Novo Endereço"}
           </h1>
         </div>
 
@@ -158,7 +202,7 @@ const AddressForm = ({ address, onSave, onCancel }) => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MapPin className="h-5 w-5 text-primary" />
-              {address ? "Editar Endereço de Entrega" : "Adicionar Endereço de Entrega"}
+              {isEditing ? "Editar Endereço de Entrega" : "Adicionar Endereço de Entrega"}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">

@@ -108,7 +108,47 @@ export class UserService {
     }
 
     /**
-     * Atualiza as informações do perfil do usuário.
+     * Atualiza as informações pessoais do perfil do usuário.
+     * @param userId - ID do usuário autenticado.
+     * @param personalData - Dados pessoais a serem atualizados (name, email, contact).
+     */
+    static async updatePersonalInfo(userId: number, personalData: { name?: string; email?: string; contact?: string }) {
+        try {
+            // Validações básicas
+            if (personalData.name !== undefined && (!personalData.name || personalData.name.trim().length === 0)) {
+                throw new Error('Nome não pode ser vazio');
+            }
+
+            if (personalData.email !== undefined && (!personalData.email || personalData.email.trim().length === 0)) {
+                throw new Error('Email não pode ser vazio');
+            }
+
+            if (personalData.contact !== undefined && (!personalData.contact || personalData.contact.trim().length === 0)) {
+                throw new Error('Telefone não pode ser vazio');
+            }
+
+            // Validar formato do email se fornecido
+            if (personalData.email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(personalData.email)) {
+                    throw new Error('Formato de email inválido');
+                }
+
+                // Verificar se email já está em uso por outro usuário
+                const existingUser = await UserRepository.findUserByEmail(personalData.email);
+                if (existingUser && existingUser.id !== userId) {
+                    throw new Error('Email já está em uso');
+                }
+            }
+
+            return await UserRepository.updateUser(userId, personalData);
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    /**
+     * Atualiza as informações do perfil do usuário (método legado para compatibilidade).
      * @param userId - ID do usuário autenticado.
      * @param profileData - Dados a serem atualizados.
      */
