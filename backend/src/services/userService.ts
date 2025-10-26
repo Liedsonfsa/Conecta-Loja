@@ -103,7 +103,8 @@ export class UserService {
         if (!user) {
             throw new Error("Usuário não encontrado");
         }
-        const address = await UserRepository.findAddressByUserId(userId);
+        // Buscar endereço principal em vez do primeiro endereço
+        const address = await UserRepository.findPrincipalAddressByUserId(userId);
         return { ...user, address, avatar: user.avatar };
     }
 
