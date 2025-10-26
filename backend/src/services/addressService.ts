@@ -89,10 +89,10 @@ export class AddressService {
         throw new Error('Estado é obrigatório');
       }
 
-      // Validar formato do CEP (XXXXX-XXX ou XXXXXXXX)
-      const cepRegex = /^\d{5}-?\d{3}$/;
-      if (!cepRegex.test(data.cep)) {
-        throw new Error('CEP deve estar no formato XXXXX-XXX ou XXXXXXXX');
+      // Validar formato do CEP (aceitar com ou sem hífen)
+      const cepRegex = /^(\d{5}-?\d{3}|\d{8})$/;
+      if (!cepRegex.test(data.cep.replace('-', ''))) {
+        throw new Error('CEP deve conter 8 dígitos');
       }
 
       // Validar estado (2 letras maiúsculas)
@@ -101,11 +101,16 @@ export class AddressService {
         throw new Error('Estado deve ter exatamente 2 letras maiúsculas');
       }
 
+      // Verificar se é o primeiro endereço do usuário para defini-lo como principal
+      const userAddresses = await AddressRepository.findUserAddresses(data.usuarioId);
+      const isFirstAddress = userAddresses.length === 0;
+
       // Criar endereço
       const addressData = {
         ...data,
         cep: data.cep.replace('-', ''), // Remove hífen se existir
-        estado: data.estado.toUpperCase()
+        estado: data.estado.toUpperCase(),
+        isPrincipal: isFirstAddress // Primeiro endereço é automaticamente principal
       };
 
       return await AddressRepository.createAddress(addressData);
@@ -131,6 +136,7 @@ export class AddressService {
     bairro?: string;
     cidade?: string;
     estado?: string;
+    isPrincipal?: boolean;
   }) {
     try {
       // Verificar se o endereço existe e pertence ao usuário
@@ -166,9 +172,9 @@ export class AddressService {
 
       // Validar formato do CEP se fornecido
       if (data.cep) {
-        const cepRegex = /^\d{5}-?\d{3}$/;
-        if (!cepRegex.test(data.cep)) {
-          throw new Error('CEP deve estar no formato XXXXX-XXX ou XXXXXXXX');
+        const cepRegex = /^(\d{5}-?\d{3}|\d{8})$/;
+        if (!cepRegex.test(data.cep.replace('-', ''))) {
+          throw new Error('CEP deve conter 8 dígitos');
         }
       }
 
@@ -217,6 +223,31 @@ export class AddressService {
       await AddressRepository.deleteAddress(addressId);
 
       return { message: 'Endereço removido com sucesso' };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * Define um endereço como principal para o usuário
+   *
+   * @param userId - ID do usuário
+   * @param addressId - ID do endereço a ser definido como principal
+   * @returns Promise com o endereço atualizado
+   */
+  static async setAddressAsPrincipal(userId: number, addressId: number) {
+    try {
+      // Verificar se o endereço existe e pertence ao usuário
+      const address = await AddressRepository.findAddressById(addressId);
+      if (!address || address.usuarioId !== userId) {
+        throw new Error('Endereço não encontrado');
+      }
+
+      // Remover flag de principal de todos os endereços do usuário
+      await AddressRepository.removePrincipalFlagFromUserAddresses(userId);
+
+      // Definir este endereço como principal
+      return await AddressRepository.updateAddress(addressId, { isPrincipal: true });
     } catch (error) {
       throw error;
     }

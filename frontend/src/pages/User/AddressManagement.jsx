@@ -79,22 +79,22 @@ const AddressManagement = () => {
   };
 
   const handleSetPrincipal = async (addressId) => {
-    // Por enquanto, vamos apenas marcar como principal no frontend
-    // TODO: Implementar no backend a lógica de endereço principal
     try {
-      setAddresses(prev => prev.map(addr => ({
-        ...addr,
-        isPrincipal: addr.id === addressId
-      })));
+      await addressService.setAddressAsPrincipal(addressId);
+
+      // Recarregar endereços para refletir a mudança
+      const response = await addressService.getUserAddresses();
+      setAddresses(response.addresses || []);
 
       toast({
         title: "Endereço principal definido",
         description: "Este endereço será usado como padrão para entregas.",
       });
     } catch (error) {
+      console.error("Erro ao definir endereço principal:", error);
       toast({
         title: "Erro",
-        description: "Não foi possível definir o endereço principal.",
+        description: error.message || "Não foi possível definir o endereço principal.",
         variant: "destructive",
       });
     }
@@ -194,14 +194,14 @@ const AddressManagement = () => {
                     <p className="text-gray-600 text-sm">
                       {address.bairro}, {address.cidade} - {address.estado}
                     </p>
-                    <p className="text-gray-600 text-sm">
-                      CEP: {address.cep}
-                    </p>
-                    {address.referencia && (
-                      <p className="text-gray-600 text-sm italic">
-                        Ref: {address.referencia}
-                      </p>
-                    )}
+                                        <p className="text-gray-600 text-sm">
+                                            CEP: {address.cep}
+                                        </p>
+                                        {address.informacoes_adicionais && (
+                                            <p className="text-gray-600 text-sm italic">
+                                                Ref: {address.informacoes_adicionais}
+                                            </p>
+                                        )}
                   </div>
 
                   {!address.isPrincipal && (

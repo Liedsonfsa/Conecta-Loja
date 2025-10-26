@@ -220,8 +220,8 @@ const UserProfile = () => {
                 });
             } catch (error) {
                 console.error("Erro ao salvar avatar:", error);
-                toast({
-                    title: "Erro ao salvar",
+            toast({
+                title: "Erro ao salvar",
                     description: error.message || "Não foi possível salvar a imagem.",
                     variant: "destructive",
                 });
@@ -481,6 +481,11 @@ const UserProfile = () => {
                                         <p className="text-gray-600 text-sm">
                                             CEP: {profile.address.cep}
                                         </p>
+                                        {profile.address.informacoes_adicionais && (
+                                            <p className="text-gray-600 text-sm italic">
+                                                Ref: {profile.address.informacoes_adicionais}
+                                            </p>
+                                        )}
                                     </div>
                                 ) : (
                                     <div className="text-center py-8">
@@ -623,7 +628,7 @@ const UserProfile = () => {
                                 className="flex-1"
                             >
                                 Cancelar
-                            </Button>
+                </Button>
                             <ButtonDash
                                 variant="destructive"
                                 onClick={confirmDeleteAvatar}
@@ -634,7 +639,7 @@ const UserProfile = () => {
                                 {isDeletingAvatar ? "Removendo..." : "Remover"}
                             </ButtonDash>
                         </div>
-                    </div>
+            </div>
                 </DialogContent>
             </Dialog>
         </div>

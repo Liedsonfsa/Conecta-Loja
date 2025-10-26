@@ -41,6 +41,7 @@ model endereco {
   bairro                 String   @db.VarChar(100) // Bairro/distrito
   cidade                 String   @db.VarChar(100) // Cidade
   estado                 String   @db.VarChar(2) // Estado (UF - 2 letras)
+  isPrincipal            Boolean  @default(false) // Se é o endereço principal
   createdAt              DateTime @default(now()) @map("created_at")
   updatedAt              DateTime @updatedAt @map("updated_at")
 

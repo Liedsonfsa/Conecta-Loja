@@ -11,7 +11,8 @@ import {
   getAddressById,
   createAddress,
   updateAddress,
-  deleteAddress
+  deleteAddress,
+  setAddressAsPrincipal
 } from '../controllers/addressController';
 
 const router = Router();
@@ -40,5 +41,8 @@ router.put('/addresses/:id', authenticateToken, updateAddress);
 
 // DELETE /api/profile/addresses/:id - Remover endereço
 router.delete('/addresses/:id', authenticateToken, deleteAddress);
+
+// PATCH /api/profile/addresses/:id/principal - Definir endereço como principal
+router.patch('/addresses/:id/principal', authenticateToken, setAddressAsPrincipal);
 
 export default router;

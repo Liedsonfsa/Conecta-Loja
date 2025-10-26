@@ -60,7 +60,7 @@ const AddressForm = ({ address, onSave, onCancel }) => {
             bairro: addressData.bairro || "",
             cidade: addressData.cidade || "",
             estado: addressData.estado || "",
-            referencia: addressData.referencia || "",
+            referencia: addressData.informacoes_adicionais || "",
           });
         } catch (error) {
           toast({
@@ -148,11 +148,31 @@ const AddressForm = ({ address, onSave, onCancel }) => {
       let result;
 
       if (isEditing && id) {
-        // Editar endereço existente
-        result = await addressService.updateAddress(parseInt(id), formData);
+        // Editar endereço existente - mapear campos corretos
+        const addressData = {
+          cep: formData.cep,
+          logradouro: formData.logradouro,
+          numero: formData.numero,
+          complemento: formData.complemento || '',
+          informacoes_adicionais: formData.referencia || '',
+          bairro: formData.bairro,
+          cidade: formData.cidade,
+          estado: formData.estado
+        };
+        result = await addressService.updateAddress(parseInt(id), addressData);
       } else {
-        // Criar novo endereço
-        result = await addressService.createAddress(formData);
+        // Criar novo endereço - mapear campos corretos
+        const addressData = {
+          cep: formData.cep,
+          logradouro: formData.logradouro,
+          numero: formData.numero,
+          complemento: formData.complemento || '',
+          informacoes_adicionais: formData.referencia || '',
+          bairro: formData.bairro,
+          cidade: formData.cidade,
+          estado: formData.estado
+        };
+        result = await addressService.createAddress(addressData);
       }
 
       toast({

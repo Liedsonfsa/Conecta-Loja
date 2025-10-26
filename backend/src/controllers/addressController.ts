@@ -221,3 +221,49 @@ export const deleteAddress = async (req: Request, res: Response) => {
     });
   }
 };
+
+/**
+ * Define um endereço como principal
+ *
+ * @param req - Requisição Express com ID do endereço nos parâmetros
+ * @param res - Resposta Express
+ */
+export const setAddressAsPrincipal = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const userId = (req as any).user.id;
+    const addressId = parseInt(id, 10);
+
+    if (isNaN(addressId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'ID do endereço deve ser um número válido',
+        code: 'INVALID_ID'
+      });
+    }
+
+    const address = await AddressService.setAddressAsPrincipal(userId, addressId);
+    res.status(200).json({
+      success: true,
+      message: 'Endereço definido como principal com sucesso',
+      address: address
+    });
+  } catch (error) {
+    console.error('Erro ao definir endereço como principal:', error);
+
+    const errorMessage = (error as Error).message;
+    if (errorMessage === 'Endereço não encontrado') {
+      return res.status(404).json({
+        success: false,
+        error: 'Endereço não encontrado',
+        code: 'ADDRESS_NOT_FOUND'
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      error: 'Erro interno do servidor',
+      code: 'INTERNAL_SERVER_ERROR'
+    });
+  }
+};

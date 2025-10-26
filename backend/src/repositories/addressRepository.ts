@@ -75,6 +75,7 @@ export class AddressRepository {
     bairro?: string;
     cidade?: string;
     estado?: string;
+    isPrincipal?: boolean;
   }) {
     return await prisma.endereco.update({
       where: {
@@ -108,6 +109,24 @@ export class AddressRepository {
     return await prisma.endereco.count({
       where: {
         usuarioId: userId
+      }
+    });
+  }
+
+  /**
+   * Remove a flag de principal de todos os endereços de um usuário
+   *
+   * @param userId - ID do usuário
+   * @returns Promise com o resultado da operação
+   */
+  static async removePrincipalFlagFromUserAddresses(userId: number) {
+    return await prisma.endereco.updateMany({
+      where: {
+        usuarioId: userId,
+        isPrincipal: true
+      },
+      data: {
+        isPrincipal: false
       }
     });
   }

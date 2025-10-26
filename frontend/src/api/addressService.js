@@ -63,4 +63,17 @@ export const addressService = {
     const response = await api.delete(`/profile/addresses/${addressId}`);
     return response.data;
   },
+
+  /**
+   * Define um endereço como principal.
+   * Chama a rota PATCH /api/profile/addresses/:id/principal no backend.
+   * @param {number} addressId - ID do endereço a ser definido como principal.
+   * @returns {Promise<object>} Endereço atualizado.
+   */
+  async setAddressAsPrincipal(addressId) {
+    const response = await api.patch(
+      `/profile/addresses/${addressId}/principal`
+    );
+    return response.data;
+  },
 };
