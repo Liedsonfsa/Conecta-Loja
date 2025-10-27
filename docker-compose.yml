@@ -32,6 +32,8 @@ services:
       sh -c "
         npm install &&
         npx prisma generate &&
+        npx prisma migrate deploy &&
+        npm run seed &&
         npx prisma studio --port 5555 --hostname 0.0.0.0
       "
     environment:
@@ -39,8 +41,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    profiles:
-      - studio
 
 volumes:
   postgres_data:

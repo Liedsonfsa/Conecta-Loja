@@ -1,6 +1,5 @@
 import React from "react";
 import Routes from "./Routes";
-import { CartProvider } from "./hooks/useCart.jsx";
 import { StoreProvider } from "./contexts/StoreContext";
 
 /**
@@ -8,7 +7,7 @@ import { StoreProvider } from "./contexts/StoreContext";
  *
  * Este é o componente principal da aplicação React que serve como ponto de entrada.
  * Ele renderiza o sistema de roteamento que controla toda a navegação da aplicação.
- * Inclui o provedor do contexto do carrinho para gerenciar o estado global do carrinho.
+ * Inclui o provedor do contexto da loja para gerenciar o estado global da aplicação.
  *
  * @returns {JSX.Element} Elemento raiz da aplicação com sistema de roteamento
  *
@@ -19,9 +18,7 @@ import { StoreProvider } from "./contexts/StoreContext";
 function App() {
   return (
       <StoreProvider>
-          <CartProvider>
-              <Routes />
-          </CartProvider>
+          <Routes />
       </StoreProvider>
 
   );

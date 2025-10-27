@@ -6,6 +6,7 @@
     "dev": "ts-node-dev --respawn --transpile-only --poll src/server.ts",
     "build": "tsc",
     "prisma": "prisma",
+    "seed": "ts-node prisma/seed.ts",
     "start": "node dist/server.js"
   },
   "keywords": [],

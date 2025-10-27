@@ -38,7 +38,9 @@ app.use(cors({
 }));
 
 // Middleware para parsing de JSON no corpo das requisições
-app.use(express.json());
+// Aumentando o limite para suportar uploads de imagem
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Servir arquivos estáticos (imagens dos produtos)
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));

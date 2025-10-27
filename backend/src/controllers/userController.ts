@@ -63,7 +63,62 @@ export const getProfile = async (req: Request, res: Response) => {
 };
 
 /**
- * Controller para atualizar o perfil do usuário logado.
+ * Controller para atualizar informações pessoais do usuário logado.
+ * Chama o serviço que salva os dados pessoais no banco.
+ */
+export const updatePersonalInfo = async (req: Request, res: Response) => {
+    try {
+        const userId = (req as any).user.id;
+        const personalData = req.body;
+
+        // Validar dados de entrada - incluir avatar também
+        const allowedFields = ['name', 'email', 'contact', 'avatar'];
+        const filteredData: any = {};
+
+        for (const field of allowedFields) {
+            if (personalData[field] !== undefined) {
+                filteredData[field] = personalData[field];
+            }
+        }
+
+        const updatedUser = await UserService.updatePersonalInfo(userId, filteredData);
+
+        res.status(200).json({
+            success: true,
+            message: 'Informações pessoais atualizadas com sucesso',
+            user: {
+                id: updatedUser.id,
+                name: updatedUser.name,
+                email: updatedUser.email,
+                contact: updatedUser.contact
+            }
+        });
+    } catch (error) {
+        console.error("Controller Error - updatePersonalInfo:", error);
+
+        const errorMessage = (error as Error).message;
+        if (errorMessage === 'Nome não pode ser vazio' ||
+            errorMessage === 'Email não pode ser vazio' ||
+            errorMessage === 'Telefone não pode ser vazio' ||
+            errorMessage === 'Formato de email inválido' ||
+            errorMessage === 'Email já está em uso') {
+            return res.status(400).json({
+                success: false,
+                error: errorMessage,
+                code: 'VALIDATION_ERROR'
+            });
+        }
+
+        res.status(500).json({
+            success: false,
+            error: 'Erro interno do servidor ao atualizar informações pessoais',
+            code: 'INTERNAL_SERVER_ERROR'
+        });
+    }
+};
+
+/**
+ * Controller para atualizar o perfil do usuário logado (método legado).
  * Chama o serviço que salva os dados no banco.
  */
 export const updateProfile = async (req: Request, res: Response) => {

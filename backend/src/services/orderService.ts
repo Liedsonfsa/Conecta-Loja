@@ -33,6 +33,7 @@ export class OrderService {
      */
     static async createOrder(data: {
         usuarioId: number,
+        enderecoId?: number,
         cupomId?: number,
         produtos: { produtoId: number, quantidade: number, precoUnitario: number | string }[],
         precoTotal: number | string,

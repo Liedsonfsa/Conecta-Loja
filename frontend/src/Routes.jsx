@@ -3,10 +3,12 @@ import { BrowserRouter, Routes as RouterRoutes, Route } from "react-router-dom";
 import ScrollToTop from "@/components/ScrollToTop";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { Toaster } from "@/components/ui/toaster";
+import { CartProvider } from "@/hooks/useCart.jsx";
 
 // Import components
 import AdminRoute from "@/components/AdminRoute";
 import EmployeeRoute from "@/components/EmployeeRoute";
+import ClientRoute from "@/components/ClientRoute";
 
 // Import page components
 import HomePage from "./pages/Home";
@@ -16,8 +18,11 @@ import NotFoundPage from "./pages/NotFound";
 import OrderManagement from "./pages/OrderManagement";
 import ProductManagement from "./pages/product-management";
 import UserProfile from "./pages/User/UserProfile";
+import AddressManagement from "./pages/User/AddressManagement";
+import AddressForm from "./pages/User/AddressForm";
 import StoreSettings from "./pages/store-settings";
 import OrderHistory from "./pages/OrderHistory/OrderHistory";
+import Checkout from "./pages/checkout";
 /**
  * Routes - Componente principal de configuração de roteamento da aplicação
  *
@@ -38,7 +43,8 @@ const AppRoutes = () => {
     <BrowserRouter>
       <ErrorBoundary>
         <ScrollToTop />
-        <RouterRoutes>
+        <CartProvider>
+          <RouterRoutes>
           <Route path="/" element={<HomePage />} />
           <Route
             path="/dashboard"
@@ -48,10 +54,34 @@ const AppRoutes = () => {
               </EmployeeRoute>
             }
           />
-          <Route path="/relatorios" element={<Reports />} />
-          <Route path="/pedidos" element={<OrderManagement />} />
-          <Route path="/produtos" element={<ProductManagement />} />
+          <Route
+            path="/relatorios"
+            element={
+              <EmployeeRoute>
+                <Reports />
+              </EmployeeRoute>
+            }
+          />
+          <Route
+            path="/pedidos"
+            element={
+              <EmployeeRoute>
+                <OrderManagement />
+              </EmployeeRoute>
+            }
+          />
+          <Route
+            path="/produtos"
+            element={
+              <EmployeeRoute>
+                <ProductManagement />
+              </EmployeeRoute>
+            }
+          />
           <Route path="/profile" element={<UserProfile />} />
+          <Route path="/profile/addresses" element={<AddressManagement />} />
+          <Route path="/profile/address/new" element={<AddressForm />} />
+          <Route path="/profile/address/:id/edit" element={<AddressForm />} />
           <Route
             path="/store-settings"
             element={
@@ -61,9 +91,18 @@ const AppRoutes = () => {
             }
           />
           <Route path="/history" element={<OrderHistory />} />
+          <Route
+            path="/checkout"
+            element={
+              <ClientRoute>
+                <Checkout />
+              </ClientRoute>
+            }
+          />
           <Route path="*" element={<NotFoundPage />} />
-        </RouterRoutes>
-        <Toaster />
+          </RouterRoutes>
+          <Toaster />
+        </CartProvider>
       </ErrorBoundary>
     </BrowserRouter>
   );

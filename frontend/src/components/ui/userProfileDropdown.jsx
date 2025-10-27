@@ -55,7 +55,7 @@ const UserProfileDropdown = ({ user, onLogout }) => {
           className="relative h-8 w-8 rounded-full hover:ring-2 hover:ring-primary transition-all focus:outline-none focus:ring-2 focus:ring-primary"
         >
           <Avatar className="h-8 w-8">
-            <AvatarImage src="" alt={user.name} />
+            <AvatarImage src={user.avatar || ""} alt={user.name} />
             <AvatarFallback className="bg-primary text-primary-foreground">
               {getInitials(user.name)}
             </AvatarFallback>

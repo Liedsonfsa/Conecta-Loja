@@ -55,7 +55,8 @@ export class UserRepository {
                 id: true,
                 name: true,
                 email: true,
-                contact: true
+                contact: true,
+                avatar: true
             }
         });
     }
@@ -71,9 +72,21 @@ export class UserRepository {
     }
 
     /**
+     * Encontra o endereço principal de um usuário.
+     */
+    static async findPrincipalAddressByUserId(userId: number) {
+        return await prisma.endereco.findFirst({
+            where: {
+                usuarioId: userId,
+                isPrincipal: true
+            },
+        });
+    }
+
+    /**
      * Atualiza os dados de um usuário.
      */
-    static async updateUser(id: number, data: { name?: string; email?: string; contact?: string }) {
+    static async updateUser(id: number, data: { name?: string; email?: string; contact?: string; avatar?: string }) {
         return await prisma.usuario.update({
             where: { id },
             data,
