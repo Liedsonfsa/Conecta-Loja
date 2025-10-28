@@ -13,7 +13,9 @@ import { Router } from 'express';
 import {
   getUserOrders,
   createOrder,
-  deleteOrder  
+  deleteOrder,
+  getOrderById,
+  updateOrderStatus
 } from '../controllers/orderController';
 
 const router = Router();
@@ -33,6 +35,16 @@ router.get('/', getUserOrders);
  * @returns {object} Pedido criado com seus produtos associados
  */
 router.post('/cadastrar', createOrder);
+
+/**
+ * @route PUT /api/order/:id/status
+ * @desc Atualiza o status de um pedido
+ * @access Privado (funcionários/admins)
+ * @param {id: number} - ID do pedido (parâmetro de rota)
+ * @body {status: OrderStatus, criadoPor?: number, observacao?: string}
+ * @returns {object} Pedido atualizado
+ */
+router.put('/:id/status', updateOrderStatus);
 
 /**
  * @route DELETE /api/order/:id

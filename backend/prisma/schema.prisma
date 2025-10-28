@@ -73,6 +73,7 @@ model pedido {
   endereco endereco?        @relation(fields: [enderecoId], references: [id])
   cupom    cupom?           @relation(fields: [cupomId], references: [id])
   produtos pedido_produto[] // UM pedido pode ter VÁRIOS produtos
+  statusHistorico pedido_status_historico[] // UM pedido pode ter VÁRIOS registros de status
 
   @@map("pedidos")
 }
@@ -107,6 +108,9 @@ model funcionario {
 
   lojaId Int
   loja   store @relation(fields: [lojaId], references: [id])
+
+  // Relations
+  statusHistorico pedido_status_historico[] // UM funcionário pode criar VÁRIOS registros de status
 }
 
 model cargo {
@@ -256,4 +260,20 @@ model carrinho_produto {
 
   @@unique([carrinhoId, produtoId]) // Um produto pode aparecer apenas uma vez por carrinho
   @@map("carrinho_produto")
+}
+
+// Order Status History - Histórico de mudanças de status dos pedidos
+model pedido_status_historico {
+  id        Int         @id @default(autoincrement())
+  pedidoId  Int         // ID do pedido
+  status    OrderStatus // Status que foi definido
+  observacao String?    // Observação opcional sobre a mudança
+  criadoPor Int?        // ID do funcionário/admin que fez a mudança (opcional)
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  // Relations
+  pedido    pedido     @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  funcionario funcionario? @relation(fields: [criadoPor], references: [id])
+
+  @@map("pedido_status_historico")
 }

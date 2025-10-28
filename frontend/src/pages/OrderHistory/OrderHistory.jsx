@@ -88,6 +88,24 @@ const OrderHistory = () => {
   const [selectedFilter, setSelectedFilter] = useState("all");
 
   /**
+   * Estado do modal de acompanhamento
+   * @type {[boolean, function]} isTrackingModalOpen
+   */
+  const [isTrackingModalOpen, setIsTrackingModalOpen] = useState(false);
+
+  /**
+   * Estado do pedido selecionado para acompanhamento
+   * @type {[object|null, function]} selectedOrder
+   */
+  const [selectedOrder, setSelectedOrder] = useState(null);
+
+  /**
+   * Estado de carregamento dos detalhes do pedido
+   * @type {[boolean, function]} loadingOrderDetails
+   */
+  const [loadingOrderDetails, setLoadingOrderDetails] = useState(false);
+
+  /**
    * Carrega pedidos do usuário logado do backend
    */
   const loadOrders = async () => {
@@ -102,23 +120,36 @@ const OrderHistory = () => {
 
       if (response.success) {
         // Formatar dados dos pedidos para o frontend
-        const formattedOrders = response.orders.map(order => ({
-          id: order.numeroPedido || order.id,
-          numeroPedido: order.numeroPedido,
-          date: new Date(order.createdAt).toLocaleDateString('pt-BR'),
-          time: new Date(order.createdAt).toLocaleTimeString('pt-BR', {
-            hour: '2-digit',
-            minute: '2-digit'
-          }),
-          status: mapOrderStatus(order.status),
-          total: parseFloat(order.precoTotal),
-          items: order.produtos.map(produto => ({
-            name: produto.produto.name,
-            quantity: produto.quantidade,
-            price: parseFloat(produto.precoUnitario)
-          })),
-          deliveryAddress: order.endereco ? formatAddress(order.endereco) : "Endereço não informado"
-        }));
+        const formattedOrders = response.orders.map(order => {
+          console.log('Dados do pedido:', {
+            id: order.id,
+            createdAt: order.createdAt,
+            numeroPedido: order.numeroPedido,
+            status: order.status
+          });
+
+          const createdAt = new Date(order.createdAt);
+          console.log('Data criada:', createdAt, 'isValid:', !isNaN(createdAt.getTime()));
+
+          return {
+            id: order.numeroPedido || order.id,
+            numeroPedido: order.numeroPedido,
+            createdAt: order.createdAt, // Manter o campo original para o modal
+            date: !isNaN(createdAt.getTime()) ? createdAt.toLocaleDateString('pt-BR') : 'Data indisponível',
+            time: !isNaN(createdAt.getTime()) ? createdAt.toLocaleTimeString('pt-BR', {
+              hour: '2-digit',
+              minute: '2-digit'
+            }) : 'Horário indisponível',
+            status: mapOrderStatus(order.status),
+            total: parseFloat(order.precoTotal),
+            items: order.produtos.map(produto => ({
+              name: produto.produto.name,
+              quantity: produto.quantidade,
+              price: parseFloat(produto.precoUnitario)
+            })),
+            deliveryAddress: order.endereco ? formatAddress(order.endereco) : "Endereço não informado"
+          };
+        });
 
         setOrders(formattedOrders);
       } else {
@@ -250,6 +281,47 @@ const OrderHistory = () => {
     const matchesFilter = selectedFilter === "all" || order.status === selectedFilter;
     return matchesSearch && matchesFilter;
   });
+
+  /**
+   * Abre o modal de acompanhamento do pedido
+   * @param {object} order - Pedido selecionado
+   */
+  const openTrackingModal = async (order) => {
+    setSelectedOrder(order);
+    setIsTrackingModalOpen(true);
+
+    // Carregar detalhes completos do pedido se necessário
+    if (!order.produtos || !order.endereco) {
+      setLoadingOrderDetails(true);
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/order/${order.id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          setSelectedOrder(data.order);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar detalhes do pedido:', error);
+      } finally {
+        setLoadingOrderDetails(false);
+      }
+    }
+  };
+
+  /**
+   * Fecha o modal de acompanhamento
+   */
+  const closeTrackingModal = () => {
+    setIsTrackingModalOpen(false);
+    setSelectedOrder(null);
+    setLoadingOrderDetails(false);
+  };
 
   /**
    * Carrega pedidos quando o componente monta
@@ -392,8 +464,12 @@ const OrderHistory = () => {
                       Total: {formatPrice(order.total)}
                     </span>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        Ver Detalhes
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openTrackingModal(order)}
+                      >
+                        Acompanhar Pedido
                       </Button>
                       {order.status === "delivered" && (
                         <Button size="sm">
@@ -420,6 +496,230 @@ const OrderHistory = () => {
             </Card>
           )}
         </div>
+
+        {/* Modal de Acompanhamento do Pedido */}
+        {isTrackingModalOpen && selectedOrder && (
+          <>
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-black/50 z-50"
+              onClick={closeTrackingModal}
+            />
+
+            {/* Modal */}
+            <div className="fixed inset-0 z-50 overflow-y-auto">
+              <div className="flex min-h-full items-center justify-center p-4">
+                <div className="bg-card border border-border rounded-lg shadow-elevation-3 w-full max-w-2xl max-h-[90vh] overflow-hidden">
+                  {/* Header */}
+                  <div className="flex items-center justify-between p-6 border-b border-border">
+                    <div>
+                      <h2 className="text-xl font-semibold text-foreground">
+                        Acompanhamento do Pedido
+                      </h2>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Pedido #{selectedOrder.numeroPedido || selectedOrder.id}
+                      </p>
+                    </div>
+                    <Button variant="ghost" size="icon" onClick={closeTrackingModal}>
+                      <span className="text-xl">×</span>
+                    </Button>
+                  </div>
+
+                  {/* Content */}
+                  <div className="overflow-y-auto max-h-[calc(90vh-140px)]">
+                    <div className="p-6 space-y-6">
+                      {/* Status Atual */}
+                      <div className="bg-muted/30 rounded-lg p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            {getStatusIcon(selectedOrder.status)}
+                            <div>
+                              <p className="font-medium text-foreground">Status Atual</p>
+                              <p className="text-sm text-muted-foreground">{getStatusText(selectedOrder.status)}</p>
+                            </div>
+                          </div>
+                          <div className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(selectedOrder.status)}`}>
+                            {getStatusText(selectedOrder.status)}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Timeline de Status */}
+                      <div>
+                        <h3 className="font-medium text-foreground mb-4">Histórico do Pedido</h3>
+                        <div className="space-y-4">
+                          {selectedOrder.statusHistorico && selectedOrder.statusHistorico.length > 0 ? (
+                            selectedOrder.statusHistorico.map((historico, index) => (
+                              <div key={index} className="flex items-start space-x-3">
+                                <div className={`w-3 h-3 rounded-full mt-1.5 flex-shrink-0 ${
+                                  index === selectedOrder.statusHistorico.length - 1
+                                    ? 'bg-primary'
+                                    : 'bg-green-500'
+                                }`}></div>
+                                <div className="flex-1">
+                                  <p className={`text-sm font-medium ${
+                                    index === selectedOrder.statusHistorico.length - 1
+                                      ? 'text-foreground'
+                                      : 'text-green-700'
+                                  }`}>
+                                    {getStatusText(historico.status)}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {(() => {
+                                      try {
+                                        const date = new Date(historico.createdAt);
+                                        if (isNaN(date.getTime())) {
+                                          console.log('Data inválida:', historico.createdAt);
+                                          return 'Data indisponível';
+                                        }
+                                        return date.toLocaleDateString('pt-BR', {
+                                          day: '2-digit',
+                                          month: '2-digit',
+                                          year: 'numeric',
+                                          hour: '2-digit',
+                                          minute: '2-digit'
+                                        });
+                                      } catch (error) {
+                                        console.log('Erro ao formatar data:', error, historico.createdAt);
+                                        return 'Data indisponível';
+                                      }
+                                    })()}
+                                    {historico.funcionario && (
+                                      <span> • por {historico.funcionario.name}</span>
+                                    )}
+                                  </p>
+                                  {historico.observacao && (
+                                    <p className="text-xs text-muted-foreground mt-1 italic">
+                                      "{historico.observacao}"
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            /* Fallback para quando não há histórico */
+                            <div className="flex items-start space-x-3">
+                              <div className="w-3 h-3 bg-primary rounded-full mt-1.5 flex-shrink-0"></div>
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-foreground">{getStatusText(selectedOrder.status)}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {(() => {
+                                  try {
+                                    const date = new Date(selectedOrder.createdAt);
+                                    if (isNaN(date.getTime())) {
+                                      console.log('Data inválida no pedido:', selectedOrder.createdAt);
+                                      return 'Data indisponível';
+                                    }
+                                    return date.toLocaleDateString('pt-BR', {
+                                      day: '2-digit',
+                                      month: '2-digit',
+                                      year: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    });
+                                  } catch (error) {
+                                    console.log('Erro ao formatar data do pedido:', error, selectedOrder.createdAt);
+                                    return 'Data indisponível';
+                                  }
+                                })()}
+                              </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Informações do Pedido */}
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="bg-muted/30 rounded-lg p-4">
+                          <h4 className="font-medium text-foreground mb-2">Informações Gerais</h4>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Data do pedido:</span>
+                              <span className="text-foreground">
+                                {(() => {
+                                  try {
+                                    const date = new Date(selectedOrder.createdAt);
+                                    if (isNaN(date.getTime())) {
+                                      return selectedOrder.date || 'Data indisponível';
+                                    }
+                                    return date.toLocaleDateString('pt-BR');
+                                  } catch (error) {
+                                    return selectedOrder.date || 'Data indisponível';
+                                  }
+                                })()}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Horário:</span>
+                              <span className="text-foreground">
+                                {(() => {
+                                  try {
+                                    const date = new Date(selectedOrder.createdAt);
+                                    if (isNaN(date.getTime())) {
+                                      return selectedOrder.time || 'Horário indisponível';
+                                    }
+                                    return date.toLocaleTimeString('pt-BR', {
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    });
+                                  } catch (error) {
+                                    return selectedOrder.time || 'Horário indisponível';
+                                  }
+                                })()}
+                              </span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Total:</span>
+                              <span className="text-foreground font-medium">{formatPrice(selectedOrder.total)}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-muted/30 rounded-lg p-4">
+                          <h4 className="font-medium text-foreground mb-2">Endereço de Entrega</h4>
+                          <p className="text-sm text-foreground leading-relaxed">
+                            {selectedOrder.deliveryAddress}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Itens do Pedido (se disponível) */}
+                      {selectedOrder.items && selectedOrder.items.length > 0 && (
+                        <div>
+                          <h4 className="font-medium text-foreground mb-3">Itens do Pedido</h4>
+                          <div className="space-y-2">
+                            {selectedOrder.items.map((item, index) => (
+                              <div key={index} className="flex justify-between items-center text-sm bg-muted/20 p-3 rounded">
+                                <span>{item.quantity}x {item.name}</span>
+                                <span className="font-medium">{formatPrice(item.price)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Loading state */}
+                      {loadingOrderDetails && (
+                        <div className="text-center py-4">
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2"></div>
+                          <p className="text-sm text-muted-foreground">Carregando detalhes...</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="flex justify-end p-6 border-t border-border bg-muted/20">
+                    <Button onClick={closeTrackingModal}>
+                      Fechar
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
