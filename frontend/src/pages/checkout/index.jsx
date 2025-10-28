@@ -208,8 +208,8 @@ const Checkout = () => {
         closeCart();
 
         toast({
-          title: 'Pedido realizado!',
-          description: `Seu pedido foi criado com sucesso. Número do pedido: ${result.order?.id || 'N/A'}`,
+          title: 'Pedido realizado com sucesso! 🎉',
+          description: `Número do pedido: ${result.pedido?.numeroPedido || result.pedido?.id || 'N/A'}. Você pode acompanhar o status do seu pedido no histórico.`,
           variant: 'default'
         });
 

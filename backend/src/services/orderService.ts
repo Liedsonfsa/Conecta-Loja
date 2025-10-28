@@ -1,6 +1,17 @@
 import { OrderRepository } from "../repositories/orderRepository";
 
 /**
+ * Gera um número de pedido formatado
+ * @param orderId - ID do pedido no banco de dados
+ * @returns Número do pedido formatado (ex: PED-20250001)
+ */
+function generateOrderNumber(orderId: number): string {
+    const currentYear = new Date().getFullYear();
+    const paddedId = orderId.toString().padStart(5, '0');
+    return `PED-${currentYear}${paddedId}`;
+}
+
+/**
  * Serviço responsável por regras de negócio relacionadas aos pedidos
  *
  * Contém métodos que conectam o controller ao repositório, garantindo
@@ -11,14 +22,18 @@ export class OrderService {
      * Busca todos os pedidos de um usuário
      *
      * @param usuarioId - ID do usuário cujos pedidos serão buscados
-     * @returns Promise<object[]> - Lista de pedidos encontrados
+     * @returns Promise<object[]> - Lista de pedidos encontrados com números formatados
      * @throws Error - Caso ocorra um problema no repositório
      */
     static async getUserOrders(usuarioId: number) {
         try {
             const orders = await OrderRepository.getUserOrders(usuarioId);
 
-            return orders;
+            // Adiciona o número do pedido formatado a cada pedido
+            return orders.map(order => ({
+                ...order,
+                numeroPedido: generateOrderNumber(order.id)
+            }));
         } catch (error) {
             throw error;
         }
@@ -28,7 +43,7 @@ export class OrderService {
      * Cria um novo pedido no banco de dados.
      *
      * @param data - Dados do pedido (usuarioId, cupomId, produtos, precoTotal, status)
-     * @returns Promise<object> - Pedido criado com produtos associados
+     * @returns Promise<object> - Pedido criado com produtos associados e número formatado
      * @throws Error - Se ocorrer erro no repositório
      */
     static async createOrder(data: {
@@ -41,7 +56,11 @@ export class OrderService {
     }) {
         try {
             const order = await OrderRepository.createOrder(data);
-            return order;
+            // Adiciona o número do pedido formatado ao objeto retornado
+            return {
+                ...order,
+                numeroPedido: generateOrderNumber(order.id)
+            };
         } catch (error) {
             throw error;
         }
