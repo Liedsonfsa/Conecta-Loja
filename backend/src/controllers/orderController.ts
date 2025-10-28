@@ -10,7 +10,16 @@ import { OrderService } from '../services/orderService';
  */
 export const getUserOrders = async (req: Request, res: Response) => {
     try {
-        const orders = await OrderService.getUserOrders(req.body.usuarioId);
+        const usuarioId = Number(req.query.usuarioId);
+
+        if (isNaN(usuarioId)) {
+            return res.status(400).json({
+                success: false,
+                message: "ID do usuário inválido"
+            });
+        }
+
+        const orders = await OrderService.getUserOrders(usuarioId);
 
         res.status(200).json({
             success: true,

@@ -17,6 +17,17 @@ export class OrderRepository {
     static async getUserOrders(usuarioId: number) {
         return await prisma.pedido.findMany({
             where: { usuarioId },
+            include: {
+                produtos: {
+                    include: {
+                        produto: true // Inclui os dados do produto relacionado
+                    }
+                },
+                endereco: true // Inclui os dados do endereço de entrega
+            },
+            orderBy: {
+                createdAt: 'desc' // Ordena por data de criação, mais recentes primeiro
+            }
         })
     }
 
