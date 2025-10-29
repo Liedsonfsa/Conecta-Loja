@@ -6,7 +6,7 @@ import { addressService, orderService } from '../../api';
 import { useToast } from '../../hooks/use-toast';
 import { openWhatsAppOrder } from '../../utils';
 import Button from '../../components/ui/ButtonDash';
-import ConfirmDialog from '../../components/ui/ConfirmDialog';
+import OrderConfirmation from '../../components/ui/OrderConfirmation';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -40,22 +40,15 @@ const Checkout = () => {
   const [creatingOrder, setCreatingOrder] = useState(false);
   const [showAddAddress, setShowAddAddress] = useState(false);
 
+  // Estados para confirmação do pedido
+  const [showOrderSuccessModal, setShowOrderSuccessModal] = useState(false);
+  const [confirmedOrderData, setConfirmedOrderData] = useState(null);
+
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
   const { items, totalPrice, totalItems, clearCart, closeCart } = useCart();
   const { toast } = useToast();
 
-  // Dialog de confirmação
-  const [confirmDialog, setConfirmDialog] = useState({
-    isOpen: false,
-    title: '',
-    description: '',
-    confirmText: 'Confirmar',
-    cancelText: 'Cancelar',
-    variant: 'default',
-    onConfirm: () => {},
-    onClose: () => setConfirmDialog(prev => ({ ...prev, isOpen: false }))
-  });
 
   /**
    * Carrega endereços do usuário
@@ -158,23 +151,6 @@ const Checkout = () => {
     }
   };
 
-  /**
-   * Mostra dialog de confirmação do pedido
-   */
-  const showOrderConfirmation = () => {
-    const selectedAddress = addresses.find(addr => addr.id === selectedAddressId);
-
-    setConfirmDialog({
-      isOpen: true,
-      title: 'Confirmar Pedido',
-      description: `Confirma o pedido para entrega no endereço: ${formatAddress(selectedAddress)}?`,
-      confirmText: 'Confirmar Pedido',
-      cancelText: 'Cancelar',
-      variant: 'default',
-      onConfirm: handleConfirmOrder,
-      onClose: () => setConfirmDialog(prev => ({ ...prev, isOpen: false }))
-    });
-  };
 
   /**
    * Finaliza o pedido
@@ -216,7 +192,6 @@ const Checkout = () => {
           phone: user.contact || user.phone || null // Tentar contact ou phone
         };
 
-
         // Formatar itens do carrinho para WhatsApp
         const whatsappItems = items.map(item => {
           const price = parseFloat(item.product?.price) || 0;
@@ -227,24 +202,15 @@ const Checkout = () => {
           };
         });
 
-        // Limpar o carrinho após pedido criado com sucesso
-        clearCart();
-
-        // Fechar o carrinho
-        closeCart();
-
-        toast({
-          title: 'Pedido realizado com sucesso! 🎉',
-          description: `Número do pedido: ${result.pedido?.numeroPedido || result.pedido?.id || 'N/A'}. Você será redirecionado para o WhatsApp para confirmar o pagamento.`,
-          variant: 'default'
+        // Salvar dados para a confirmação animada
+        setConfirmedOrderData({
+          orderData,
+          customerData,
+          whatsappItems
         });
 
-        // Aguardar um pouco antes de redirecionar para WhatsApp
-        setTimeout(() => {
-          openWhatsAppOrder(orderData, customerData, whatsappItems);
-          // Redirecionar para página de histórico de pedidos após WhatsApp
-          navigate('/history');
-        }, 2000);
+        // Mostrar confirmação animada
+        setShowOrderSuccessModal(true);
       } else {
         toast({
           title: 'Erro ao criar pedido',
@@ -261,7 +227,25 @@ const Checkout = () => {
       });
     } finally {
       setCreatingOrder(false);
-      setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+    }
+  };
+
+  /**
+   * Manipula a conclusão da animação de confirmação do pedido
+   */
+  const handleOrderConfirmationComplete = () => {
+    if (confirmedOrderData) {
+      const { orderData, customerData, whatsappItems } = confirmedOrderData;
+
+      // Abrir WhatsApp
+      openWhatsAppOrder(orderData, customerData, whatsappItems);
+
+      // Limpar carrinho e fechar após redirecionamento
+      setTimeout(() => {
+        clearCart();
+        closeCart();
+        navigate('/history');
+      }, 500);
     }
   };
 
@@ -485,7 +469,7 @@ const Checkout = () => {
 
                 <div className="mt-6 space-y-3">
                   <Button
-                    onClick={showOrderConfirmation}
+                    onClick={handleConfirmOrder}
                     disabled={!selectedAddressId || creatingOrder || addresses.length === 0}
                     loading={creatingOrder}
                     className="w-full"
@@ -506,16 +490,11 @@ const Checkout = () => {
           </div>
       </div>
 
-      {/* Confirmation Dialog */}
-      <ConfirmDialog
-        isOpen={confirmDialog.isOpen}
-        onClose={confirmDialog.onClose}
-        onConfirm={confirmDialog.onConfirm}
-        title={confirmDialog.title}
-        description={confirmDialog.description}
-        confirmText={confirmDialog.confirmText}
-        cancelText={confirmDialog.cancelText}
-        variant={confirmDialog.variant}
+      {/* Order Confirmation Modal */}
+      <OrderConfirmation
+        isVisible={showOrderSuccessModal}
+        orderNumber={confirmedOrderData?.orderData?.numeroPedido || confirmedOrderData?.orderData?.id}
+        onComplete={handleOrderConfirmationComplete}
       />
     </div>
   );

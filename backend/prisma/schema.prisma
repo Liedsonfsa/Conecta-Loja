@@ -102,6 +102,7 @@ model funcionario {
   name     String
   email    String @unique
   password String
+  avatar   String? @db.Text // Foto do funcionário em base64 (opcional)
 
   cargoId Int? // Temporariamente opcional
   cargo   cargo? @relation(fields: [cargoId], references: [id])

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { UserService } from '../services/userService';
+import { EmployeeService } from '../services/employeeService';
 
 /**
  * Controller para criação de usuário
@@ -41,20 +42,31 @@ export const createUser = async (req: Request, res: Response) => {
 };
 /**
  * Controller para buscar o perfil do usuário logado.
- * Chama o serviço que busca os dados no banco.
+ * Detecta o tipo de usuário (cliente/funcionário) e chama o serviço apropriado.
  */
 export const getProfile = async (req: Request, res: Response) => {
     console.log("--- [CONTROLLER] A função getProfile foi chamada. ---");
     try {
-        // O ID do usuário é injetado na requisição pelo seu middleware de autenticação
+        // O ID e tipo do usuário são injetados na requisição pelo middleware de autenticação
         const userId = (req as any).user.id;
+        const userType = (req as any).user.userType;
 
-        const userProfile = await UserService.getProfile(userId);
+        let userProfile;
+
+        // Chamar serviço apropriado baseado no tipo de usuário
+        if (userType === 'funcionario' || userType === 'admin') {
+            // Para funcionários e admins, buscar dados da tabela funcionário
+            userProfile = await EmployeeService.getEmployeeProfile(userId);
+        } else {
+            // Para clientes, buscar dados da tabela usuário
+            userProfile = await UserService.getProfile(userId);
+        }
+
         res.status(200).json(userProfile);
     } catch (error) {
         const errorMessage = (error as Error).message;
         // Retorna erros específicos vindos do serviço
-        if (errorMessage === "Usuário não encontrado") {
+        if (errorMessage === "Usuário não encontrado" || errorMessage === "Funcionário não encontrado") {
             return res.status(404).json({ success: false, error: errorMessage });
         }
         // Retorna um erro genérico para outros casos
@@ -64,24 +76,42 @@ export const getProfile = async (req: Request, res: Response) => {
 
 /**
  * Controller para atualizar informações pessoais do usuário logado.
- * Chama o serviço que salva os dados pessoais no banco.
+ * Detecta o tipo de usuário e chama o serviço apropriado.
  */
 export const updatePersonalInfo = async (req: Request, res: Response) => {
     try {
         const userId = (req as any).user.id;
+        const userType = (req as any).user.userType;
         const personalData = req.body;
 
-        // Validar dados de entrada - incluir avatar também
-        const allowedFields = ['name', 'email', 'contact', 'avatar'];
-        const filteredData: any = {};
+        let updatedUser;
 
-        for (const field of allowedFields) {
-            if (personalData[field] !== undefined) {
-                filteredData[field] = personalData[field];
+        // Chamar serviço apropriado baseado no tipo de usuário
+        if (userType === 'funcionario' || userType === 'admin') {
+            // Para funcionários e admins, campos permitidos são diferentes
+            const allowedFields = ['name', 'email', 'avatar'];
+            const filteredData: any = {};
+
+            for (const field of allowedFields) {
+                if (personalData[field] !== undefined) {
+                    filteredData[field] = personalData[field];
+                }
             }
-        }
 
-        const updatedUser = await UserService.updatePersonalInfo(userId, filteredData);
+            updatedUser = await EmployeeService.updateEmployeePersonalInfo(userId, filteredData);
+        } else {
+            // Para clientes, campos incluem contact (telefone)
+            const allowedFields = ['name', 'email', 'contact', 'avatar'];
+            const filteredData: any = {};
+
+            for (const field of allowedFields) {
+                if (personalData[field] !== undefined) {
+                    filteredData[field] = personalData[field];
+                }
+            }
+
+            updatedUser = await UserService.updatePersonalInfo(userId, filteredData);
+        }
 
         res.status(200).json({
             success: true,
@@ -90,7 +120,7 @@ export const updatePersonalInfo = async (req: Request, res: Response) => {
                 id: updatedUser.id,
                 name: updatedUser.name,
                 email: updatedUser.email,
-                contact: updatedUser.contact
+                contact: updatedUser.contact || null // Funcionários podem não ter contact
             }
         });
     } catch (error) {
