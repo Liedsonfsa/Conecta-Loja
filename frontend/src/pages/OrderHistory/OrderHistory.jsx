@@ -121,15 +121,7 @@ const OrderHistory = () => {
       if (response.success) {
         // Formatar dados dos pedidos para o frontend
         const formattedOrders = response.orders.map(order => {
-          console.log('Dados do pedido:', {
-            id: order.id,
-            createdAt: order.createdAt,
-            numeroPedido: order.numeroPedido,
-            status: order.status
-          });
-
           const createdAt = new Date(order.createdAt);
-          console.log('Data criada:', createdAt, 'isValid:', !isNaN(createdAt.getTime()));
 
           return {
             id: order.numeroPedido || order.id,
@@ -569,7 +561,6 @@ const OrderHistory = () => {
                                       try {
                                         const date = new Date(historico.createdAt);
                                         if (isNaN(date.getTime())) {
-                                          console.log('Data inválida:', historico.createdAt);
                                           return 'Data indisponível';
                                         }
                                         return date.toLocaleDateString('pt-BR', {
@@ -580,7 +571,6 @@ const OrderHistory = () => {
                                           minute: '2-digit'
                                         });
                                       } catch (error) {
-                                        console.log('Erro ao formatar data:', error, historico.createdAt);
                                         return 'Data indisponível';
                                       }
                                     })()}
@@ -603,25 +593,7 @@ const OrderHistory = () => {
                               <div className="flex-1">
                                 <p className="text-sm font-medium text-foreground">{getStatusText(selectedOrder.status)}</p>
                               <p className="text-xs text-muted-foreground">
-                                {(() => {
-                                  try {
-                                    const date = new Date(selectedOrder.createdAt);
-                                    if (isNaN(date.getTime())) {
-                                      console.log('Data inválida no pedido:', selectedOrder.createdAt);
-                                      return 'Data indisponível';
-                                    }
-                                    return date.toLocaleDateString('pt-BR', {
-                                      day: '2-digit',
-                                      month: '2-digit',
-                                      year: 'numeric',
-                                      hour: '2-digit',
-                                      minute: '2-digit'
-                                    });
-                                  } catch (error) {
-                                    console.log('Erro ao formatar data do pedido:', error, selectedOrder.createdAt);
-                                    return 'Data indisponível';
-                                  }
-                                })()}
+                                {selectedOrder.date || 'Data indisponível'}
                               </p>
                               </div>
                             </div>
@@ -637,36 +609,13 @@ const OrderHistory = () => {
                             <div className="flex justify-between">
                               <span className="text-muted-foreground">Data do pedido:</span>
                               <span className="text-foreground">
-                                {(() => {
-                                  try {
-                                    const date = new Date(selectedOrder.createdAt);
-                                    if (isNaN(date.getTime())) {
-                                      return selectedOrder.date || 'Data indisponível';
-                                    }
-                                    return date.toLocaleDateString('pt-BR');
-                                  } catch (error) {
-                                    return selectedOrder.date || 'Data indisponível';
-                                  }
-                                })()}
+                                {selectedOrder.date || 'Data indisponível'}
                               </span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-muted-foreground">Horário:</span>
                               <span className="text-foreground">
-                                {(() => {
-                                  try {
-                                    const date = new Date(selectedOrder.createdAt);
-                                    if (isNaN(date.getTime())) {
-                                      return selectedOrder.time || 'Horário indisponível';
-                                    }
-                                    return date.toLocaleTimeString('pt-BR', {
-                                      hour: '2-digit',
-                                      minute: '2-digit'
-                                    });
-                                  } catch (error) {
-                                    return selectedOrder.time || 'Horário indisponível';
-                                  }
-                                })()}
+                                {selectedOrder.time || 'Horário indisponível'}
                               </span>
                             </div>
                             <div className="flex justify-between">
