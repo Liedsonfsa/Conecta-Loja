@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { OrderService } from '../services/orderService';
+import { OrderStatus } from '../generated/prisma';
 
 /**
  * @route GET /api/order
@@ -10,7 +11,16 @@ import { OrderService } from '../services/orderService';
  */
 export const getUserOrders = async (req: Request, res: Response) => {
     try {
-        const orders = await OrderService.getUserOrders(req.body.usuarioId);
+        const usuarioId = Number(req.query.usuarioId);
+
+        if (isNaN(usuarioId)) {
+            return res.status(400).json({
+                success: false,
+                message: "ID do usuário inválido"
+            });
+        }
+
+        const orders = await OrderService.getUserOrders(usuarioId);
 
         res.status(200).json({
             success: true,
@@ -95,4 +105,115 @@ export const deleteOrder = async (req: Request, res: Response) => {
       .status(500)
       .json({ success: false, message: "Erro ao excluir pedido" });
   }
+};
+
+/**
+ * Busca um pedido específico por ID
+ *
+ * Recebe o ID do pedido via parâmetro de rota e retorna os detalhes completos
+ * do pedido incluindo produtos, endereço e histórico de status.
+ *
+ * @param req - Requisição Express contendo o parâmetro `id` da rota
+ * @param res - Resposta Express
+ * @returns Promise<Response> - Retorna os detalhes do pedido ou mensagem de erro
+ *
+ * @example
+ * GET /api/order/123
+ */
+export const getOrderById = async (req: Request, res: Response) => {
+    try {
+        const id = Number(req.params.id);
+
+        if (isNaN(id)) {
+            return res.status(400).json({
+                success: false,
+                message: "ID do pedido inválido"
+            });
+        }
+
+        const order = await OrderService.getOrderById(id);
+
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: "Pedido não encontrado"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            order
+        });
+    } catch (error) {
+        console.error('Erro ao buscar pedido por ID:', error);
+        return res.status(500).json({
+            success: false,
+            message: "Erro ao buscar pedido"
+        });
+    }
+};
+
+/**
+ * Atualiza o status de um pedido
+ *
+ * Recebe o ID do pedido e o novo status, atualiza o pedido e registra
+ * a mudança no histórico de status.
+ *
+ * @param req - Requisição Express contendo id (params) e status, criadoPor, observacao (body)
+ * @param res - Resposta Express
+ * @returns Promise<Response> - Retorna o pedido atualizado ou mensagem de erro
+ *
+ * @example
+ * PUT /api/order/123/status
+ * {
+ *   "status": "PREPARO",
+ *   "criadoPor": 1,
+ *   "observacao": "Pedido iniciado na cozinha"
+ * }
+ */
+export const updateOrderStatus = async (req: Request, res: Response) => {
+    try {
+        const id = Number(req.params.id);
+        const { status, criadoPor, observacao } = req.body;
+
+        if (isNaN(id)) {
+            return res.status(400).json({
+                success: false,
+                message: "ID do pedido inválido"
+            });
+        }
+
+        if (!status || !(status in OrderStatus)) {
+            return res.status(400).json({
+                success: false,
+                message: "Status inválido"
+            });
+        }
+
+        const pedidoAtualizado = await OrderService.updateOrderStatus(
+            id,
+            status as OrderStatus,
+            criadoPor,
+            observacao
+        );
+
+        res.status(200).json({
+            success: true,
+            message: "Status do pedido atualizado com sucesso",
+            pedido: pedidoAtualizado
+        });
+    } catch (error: any) {
+        if (error.message === "Pedido não encontrado") {
+            return res.status(404).json({
+                success: false,
+                message: error.message
+            });
+        }
+
+        console.error('Erro ao atualizar status do pedido:', error);
+        return res.status(500).json({
+            success: false,
+            message: "Erro ao atualizar status do pedido"
+        });
+    }
 };

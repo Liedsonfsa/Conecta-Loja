@@ -4,6 +4,7 @@ import { useCart } from '../../hooks/useCart';
 import { useAuth } from '../../hooks/use-auth.js';
 import { addressService, orderService } from '../../api';
 import { useToast } from '../../hooks/use-toast';
+import { openWhatsAppOrder } from '../../utils';
 import Button from '../../components/ui/ButtonDash';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import { Input } from '@/components/ui/input';
@@ -201,6 +202,31 @@ const Checkout = () => {
       const result = await orderService.createOrder(orderData);
 
       if (result.success) {
+        // Preparar dados para WhatsApp
+        const orderData = {
+          id: result.pedido?.id,
+          numeroPedido: result.pedido?.numeroPedido
+        };
+
+        // Garantir que o nome seja tratado corretamente (problema de encoding)
+        const cleanName = (user.name || 'Cliente').replace(/Ã©/g, 'é').replace(/Ã¡/g, 'á').replace(/Ã£/g, 'ã').replace(/Ãµ/g, 'õ').replace(/Ã§/g, 'ç').replace(/Ã‰/g, 'É').replace(/Ã/g, 'Á');
+
+        const customerData = {
+          name: cleanName,
+          phone: user.contact || user.phone || null // Tentar contact ou phone
+        };
+
+
+        // Formatar itens do carrinho para WhatsApp
+        const whatsappItems = items.map(item => {
+          const price = parseFloat(item.product?.price) || 0;
+          return {
+            name: item.product?.name || 'Produto sem nome',
+            quantity: item.quantity || 1,
+            price: price
+          };
+        });
+
         // Limpar o carrinho após pedido criado com sucesso
         clearCart();
 
@@ -208,13 +234,17 @@ const Checkout = () => {
         closeCart();
 
         toast({
-          title: 'Pedido realizado!',
-          description: `Seu pedido foi criado com sucesso. Número do pedido: ${result.order?.id || 'N/A'}`,
+          title: 'Pedido realizado com sucesso! 🎉',
+          description: `Número do pedido: ${result.pedido?.numeroPedido || result.pedido?.id || 'N/A'}. Você será redirecionado para o WhatsApp para confirmar o pagamento.`,
           variant: 'default'
         });
 
-        // Redirecionar para página de pedidos
-        navigate('/orders');
+        // Aguardar um pouco antes de redirecionar para WhatsApp
+        setTimeout(() => {
+          openWhatsAppOrder(orderData, customerData, whatsappItems);
+          // Redirecionar para página de histórico de pedidos após WhatsApp
+          navigate('/history');
+        }, 2000);
       } else {
         toast({
           title: 'Erro ao criar pedido',

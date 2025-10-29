@@ -17,6 +17,17 @@ export class OrderRepository {
     static async getUserOrders(usuarioId: number) {
         return await prisma.pedido.findMany({
             where: { usuarioId },
+            include: {
+                produtos: {
+                    include: {
+                        produto: true // Inclui os dados do produto relacionado
+                    }
+                },
+                endereco: true // Inclui os dados do endereço de entrega
+            },
+            orderBy: {
+                createdAt: 'desc' // Ordena por data de criação, mais recentes primeiro
+            }
         })
     }
 
@@ -82,6 +93,63 @@ export class OrderRepository {
 
         return await prisma.pedido.delete({
             where: { id },
+        });
+    }
+
+    /**
+     * Atualiza o status de um pedido
+     *
+     * @param id - ID do pedido a ser atualizado
+     * @param novoStatus - Novo status do pedido
+     * @returns Promise<object> - Pedido atualizado
+     */
+    /**
+     * Busca um pedido específico por ID
+     *
+     * @param id - ID do pedido a ser retornado
+     * @returns Promise<object> - Pedido encontrado com relacionamentos
+     */
+    static async getOrderById(id: number) {
+        return await prisma.pedido.findUnique({
+            where: { id },
+            include: {
+                produtos: {
+                    include: {
+                        produto: true // Inclui os dados do produto relacionado
+                    }
+                },
+                endereco: true, // Inclui os dados do endereço de entrega
+                usuario: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true
+                    }
+                }, // Inclui dados básicos do usuário
+                statusHistorico: {
+                    include: {
+                        funcionario: {
+                            select: {
+                                id: true,
+                                name: true
+                            }
+                        }
+                    },
+                    orderBy: {
+                        createdAt: 'asc' // Ordena por data de criação (mais antigo primeiro)
+                    }
+                } // Inclui histórico completo de status
+            }
+        });
+    }
+
+    static async updateOrderStatus(id: number, novoStatus: OrderStatus) {
+        return await prisma.pedido.update({
+            where: { id },
+            data: {
+                status: novoStatus,
+                updatedAt: new Date()
+            }
         });
     }
 }

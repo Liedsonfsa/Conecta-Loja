@@ -27,16 +27,23 @@ const cors_1 = __importDefault(require("cors"));
 const path_1 = __importDefault(require("path"));
 const routes_1 = __importDefault(require("./routes"));
 const app = (0, express_1.default)();
-// Configuração do CORS para permitir requisições do frontend
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] >>> REQUISIÇÃO RECEBIDA: ${req.method} ${req.originalUrl}`);
+    next();
+});
 // Em produção, deve ser configurado para aceitar apenas origens específicas
 app.use((0, cors_1.default)({
-    origin: "http://localhost:4028", // URL padrão do Vite em desenvolvimento
-    credentials: true // Permite envio de cookies e headers de autorização
+    origin: "http://localhost:4028",
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    allowedHeaders: "Content-Type, Authorization",
+    credentials: true
 }));
 // Middleware para parsing de JSON no corpo das requisições
-app.use(express_1.default.json());
+// Aumentando o limite para suportar uploads de imagem
+app.use(express_1.default.json({ limit: '10mb' }));
+app.use(express_1.default.urlencoded({ limit: '10mb', extended: true }));
 // Servir arquivos estáticos (imagens dos produtos)
-app.use('/uploads', express_1.default.static(path_1.default.join(__dirname, '../../uploads')));
+app.use('/uploads', express_1.default.static(path_1.default.join(process.cwd(), 'uploads')));
 // Rota inicial de teste - útil para verificar se o servidor está respondendo
 app.get("/", (req, res) => {
     res.send("Hello World");

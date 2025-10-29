@@ -23,7 +23,7 @@ class EmployeeService {
      * @param data.name - Nome completo do funcionário
      * @param data.email - Email único do funcionário
      * @param data.password - Senha em texto plano (será hasheada)
-     * @param data.role - Função/cargo do funcionário na empresa
+     * @param data.cargoId - ID do cargo/função do funcionário
      * @param data.storeId - ID da loja onde o funcionário trabalha
      * @returns Promise com o funcionário criado (sem senha)
      *
@@ -34,10 +34,18 @@ class EmployeeService {
      *   name: "Maria Santos",
      *   email: "maria@empresa.com",
      *   password: "senha123",
-     *   role: "gerente",
+     *   cargoId: 1,
+     *   storeId: 1
+     * };
+     * const adminData = {
+     *   name: "João Admin",
+     *   email: "admin@empresa.com",
+     *   password: "admin123",
+     *   cargoId: 2,
      *   storeId: 1
      * };
      * const employee = await EmployeeService.createEmployee(employeeData);
+     * const admin = await EmployeeService.createEmployee(adminData);
      */
     static async createEmployee(data) {
         try {
@@ -47,11 +55,156 @@ class EmployeeService {
                 name: data.name,
                 email: data.email,
                 password: hashedPassword,
-                role: data.role,
+                cargoId: data.cargoId,
                 storeId: data.storeId
             });
             const { password, ...employeeWithoutPassword } = employee;
             return employeeWithoutPassword;
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+    /**
+     * Atualiza os dados de um funcionário existente no banco de dados.
+     *
+     * Permite modificar nome, email, função/cargo, ID da loja e senha (opcional).
+     * Caso uma nova senha seja fornecida, ela será automaticamente hasheada com bcrypt.
+     *
+     * @param id - ID do funcionário a ser atualizado
+     * @param data - Dados a serem atualizados
+     * @param data.name - (Opcional) Novo nome do funcionário
+     * @param data.email - (Opcional) Novo email do funcionário
+     * @param data.password - (Opcional) Nova senha em texto plano (será hasheada)
+     * @param data.role - (Opcional) Nova função/cargo do funcionário
+     * @param data.storeId - (Opcional) Novo ID da loja onde o funcionário trabalha
+     * @returns Promise com o funcionário atualizado (sem senha)
+     *
+     * @throws Error se o funcionário não for encontrado ou se ocorrer falha na atualização
+     *
+     * @example
+     * const updatedEmployee = await EmployeeService.editEmployee(1, {
+     *   name: "João Silva Atualizado",
+     *   password: "novaSenha456"
+     * });
+     */
+    static async editEmployee(id, data) {
+        try {
+            const existingEmployee = await employeeRepository_1.EmployeeRepository.findEmployeeById(id);
+            if (!existingEmployee) {
+                throw new Error("Funcionário não encontrado");
+            }
+            const updatedData = { ...data };
+            if (data.password) {
+                const saltRounds = 12;
+                updatedData.password = await bcrypt_1.default.hash(data.password, saltRounds);
+            }
+            // Mapear role para cargoId se fornecido
+            if (data.role) {
+                updatedData.cargoId = data.role === 'ADMIN' ? 2 : 1;
+                delete updatedData.role; // Remover o campo role antigo
+            }
+            const updatedEmployee = await employeeRepository_1.EmployeeRepository.updateEmployee(id, updatedData);
+            const { password, ...employeeWithoutPassword } = updatedEmployee;
+            return employeeWithoutPassword;
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+    /**
+     * Busca um funcionário pelo ID
+     *
+     * @param id - ID do funcionário a ser buscado
+     * @returns Promise com o funcionário encontrado (sem senha)
+     *
+     * @throws Error se o funcionário não for encontrado
+     *
+     * @example
+     * const employee = await EmployeeService.getEmployeeById(1);
+     */
+    static async getEmployeeById(id) {
+        try {
+            const employee = await employeeRepository_1.EmployeeRepository.findEmployeeById(id);
+            if (!employee) {
+                throw new Error("Funcionário não encontrado");
+            }
+            const { password, ...employeeWithoutPassword } = employee;
+            return employeeWithoutPassword;
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+    /**
+     * Lista todos os funcionários com paginação e filtros
+     *
+     * @param options - Opções de busca
+     * @param options.page - Página atual (padrão: 1)
+     * @param options.limit - Limite de itens por página (padrão: 10)
+     * @param options.search - Termo de busca por nome ou email
+     * @returns Promise com lista de funcionários e metadados de paginação
+     *
+     * @example
+     * const result = await EmployeeService.getAllEmployees({
+     *   page: 1,
+     *   limit: 10,
+     *   search: "João"
+     * });
+     */
+    static async getAllEmployees(options) {
+        try {
+            const { page = 1, limit = 10, search } = options || {};
+            // Construir filtros
+            const where = {};
+            if (search) {
+                where.OR = [
+                    { name: { contains: search, mode: 'insensitive' } },
+                    { email: { contains: search, mode: 'insensitive' } }
+                ];
+            }
+            const skip = (page - 1) * limit;
+            const [employees, total] = await Promise.all([
+                employeeRepository_1.EmployeeRepository.findAllEmployees({ skip, take: limit, where }),
+                employeeRepository_1.EmployeeRepository.countEmployees(where),
+            ]);
+            // Remover senha de todos os funcionários
+            const employeesWithoutPassword = employees.map(employee => {
+                const { password, ...employeeWithoutPassword } = employee;
+                return employeeWithoutPassword;
+            });
+            return {
+                employees: employeesWithoutPassword,
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    totalPages: Math.ceil(total / limit),
+                },
+            };
+        }
+        catch (error) {
+            throw error;
+        }
+    }
+    /**
+     * Remove um funcionário do banco de dados
+     *
+     * @param id - ID do funcionário a ser removido
+     * @returns Promise<void>
+     *
+     * @throws Error se o funcionário não for encontrado
+     *
+     * @example
+     * await EmployeeService.deleteEmployee(1);
+     */
+    static async deleteEmployee(id) {
+        try {
+            const employee = await employeeRepository_1.EmployeeRepository.findEmployeeById(id);
+            if (!employee) {
+                throw new Error("Funcionário não encontrado");
+            }
+            await employeeRepository_1.EmployeeRepository.deleteEmployee(id);
         }
         catch (error) {
             throw error;
