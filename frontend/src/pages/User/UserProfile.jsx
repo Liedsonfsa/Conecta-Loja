@@ -18,6 +18,7 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth.js";
 import { userService } from "@/api/userService";
 
 /**
@@ -46,6 +47,7 @@ import { userService } from "@/api/userService";
 const UserProfile = () => {
     const navigate = useNavigate();
     const { toast } = useToast();
+    const { userType } = useAuth();
 
     const [profile, setProfile] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -94,12 +96,15 @@ const UserProfile = () => {
     };
 
     const handleEditContact = () => {
-        // Preencher o formulário com os dados atuais
-        setContactForm({
-            email: profile.email,
-            contact: profile.contact || ""
-        });
-        setIsContactModalOpen(true);
+        // Só permite edição de contato para clientes
+        if (userType === 'cliente') {
+            // Preencher o formulário com os dados atuais
+            setContactForm({
+                email: profile.email,
+                contact: profile.contact || ""
+            });
+            setIsContactModalOpen(true);
+        }
     };
 
     const handleSavePersonalInfo = async () => {
@@ -405,25 +410,36 @@ const UserProfile = () => {
                             </CardContent>
                         </Card>
 
-                        {/* Contato */}
+                        {/* Contato / Informações Profissionais */}
                         <Card className="shadow-sm">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
                                 <CardTitle className="flex items-center gap-2">
-                                    <Phone className="h-5 w-5 text-primary" />
-                                    Contato
+                                    {userType === 'cliente' ? (
+                                        <>
+                                            <Phone className="h-5 w-5 text-primary" />
+                                            Contato
+                                        </>
+                                    ) : (
+                                        <>
+                                            <User className="h-5 w-5 text-primary" />
+                                            Informações Profissionais
+                                        </>
+                                    )}
                                 </CardTitle>
-                                <Dialog open={isContactModalOpen} onOpenChange={setIsContactModalOpen}>
-                                    <DialogTrigger asChild>
-                                        <ButtonDash
-                                            variant="outline"
-                                            size="sm"
-                                            iconName="Edit3"
-                                            onClick={handleEditContact}
-                                        >
-                                            Editar
-                                        </ButtonDash>
-                                    </DialogTrigger>
-                                </Dialog>
+                                {userType === 'cliente' && (
+                                    <Dialog open={isContactModalOpen} onOpenChange={setIsContactModalOpen}>
+                                        <DialogTrigger asChild>
+                                            <ButtonDash
+                                                variant="outline"
+                                                size="sm"
+                                                iconName="Edit3"
+                                                onClick={handleEditContact}
+                                            >
+                                                Editar
+                                            </ButtonDash>
+                                        </DialogTrigger>
+                                    </Dialog>
+                                )}
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-3">
@@ -431,40 +447,65 @@ const UserProfile = () => {
                                         <p className="text-sm font-medium text-gray-500">Email</p>
                                         <p className="text-gray-900">{profile.email}</p>
                             </div>
-                            <div>
-                                        <p className="text-sm font-medium text-gray-500">Telefone</p>
-                                        <p className="text-gray-900">{profile.contact || 'Não informado'}</p>
-                            </div>
+                            {userType === 'cliente' ? (
+                                <div>
+                                    <p className="text-sm font-medium text-gray-500">Telefone</p>
+                                    <p className="text-gray-900">{profile.contact || 'Não informado'}</p>
+                                </div>
+                            ) : (
+                                <>
+                                    {profile.cargo && (
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-500">Cargo</p>
+                                            <p className="text-gray-900">{profile.cargo.name}</p>
+                                            {profile.cargo.description && (
+                                                <p className="text-sm text-gray-600">{profile.cargo.description}</p>
+                                            )}
+                                        </div>
+                                    )}
+                                    {profile.store && (
+                                        <div>
+                                            <p className="text-sm font-medium text-gray-500">Loja</p>
+                                            <p className="text-gray-900">{profile.store.name}</p>
+                                            <p className="text-sm text-gray-600">{profile.store.email}</p>
+                                            {profile.store.contact && (
+                                                <p className="text-sm text-gray-600">{profile.store.contact}</p>
+                                            )}
+                                        </div>
+                                    )}
+                                </>
+                            )}
                         </div>
                     </CardContent>
                 </Card>
 
-                        {/* Endereços */}
-                        <Card className="shadow-sm">
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                        <CardTitle className="flex items-center gap-2">
-                                    <MapPin className="h-5 w-5 text-primary" />
-                                    Endereços de Entrega
-                        </CardTitle>
-                                <div className="flex gap-2">
-                                    <ButtonDash
-                                        variant="outline"
-                                        size="sm"
-                                        iconName="Settings"
-                                        onClick={handleManageAddresses}
-                                    >
-                                        Gerenciar
-                                    </ButtonDash>
-                                    <ButtonDash
-                                        variant="default"
-                                        size="sm"
-                                        iconName="Plus"
-                                        onClick={handleAddAddress}
-                                    >
-                                        Adicionar
-                                    </ButtonDash>
-                                </div>
-                    </CardHeader>
+                        {/* Endereços - Apenas para clientes */}
+                        {userType === 'cliente' && (
+                            <Card className="shadow-sm">
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                            <CardTitle className="flex items-center gap-2">
+                                        <MapPin className="h-5 w-5 text-primary" />
+                                        Endereços de Entrega
+                            </CardTitle>
+                                    <div className="flex gap-2">
+                                        <ButtonDash
+                                            variant="outline"
+                                            size="sm"
+                                            iconName="Settings"
+                                            onClick={handleManageAddresses}
+                                        >
+                                            Gerenciar
+                                        </ButtonDash>
+                                        <ButtonDash
+                                            variant="default"
+                                            size="sm"
+                                            iconName="Plus"
+                                            onClick={handleAddAddress}
+                                        >
+                                            Adicionar
+                                        </ButtonDash>
+                                    </div>
+                        </CardHeader>
                     <CardContent>
                                 {profile.address ? (
                                     <div className="space-y-2">
@@ -502,6 +543,7 @@ const UserProfile = () => {
                                 )}
                             </CardContent>
                         </Card>
+                        )}
 
                     </div>
                 </div>

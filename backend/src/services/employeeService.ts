@@ -240,4 +240,112 @@ export class EmployeeService {
         }
     }
 
+    /**
+     * Busca o perfil completo do funcionário logado
+     *
+     * @param employeeId - ID do funcionário autenticado
+     * @returns Promise com dados do perfil do funcionário
+     *
+     * @throws Error se o funcionário não for encontrado
+     *
+     * @example
+     * const profile = await EmployeeService.getEmployeeProfile(1);
+     */
+    static async getEmployeeProfile(employeeId: number) {
+        try {
+            const employee = await EmployeeRepository.findEmployeeById(employeeId);
+            if (!employee) {
+                throw new Error("Funcionário não encontrado");
+            }
+
+            // Retornar dados do funcionário (sem senha)
+            const { password, ...employeeWithoutPassword } = employee;
+
+            // Buscar dados da loja e cargo se existirem
+            let store = null;
+            let cargo = null;
+
+            if (employee.lojaId) {
+                const storeData = await EmployeeRepository.findStoreById(employee.lojaId);
+                if (storeData) {
+                    store = {
+                        id: storeData.id,
+                        name: storeData.name,
+                        contact: storeData.contact,
+                        email: storeData.email
+                    };
+                }
+            }
+
+            if (employee.cargoId) {
+                const cargoData = await EmployeeRepository.findCargoById(employee.cargoId);
+                if (cargoData) {
+                    cargo = {
+                        id: cargoData.id,
+                        name: cargoData.name,
+                        description: cargoData.description
+                    };
+                }
+            }
+
+            return {
+                ...employeeWithoutPassword,
+                store,
+                cargo,
+                avatar: employee.avatar || null
+            };
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    /**
+     * Atualiza informações pessoais do funcionário
+     *
+     * @param employeeId - ID do funcionário autenticado
+     * @param personalData - Dados pessoais a serem atualizados
+     * @returns Promise com dados atualizados do funcionário
+     *
+     * @throws Error se houver validação ou problemas na atualização
+     *
+     * @example
+     * const updatedEmployee = await EmployeeService.updateEmployeePersonalInfo(1, { name: "Novo Nome" });
+     */
+    static async updateEmployeePersonalInfo(employeeId: number, personalData: { name?: string; email?: string; avatar?: string | null | undefined }) {
+        try {
+            // Validações básicas
+            if (personalData.name !== undefined && (!personalData.name || personalData.name.trim().length === 0)) {
+                throw new Error('Nome não pode ser vazio');
+            }
+
+            if (personalData.email !== undefined && (!personalData.email || personalData.email.trim().length === 0)) {
+                throw new Error('Email não pode ser vazio');
+            }
+
+            // Validar formato do email se fornecido
+            if (personalData.email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(personalData.email)) {
+                    throw new Error('Formato de email inválido');
+                }
+
+                // Verificar se email já está em uso por outro funcionário
+                const existingEmployee = await EmployeeRepository.findEmployeeByEmail(personalData.email);
+                if (existingEmployee && existingEmployee.id !== employeeId) {
+                    throw new Error('Email já está em uso');
+                }
+            }
+
+            // Preparar dados para atualização, convertendo null para undefined
+            const updateData: any = { ...personalData };
+            if (updateData.avatar === null) {
+                updateData.avatar = undefined;
+            }
+
+            return await EmployeeRepository.updateEmployee(employeeId, updateData);
+        } catch (error) {
+            throw error;
+        }
+    }
+
 }

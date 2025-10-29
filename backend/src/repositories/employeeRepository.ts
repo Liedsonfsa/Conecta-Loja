@@ -144,4 +144,28 @@ export class EmployeeRepository {
             where: { id }
         });
     };
+
+    /**
+     * Busca uma loja pelo ID
+     *
+     * @param storeId - ID da loja
+     * @returns Dados da loja ou null se não encontrada
+     */
+    static async findStoreById(storeId: number) {
+        return await prisma.store.findUnique({
+            where: { id: storeId }
+        });
+    };
+
+    /**
+     * Busca um cargo pelo ID
+     *
+     * @param cargoId - ID do cargo
+     * @returns Dados do cargo ou null se não encontrado
+     */
+    static async findCargoById(cargoId: number) {
+        return await prisma.cargo.findUnique({
+            where: { id: cargoId }
+        });
+    };
 }
