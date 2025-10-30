@@ -11,26 +11,50 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 /**
- * Checkout - Página de finalização de pedido
+ * Checkout - Página de finalização de pedido da aplicação Conecta-Loja
+ *
+ * Página completa e moderna para finalização de pedidos com experiência fluida
+ * e confirmação animada tipo PicPay. Gerencia todo o fluxo de checkout desde
+ * a seleção de endereço até a confirmação final do pedido.
+ *
+ * @component
  *
  * Fluxo de checkout completo:
  * 1. Verifica se usuário tem endereços cadastrados
- * 2. Se não tiver, redireciona para cadastro de endereço
- * 3. Permite selecionar endereço de entrega
- * 4. Mostra resumo do pedido
- * 5. Permite finalizar pedido
+ * 2. Se não tiver, permite cadastro de endereço diretamente na página
+ * 3. Permite seleção do endereço de entrega
+ * 4. Mostra resumo detalhado do pedido
+ * 5. Permite finalizar pedido com confirmação animada
+ * 6. Redireciona para WhatsApp para confirmação de pagamento
  *
  * Estados gerenciados:
- * - Lista de endereços do usuário
- * - Endereço selecionado
- * - Loading states
- * - Estados de confirmação
+ * - Lista completa de endereços do usuário
+ * - Endereço selecionado para entrega
+ * - Estados de loading (autenticação, endereços, criação de pedido)
+ * - Modal de confirmação animada do pedido
+ * - Formulário de cadastro de endereço integrado
  *
- * Integrações:
- * - useCart: Para acessar itens do carrinho
- * - useAuth: Para dados do usuário
- * - addressService: Para gerenciar endereços
- * - orderService: Para criar pedidos
+ * Integrações principais:
+ * - useCart: Acesso aos itens do carrinho e funções de limpeza
+ * - useAuth: Dados do usuário autenticado
+ * - addressService: Gerenciamento completo de endereços
+ * - orderService: Criação e processamento de pedidos
+ * - OrderConfirmation: Componente de confirmação animada
+ *
+ * Funcionalidades especiais:
+ * - Confirmação animada tipo PicPay com ícone de sucesso
+ * - Redirecionamento automático para WhatsApp
+ * - Limpeza automática do carrinho após confirmação
+ * - Navegação para histórico de pedidos
+ * - Tratamento robusto de erros com toast notifications
+ *
+ * @example
+ * // Rota configurada em Routes.jsx
+ * <Route path="/checkout" element={<Checkout />} />
+ *
+ * @example
+ * // Navegação via carrinho
+ * navigate('/checkout');
  */
 const Checkout = () => {
   const [addresses, setAddresses] = useState([]);
@@ -51,7 +75,20 @@ const Checkout = () => {
 
 
   /**
-   * Carrega endereços do usuário
+   * Carrega todos os endereços cadastrados do usuário autenticado
+   *
+   * Faz uma chamada para a API para buscar os endereços do usuário,
+   * atualiza o estado local e seleciona automaticamente o primeiro
+   * endereço como padrão se existir.
+   *
+   * @async
+   * @function loadAddresses
+   * @returns {Promise<void>} Promise que resolve quando os endereços são carregados
+   *
+   * @throws {Error} Quando há erro na comunicação com a API
+   *
+   * @example
+   * await loadAddresses();
    */
   const loadAddresses = async () => {
     try {
@@ -77,7 +114,19 @@ const Checkout = () => {
   };
 
   /**
-   * Verifica se o usuário pode prosseguir com o checkout
+   * Verifica os pré-requisitos necessários para prosseguir com o checkout
+   *
+   * Valida se o usuário está autenticado e se há itens no carrinho.
+   * Se alguma validação falhar, mostra toast de erro e redireciona
+   * para a página apropriada.
+   *
+   * @function checkCheckoutPrerequisites
+   * @returns {boolean} true se pode prosseguir, false caso contrário
+   *
+   * @example
+   * if (!checkCheckoutPrerequisites()) {
+   *   return; // Interrompe o fluxo
+   * }
    */
   const checkCheckoutPrerequisites = () => {
     // Verifica se usuário está logado
@@ -106,28 +155,106 @@ const Checkout = () => {
   };
 
   /**
-   * Formata endereço para exibição
+   * Formata um endereço completo para exibição em formato legível
+   *
+   * Combina todos os campos do endereço em uma string formatada,
+   * incluindo logradouro, número, complemento, bairro, cidade, estado e CEP.
+   *
+   * @function formatAddress
+   * @param {Object} address - Objeto contendo os dados do endereço
+   * @param {string} address.logradouro - Nome da rua/avenida
+   * @param {string} address.numero - Número do endereço
+   * @param {string} [address.complemento] - Complemento (opcional)
+   * @param {string} address.bairro - Bairro/distrito
+   * @param {string} address.cidade - Cidade
+   * @param {string} address.estado - Estado (UF)
+   * @param {string} address.cep - CEP formatado
+   * @returns {string} Endereço formatado para exibição
+   *
+   * @example
+   * const endereco = {
+   *   logradouro: "Rua das Flores",
+   *   numero: "123",
+   *   complemento: "Apto 45",
+   *   bairro: "Centro",
+   *   cidade: "São Paulo",
+   *   estado: "SP",
+   *   cep: "01234-567"
+   * };
+   * const enderecoFormatado = formatAddress(endereco);
+   * // Resultado: "Rua das Flores, 123, Apto 45 - Centro, São Paulo - SP, CEP: 01234-567"
    */
   const formatAddress = (address) => {
     return `${address.logradouro}, ${address.numero}${address.complemento ? `, ${address.complemento}` : ''} - ${address.bairro}, ${address.cidade} - ${address.estado}, CEP: ${address.cep}`;
   };
 
   /**
-   * Manipula seleção de endereço
+   * Manipula a seleção de um endereço de entrega
+   *
+   * Atualiza o estado do endereço selecionado quando o usuário
+   * clica em um endereço na lista de opções.
+   *
+   * @function handleAddressSelect
+   * @param {number|string} addressId - ID do endereço selecionado
+   *
+   * @example
+   * <div onClick={() => handleAddressSelect(address.id)}>
+   *   Endereço clicável
+   * </div>
    */
   const handleAddressSelect = (addressId) => {
     setSelectedAddressId(addressId);
   };
 
   /**
-   * Mostra/esconde o formulário de adicionar endereço
+   * Controla a visibilidade do formulário de adicionar endereço
+   *
+   * Alterna entre mostrar/esconder o formulário integrado de cadastro
+   * de novo endereço na página de checkout.
+   *
+   * @function handleAddAddress
+   *
+   * @example
+   * <Button onClick={handleAddAddress}>
+   *   {showAddAddress ? 'Cancelar' : 'Adicionar Endereço'}
+   * </Button>
    */
   const handleAddAddress = () => {
     setShowAddAddress(!showAddAddress);
   };
 
   /**
-   * Salva um novo endereço
+   * Salva um novo endereço de entrega para o usuário
+   *
+   * Processa o cadastro de um novo endereço através da API,
+   * atualiza a lista de endereços e fecha o formulário em caso de sucesso.
+   * Mostra notificações toast para feedback do usuário.
+   *
+   * @async
+   * @function handleSaveAddress
+   * @param {Object} addressData - Dados do endereço a ser cadastrado
+   * @param {string} addressData.cep - CEP do endereço
+   * @param {string} addressData.logradouro - Nome da rua/avenida
+   * @param {string} addressData.numero - Número do endereço
+   * @param {string} [addressData.complemento] - Complemento (opcional)
+   * @param {string} [addressData.informacoes_adicionais] - Informações adicionais (opcional)
+   * @param {string} addressData.bairro - Bairro/distrito
+   * @param {string} addressData.cidade - Cidade
+   * @param {string} addressData.estado - Estado (UF)
+   * @returns {Promise<void>} Promise que resolve quando o endereço é salvo
+   *
+   * @throws {Error} Quando há erro na validação ou comunicação com a API
+   *
+   * @example
+   * const endereco = {
+   *   cep: "01234-567",
+   *   logradouro: "Rua das Flores",
+   *   numero: "123",
+   *   bairro: "Centro",
+   *   cidade: "São Paulo",
+   *   estado: "SP"
+   * };
+   * await handleSaveAddress(endereco);
    */
   const handleSaveAddress = async (addressData) => {
     try {
@@ -153,7 +280,37 @@ const Checkout = () => {
 
 
   /**
-   * Finaliza o pedido
+   * Finaliza e confirma o pedido do usuário
+   *
+   * Processo completo de finalização do pedido:
+   * 1. Formata os produtos do carrinho para o formato da API
+   * 2. Cria o pedido através da API do backend
+   * 3. Prepara dados para WhatsApp (cliente, produtos, pedido)
+   * 4. Mostra modal de confirmação animada tipo PicPay
+   * 5. Trata erros e mostra notificações apropriadas
+   *
+   * Após a confirmação animada, o pedido é enviado para WhatsApp
+   * e o carrinho é limpo automaticamente.
+   *
+   * @async
+   * @function handleConfirmOrder
+   * @returns {Promise<void>} Promise que resolve quando o pedido é processado
+   *
+   * @throws {Error} Quando há erro na criação do pedido ou comunicação com APIs
+   *
+   * Fluxo de execução:
+   * - Validação de dados do usuário e endereço
+   * - Formatação de produtos para API
+   * - Criação do pedido no backend
+   * - Preparação de dados para WhatsApp
+   * - Exibição de confirmação animada
+   * - Redirecionamento e limpeza do carrinho
+   *
+   * @example
+   * // Chamado quando usuário clica em "Confirmar Pedido"
+   * <Button onClick={handleConfirmOrder}>
+   *   Confirmar Pedido
+   * </Button>
    */
   const handleConfirmOrder = async () => {
     try {
@@ -232,6 +389,24 @@ const Checkout = () => {
 
   /**
    * Manipula a conclusão da animação de confirmação do pedido
+   *
+   * Executado quando a animação do OrderConfirmation termina.
+   * Abre o WhatsApp com os dados preparados, limpa o carrinho
+   * e navega para a página de histórico de pedidos.
+   *
+   * @function handleOrderConfirmationComplete
+   * @returns {void}
+   *
+   * Sequência de ações:
+   * 1. Abre WhatsApp com dados do pedido e cliente
+   * 2. Aguarda 500ms para estabilização
+   * 3. Limpa o carrinho completamente
+   * 4. Fecha a sidebar do carrinho
+   * 5. Navega para página de histórico
+   *
+   * @example
+   * // Chamado automaticamente pelo componente OrderConfirmation
+   * <OrderConfirmation onComplete={handleOrderConfirmationComplete} />
    */
   const handleOrderConfirmationComplete = () => {
     if (confirmedOrderData) {
@@ -250,7 +425,19 @@ const Checkout = () => {
   };
 
   /**
-   * Volta para o carrinho
+   * Navega de volta para a página do carrinho
+   *
+   * Permite ao usuário voltar para a página anterior (geralmente o carrinho)
+   * para fazer alterações nos itens do pedido antes da finalização.
+   *
+   * @function handleBackToCart
+   * @returns {void}
+   *
+   * @example
+   * // Botão de voltar no breadcrumb
+   * <button onClick={handleBackToCart}>
+   *   ← Voltar ao Carrinho
+   * </button>
    */
   const handleBackToCart = () => {
     navigate(-1); // Volta para a página anterior
@@ -501,7 +688,38 @@ const Checkout = () => {
 };
 
 /**
- * AddressForm - Formulário para adicionar endereço diretamente no checkout
+ * AddressForm - Formulário integrado para cadastro de endereços no checkout
+ *
+ * Componente auxiliar do Checkout que permite ao usuário cadastrar
+ * um novo endereço de entrega diretamente na página de finalização
+ * do pedido, sem precisar navegar para outra página.
+ *
+ * @component
+ * @param {Object} props - Propriedades do componente
+ * @param {Function} props.onSave - Callback executado quando endereço é salvo com sucesso
+ * @param {Function} props.onCancel - Callback executado quando usuário cancela o cadastro
+ *
+ * Campos do formulário:
+ * - CEP (com validação de formato)
+ * - Estado (select com todas UFs brasileiras)
+ * - Logradouro (rua/avenida)
+ * - Número do endereço
+ * - Complemento (opcional)
+ * - Bairro
+ * - Cidade
+ * - Informações adicionais (ponto de referência)
+ *
+ * Funcionalidades:
+ * - Validação obrigatória de campos principais
+ * - Estados de loading durante salvamento
+ * - Reset automático do formulário após sucesso
+ * - Tratamento de erros com feedback visual
+ *
+ * @example
+ * <AddressForm
+ *   onSave={(addressData) => handleSaveAddress(addressData)}
+ *   onCancel={() => setShowAddAddress(false)}
+ * />
  */
 const AddressForm = ({ onSave, onCancel }) => {
   const [formData, setFormData] = useState({
@@ -516,6 +734,9 @@ const AddressForm = ({ onSave, onCancel }) => {
   });
   const [saving, setSaving] = useState(false);
 
+  /**
+   * Manipula mudanças nos campos do formulário
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -524,6 +745,9 @@ const AddressForm = ({ onSave, onCancel }) => {
     }));
   };
 
+  /**
+   * Processa o envio do formulário de endereço
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -705,4 +929,13 @@ const AddressForm = ({ onSave, onCancel }) => {
   );
 };
 
+/**
+ * Exporta o componente Checkout como padrão
+ *
+ * O componente Checkout é a página principal de finalização de pedidos
+ * da aplicação Conecta-Loja, oferecendo uma experiência completa e moderna.
+ *
+ * @exports default
+ * @type {React.Component}
+ */
 export default Checkout;
