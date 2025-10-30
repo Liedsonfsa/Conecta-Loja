@@ -23,6 +23,9 @@ import AddressForm from "./pages/User/AddressForm";
 import StoreSettings from "./pages/store-settings";
 import OrderHistory from "./pages/OrderHistory/OrderHistory";
 import Checkout from "./pages/checkout";
+import ForgotPassword from "./pages/Auth/ForgotPassword";
+import ResetPassword from "./pages/Auth/ResetPassword";
+import VerifyEmail from "./pages/Auth/VerifyEmail";
 /**
  * Routes - Componente principal de configuração de roteamento da aplicação
  *
@@ -99,6 +102,9 @@ const AppRoutes = () => {
               </ClientRoute>
             }
           />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
           <Route path="*" element={<NotFoundPage />} />
           </RouterRoutes>
           <Toaster />
