@@ -8,6 +8,8 @@ import Image from '../../../components/AppImage';
 import ConfirmDialog from '../../../components/ui/ConfirmDialog';
 import { employeeService, roleService } from '../../../api';
 import { useToast } from '../../../hooks/use-toast';
+import { User } from "lucide-react";
+
 
 const EmployeeManagementSection = () => {
   // Estados para dados e loading
@@ -554,11 +556,9 @@ const EmployeeManagementSection = () => {
                       <td className="p-4">
                         <div className="flex items-center space-x-3">
                           <div className="w-10 h-10 rounded-full overflow-hidden bg-muted flex-shrink-0">
-                            <Image
-                              src={`https://randomuser.me/api/portraits/${Math.random() > 0.5 ? 'men' : 'women'}/${Math.floor(Math.random() * 99)}.jpg`}
-                              alt={employee?.name}
-                              className="w-full h-full object-cover"
-                            />
+                            <div className="w-full h-full flex items-center justify-center bg-muted rounded-full">
+                              <User className="w-8 h-8 text-muted-foreground" />
+                            </div>
                           </div>
                           <div>
                             <div className="font-medium text-foreground">{employee?.name}</div>
