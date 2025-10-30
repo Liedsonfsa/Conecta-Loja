@@ -13,26 +13,17 @@ const QuickActionTiles = ({ userType }) => {
       description: 'Adicionar, editar e controlar estoque',
       icon: 'Package',
       color: 'bg-primary text-primary-foreground',
-      route: '/product-management',
+      route: '/produtos', 
       stats: '0 produtos ativos'
     },
     {
       id: 'orders',
-      title: 'Histórico de Pedidos',
+      title: 'Gerenciar Pedidos',
       description: 'Visualizar e gerenciar pedidos',
       icon: 'ShoppingCart',
       color: 'bg-secondary text-secondary-foreground',
-      route: '/order-management',
+      route: '/pedidos',
       stats: '0 pedidos este mês'
-    },
-    {
-      id: 'storefront',
-      title: 'Loja do Cliente',
-      description: 'Visualizar como os clientes veem sua loja',
-      icon: 'Store',
-      color: 'bg-warning text-warning-foreground',
-      route: '/customer-storefront',
-      stats: 'Online e funcionando'
     },
     {
       id: 'analytics',
@@ -40,7 +31,7 @@ const QuickActionTiles = ({ userType }) => {
       description: 'Análises detalhadas de performance',
       icon: 'BarChart3',
       color: 'bg-success text-success-foreground',
-      route: '/sales-analytics',
+      route: '/relatorios',
       stats: 'R$ 0 este mês'
     },
     {

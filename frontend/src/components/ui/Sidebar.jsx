@@ -61,23 +61,12 @@ const Sidebar = ({ isCollapsed = false, onToggle, className = "" }) => {
       description: "Relatórios de vendas",
     },
     {
-      label: "Funcionários",
+      label: "Configurações",
       path: "/store-settings",
       icon: "Settings",
-      description: "Funcionários da loja",
+      description: "Configurações da loja",
     },
   ];
-  useEffect(() => {
-    if (!isCollapsed) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isCollapsed]);
 
   // Filtrar itens de navegação baseado no tipo de usuário (apenas admin vê configurações)
   const filteredNavigationItems = navigationItems.filter((item) => {
