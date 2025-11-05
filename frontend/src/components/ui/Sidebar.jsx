@@ -20,13 +20,14 @@
  * />
  */
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Icon from "../AppIcon";
 import Button from "./ButtonDash";
 import { useAuth } from "../../hooks/use-auth";
 
 const Sidebar = ({ isCollapsed = false, onToggle, className = "" }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { userType } = useAuth();
   const [notifications, setNotifications] = useState({
     "/dashboard": 0,
@@ -42,28 +43,16 @@ const Sidebar = ({ isCollapsed = false, onToggle, className = "" }) => {
       description: "Visão geral do negócio",
     },
     {
-      label: "Operações",
-      type: "group",
-      children: [
-        {
-          label: "Gestão de Produtos",
-          path: "/produtos",
-          icon: "Package",
-          description: "Catálogo e estoque",
-        },
-        {
-          label: "Gestão de Pedidos",
-          path: "/pedidos",
-          icon: "ShoppingCart",
-          description: "Pedidos e WhatsApp",
-        },
-      ],
+      label: "Gestão de Produtos",
+      path: "/produtos",
+      icon: "Package",
+      description: "Catálogo e estoque",
     },
     {
-      label: "Loja do Cliente",
-      path: "/customer-storefront",
-      icon: "Store",
-      description: "Vitrine online",
+      label: "Gestão de Pedidos",
+      path: "/pedidos",
+      icon: "ShoppingCart",
+      description: "Pedidos e WhatsApp",
     },
     {
       label: "Relatórios",
@@ -72,10 +61,10 @@ const Sidebar = ({ isCollapsed = false, onToggle, className = "" }) => {
       description: "Relatórios de vendas",
     },
     {
-      label: "Funcionários",
+      label: "Configurações",
       path: "/store-settings",
       icon: "Settings",
-      description: "Funcionários da loja",
+      description: "Configurações da loja",
     },
   ];
 
@@ -99,7 +88,12 @@ const Sidebar = ({ isCollapsed = false, onToggle, className = "" }) => {
    * @param {string} path - Caminho para navegar
    */
   const handleNavigation = (path) => {
-    window.location.href = path;
+    navigate(path);
+  
+  
+  if (window.innerWidth < 1024 && !isCollapsed) {
+      onToggle();
+    }
   };
 
   /**
@@ -110,18 +104,6 @@ const Sidebar = ({ isCollapsed = false, onToggle, className = "" }) => {
   const getNotificationCount = (path) => {
     return notifications?.[path] || 0;
   };
-
-  useEffect(() => {
-    // Simulate real-time notifications
-    const interval = setInterval(() => {
-      setNotifications((prev) => ({
-        ...prev,
-        "/pedidos": Math.floor(Math.random() * 10),
-      }));
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   /**
    * Renderiza um item individual de navegação
@@ -222,10 +204,18 @@ const Sidebar = ({ isCollapsed = false, onToggle, className = "" }) => {
         className={`
           fixed left-0 top-0 h-full bg-card border-r border-border z-1020
           transition-all duration-300 ease-in-out
-          ${isCollapsed ? "w-16" : "w-60"}
-          ${className}
-        `}
-      >
+          w-60 /* 1. Largura base para o slide mobile */
+          
+          /* 2. Lógica de estado */
+          ${
+            isCollapsed
+              ? "-translate-x-full lg:w-16 lg:translate-x-0" /* Fechado: Some no mobile, w-16 no desktop */
+              : "translate-x-0 lg:w-60" /* Aberto: w-60 em ambos */
+          }
+          
+          ${className} /* 3. Classes do pai (se houver) */
+          `}
+        >
         {/* Header */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-border">
           {!isCollapsed && (

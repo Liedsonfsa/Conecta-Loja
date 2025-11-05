@@ -40,7 +40,13 @@ const Header = ({ onMenuToggle, isSidebarCollapsed = false }) => {
   }, [profileMenuRef]); // A dependência é a própria referência
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-card border-b border-border z-1000">
+    <header
+        className={`
+          fixed top-0 right-0 bg-card border-b border-border z-1000
+          transition-all duration-300 ease-in-out
+          left-0 ${isSidebarCollapsed ? 'lg:left-25' : 'lg:left-69'}
+        `}
+      >
       <div className="flex items-center justify-between h-16 px-6">
         {/* Left Section - Logo and Mobile Menu (Sem alterações) */}
         <div className="flex items-center space-x-4">
@@ -53,19 +59,7 @@ const Header = ({ onMenuToggle, isSidebarCollapsed = false }) => {
             <Icon name="Menu" size={20} />
           </Button>
 
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
-              {/* Seu SVG de Logo */}
-              <svg width="20" height="20" /* ...props */ >
-                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" /* ...props */ />
-                <path d="M2 17L12 22L22 17" stroke="currentColor" /* ...props */ />
-                <path d="M2 12L12 17L22 12" stroke="currentColor" /* ...props */ />
-              </svg>
-            </div>
-            <span className="text-xl font-semibold text-foreground">
-              Conecta Loja
-            </span>
-          </div>
+          
         </div>
 
         {/* Right Section - Actions (Modificado) */}
