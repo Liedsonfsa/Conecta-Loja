@@ -15,36 +15,40 @@ export class ReportsRepository {
   }
 
   static async getTopProducts(start: Date, end: Date) {
-    const grouped = await prisma.pedido_produto.groupBy({
-      by: ["produtoId"],
-      _sum: { quantidade: true, precoUnitario: true },
-      where: {
-        pedido: {
-          createdAt: { gte: start, lte: end },
-          status: { not: "CANCELADO" },
-        },
+  const grouped = await prisma.pedido_produto.groupBy({
+    by: ["produtoId"],
+    _sum: { quantidade: true, precoUnitario: true },
+    where: {
+      pedido: {
+        createdAt: { gte: start, lte: end },
+        status: { not: "CANCELADO" },
       },
-      orderBy: { _sum: { quantidade: "desc" } },
-      take: 5,
-    });
+    },
+    orderBy: { _sum: { quantidade: "desc" } },
+    take: 5,
+  });
 
-    const products = await Promise.all(
-      grouped.map(async (g) => {
-        const product = await prisma.product.findUnique({
-          where: { id: g.produtoId },
-        });
-        return {
-          id: product?.id,
-          name: product?.name,
-          quantity: g._sum.quantidade || 0,
-          revenue:
-            Number(g._sum.precoUnitario || 0) * Number(g._sum.quantidade || 0),
-        };
-      })
-    );
+  const products = await Promise.all(
+    grouped.map(async (g) => {
+      const produto = await prisma.product.findUnique({
+        where: { id: g.produtoId },
+        select: { id: true, name: true, price: true },
+      });
 
-    return products;
-  }
+      const totalRevenue =
+        Number(g._sum.quantidade || 0) * Number(produto?.price || 0);
+
+      return {
+        id: produto?.id,
+        name: produto?.name || "Produto Desconhecido",
+        quantity: g._sum.quantidade || 0,
+        revenue: totalRevenue,
+      };
+    })
+  );
+
+  return products;
+}
 
   static async getCategoryDistribution(start: Date, end: Date) {
     const categories = await prisma.category.findMany({
