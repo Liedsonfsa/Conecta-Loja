@@ -37,6 +37,8 @@ import Button from '../../../components/ui/ButtonDash';
  * @param {Function} props.onFilterChange - Callback para mudança de filtros
  * @param {Function} props.onClearFilters - Callback para limpar filtros
  * @param {Function} props.onExport - Callback para exportar dados
+ * @param {number} props.itemsPerPage - Quantidade atual de itens por página
+ * @param {Function} props.onItemsPerPageChange - Callback para mudança de itens por página
  *
  * @example
  * const filters = {
@@ -56,13 +58,17 @@ import Button from '../../../components/ui/ButtonDash';
  *   onFilterChange={handleFilterChange}
  *   onClearFilters={() => setFilters(initialFilters)}
  *   onExport={handleExport}
+ *   itemsPerPage={itemsPerPage}
+ *   onItemsPerPageChange={setItemsPerPage}
  * />
  */
 const OrderFilters = ({
                           filters,
                           onFilterChange,
                           onClearFilters,
-                          onExport
+                          onExport,
+                          itemsPerPage,
+                          onItemsPerPageChange
                       }) => {
     /**
      * Opções disponíveis para filtro de status dos pedidos
@@ -79,6 +85,16 @@ const OrderFilters = ({
         { value: 'delivered', label: 'Entregue' },
         { value: 'cancelled', label: 'Cancelado' },
         { value: 'delivery_failed', label: 'Tentativa de Entrega Falhada' }
+    ];
+
+    /**
+     * Opções disponíveis para quantidade de itens por página
+     * @type {Array<Object>} pageSizeOptions
+     */
+    const pageSizeOptions = [
+        { value: 20, label: '20 por página' },
+        { value: 50, label: '50 por página' },
+        { value: 100, label: '100 por página' }
     ];
 
     /**
@@ -129,6 +145,16 @@ const OrderFilters = ({
                         value={filters?.dateTo}
                         onChange={(e) => onFilterChange('dateTo', e?.target?.value)}
                         className="w-full lg:w-40"
+                    />
+                </div>
+
+                {/* Items per page */}
+                <div className="w-full lg:w-40">
+                    <Select
+                        options={pageSizeOptions}
+                        value={itemsPerPage}
+                        onChange={(value) => onItemsPerPageChange(Number(value))}
+                        placeholder="Itens por página"
                     />
                 </div>
 

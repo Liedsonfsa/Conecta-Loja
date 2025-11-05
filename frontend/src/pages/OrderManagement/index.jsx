@@ -8,6 +8,7 @@ import OrderFilters from './components/OrderFilters';
 import OrderTable from './components/OrderTable';
 import OrderDetailsModal from './components/OrderDetailsModal';
 import StatusUpdateModal from './components/StatusUpdateModal';
+import Pagination from '../../components/ui/Pagination';
 import { formatCurrency, debounce, exportToCSV } from 'src/utils';
 import { orderService } from '../../api/orders';
 
@@ -95,6 +96,18 @@ const OrderManagement = () => {
      * @type {[Object|null, function]} notification - { message: string, type: 'success'|'error'|'info' }
      */
     const [notification, setNotification] = useState(null);
+
+    /**
+     * Estado de paginação
+     * @type {[number, function]} currentPage - Página atual (baseado em 1)
+     */
+    const [currentPage, setCurrentPage] = useState(1);
+
+    /**
+     * Estado de itens por página
+     * @type {[number, function]} itemsPerPage - Quantidade de itens por página
+     */
+    const [itemsPerPage, setItemsPerPage] = useState(20);
 
     /**
      * Lista de pedidos com dados completos da API
@@ -267,6 +280,17 @@ const OrderManagement = () => {
     }, [orders, filters]);
 
     /**
+     * Lista de pedidos paginada baseada nos filtros aplicados
+     * Utiliza useMemo para otimizar performance evitando recálculos desnecessários
+     * @type {Array} paginatedOrders - Array de pedidos da página atual
+     */
+    const paginatedOrders = React.useMemo(() => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        return filteredOrders.slice(startIndex, endIndex);
+    }, [filteredOrders, currentPage, itemsPerPage]);
+
+    /**
      * Função debounced para mudanças no filtro de busca
      * Aplica debounce de 300ms para evitar múltiplas execuções durante digitação
      * @type {Function} debouncedFilterChange
@@ -290,6 +314,10 @@ const OrderManagement = () => {
         } else {
             setFilters(prev => ({ ...prev, [key]: value }));
         }
+        // Reset to first page when filters change (except search which is debounced)
+        if (key !== 'search') {
+            setCurrentPage(1);
+        }
     };
 
     /**
@@ -303,6 +331,7 @@ const OrderManagement = () => {
             dateTo: '',
             sort: 'newest'
         });
+        setCurrentPage(1); // Reset to first page when clearing filters
     };
 
     /**
@@ -503,22 +532,30 @@ const OrderManagement = () => {
                         onFilterChange={handleFilterChange}
                         onClearFilters={handleClearFilters}
                         onExport={handleExport}
+                        itemsPerPage={itemsPerPage}
+                        onItemsPerPageChange={(value) => {
+                            setItemsPerPage(value);
+                            setCurrentPage(1); // Reset to first page when changing items per page
+                        }}
                     />
 
                     {/* Orders Table */}
                     <OrderTable
-                        orders={filteredOrders}
+                        orders={paginatedOrders}
                         onStatusUpdate={handleStatusUpdate}
                         onViewDetails={handleViewDetails}
                         onContactCustomer={handleContactCustomer}
                         loading={loading}
                     />
 
-                    {/* Results Summary */}
+                    {/* Pagination */}
                     {filteredOrders?.length > 0 && (
-                        <div className="mt-4 text-center text-sm text-muted-foreground">
-                            Mostrando {filteredOrders?.length} de {orders?.length} pedidos
-                        </div>
+                        <Pagination
+                            currentPage={currentPage}
+                            totalItems={filteredOrders.length}
+                            itemsPerPage={itemsPerPage}
+                            onPageChange={(page) => setCurrentPage(page)}
+                        />
                     )}
                 </div>
             </main>
