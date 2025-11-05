@@ -1,3 +1,9 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -9,69 +15,85 @@ datasource db {
 }
 
 model usuario {
-  id        Int        @id @default(autoincrement())
-  name      String     @db.VarChar(100)
-  email     String     @unique @db.VarChar(255)
-  password  String     @db.VarChar(255)
-  contact   String     @db.VarChar(20)
-  createdAt DateTime   @default(now()) @map("created_at")
-  updatedAt DateTime   @updatedAt @map("updated_at")
-  avatar    String?
-  carrinho  carrinho?
-  enderecos endereco[]
-  pedidos   pedido[]
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(100) // Limite de 100 caracteres
+  email     String   @unique @db.VarChar(255) // Email único e limite de 255 caracteres
+  password  String   @db.VarChar(255) // Hash da senha (bcrypt)
+  contact   String   @db.VarChar(20) // Contato/telefone com limite de 20 caracteres
+  avatar    String?  @db.Text // Foto do usuário em base64 (opcional)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  enderecos endereco[] // UM usuário pode ter VÁRIOS endereços
+  pedidos   pedido[] // UM usuário pode ter VÁRIOS pedidos
+  carrinho  carrinho? // UM usuário pode ter UM carrinho ativo
 
   @@map("usuarios")
 }
 
 model endereco {
   id                     Int      @id @default(autoincrement())
-  cep                    String   @db.VarChar(10)
-  logradouro             String   @db.VarChar(255)
-  numero                 String   @db.VarChar(10)
-  complemento            String?  @db.VarChar(100)
-  informacoes_adicionais String?  @db.VarChar(255)
-  bairro                 String   @db.VarChar(100)
-  cidade                 String   @db.VarChar(100)
-  estado                 String   @db.VarChar(2)
+  cep                    String   @db.VarChar(10) // CEP (XXXXX-XXX)
+  logradouro             String   @db.VarChar(255) // Nome da rua/avenida
+  numero                 String   @db.VarChar(10) // Número do endereço
+  complemento            String?  @db.VarChar(100) // Complemento (opcional)
+  informacoes_adicionais String?  @db.VarChar(255) // Informações adicionais (opcional)
+  bairro                 String   @db.VarChar(100) // Bairro/distrito
+  cidade                 String   @db.VarChar(100) // Cidade
+  estado                 String   @db.VarChar(2) // Estado (UF - 2 letras)
+  isPrincipal            Boolean  @default(false) // Se é o endereço principal
   createdAt              DateTime @default(now()) @map("created_at")
   updatedAt              DateTime @updatedAt @map("updated_at")
-  usuarioId              Int
-  isPrincipal            Boolean  @default(false)
-  usuario                usuario  @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
-  pedidos                pedido[]
+
+  // Foreign Key para usuário
+  usuarioId Int
+  usuario   usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  // Relations
+  pedidos pedido[] // UM endereço pode ser usado em VÁRIOS pedidos
 
   @@map("enderecos")
 }
 
+// Order model
 model pedido {
-  id              Int                       @id @default(autoincrement())
-  precoTotal      Decimal                   @db.Decimal(10, 2)
-  status          OrderStatus               @default(RECEBIDO)
-  createdAt       DateTime                  @default(now()) @map("created_at")
-  updatedAt       DateTime                  @updatedAt @map("updated_at")
-  usuarioId       Int
-  cupomId         Int?
-  enderecoId      Int?
-  produtos        pedido_produto[]
-  statusHistorico pedido_status_historico[]
-  cupom           cupom?                    @relation(fields: [cupomId], references: [id])
-  endereco        endereco?                 @relation(fields: [enderecoId], references: [id])
+  id         Int         @id @default(autoincrement())
+  precoTotal Decimal     @db.Decimal(10, 2) // Preço total do pedido
+  status     OrderStatus @default(RECEBIDO) // Status atual do pedido
+  createdAt  DateTime    @default(now()) @map("created_at")
+  updatedAt  DateTime    @updatedAt @map("updated_at")
+
+  // Foreign Keys
+  usuarioId  Int // ID do usuário que fez o pedido
+  enderecoId Int? // ID do endereço de entrega (opcional por enquanto)
+  cupomId    Int? // ID do cupom usado (opcional)
+
+  // Relations
   usuario         usuario                   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  endereco        endereco?                 @relation(fields: [enderecoId], references: [id])
+  cupom           cupom?                    @relation(fields: [cupomId], references: [id])
+  produtos        pedido_produto[] // UM pedido pode ter VÁRIOS produtos
+  statusHistorico pedido_status_historico[] // UM pedido pode ter VÁRIOS registros de status
 
   @@map("pedidos")
 }
 
+// Junction table for order-product relationship (N:M)
 model pedido_produto {
   id            Int     @id @default(autoincrement())
-  quantidade    Int     @default(1)
-  pedidoId      Int
-  produtoId     Int
+  quantidade    Int     @default(1) // Quantidade do produto no pedido
   precoUnitario Decimal @default(0.00) @db.Decimal(10, 2)
-  pedido        pedido  @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
-  produto       product @relation(fields: [produtoId], references: [id])
+  // Preço unitário do produto no momento do pedido
 
-  @@unique([pedidoId, produtoId])
+  // Foreign Keys
+  pedidoId  Int
+  produtoId Int
+
+  // Relations
+  pedido  pedido  @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  produto product @relation(fields: [produtoId], references: [id])
+
+  @@unique([pedidoId, produtoId]) // Um produto pode aparecer apenas uma vez por pedido
   @@map("pedido_produto")
 }
 
@@ -93,136 +115,166 @@ model funcionario {
 }
 
 model cargo {
-  id           Int           @id @default(autoincrement())
-  name         String        @unique
-  description  String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  funcionarios funcionario[]
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  funcionarios funcionario[] // UM cargo pode ter VÁRIOS funcionários
 }
 
 model store {
-  id             Int           @id @default(autoincrement())
-  name           String
-  contact        String
-  email          String
-  description    String
-  image          String?
-  accentColor    String?       @default("#F59E0B") @map("accent_color")
-  bannerImageUrl String?       @map("banner_image_url")
-  city           String?
-  customCSS      String?       @map("custom_css")
-  footerMessage  String?       @map("footer_message")
-  logoUrl        String?       @map("logo_url")
-  primaryColor   String?       @default("#2563EB") @map("primary_color")
-  secondaryColor String?       @default("#059669") @map("secondary_color")
-  state          String?
-  street         String?
-  theme          String?       @default("modern")
-  welcomeMessage String?       @map("welcome_message")
-  zipCode        String?       @map("zip_code")
-  funcionarios   funcionario[]
+  id           Int           @id @default(autoincrement())
+  name         String
+  contact      String
+  email        String
+  description  String
+  image        String?
+  funcionarios funcionario[] // UMA loja pode ter VÁRIOS funcionários
+
+  // Imagens da Marca
+  logoUrl        String? @map("logo_url")
+  bannerImageUrl String? @map("banner_image_url")
+
+  // Esquema de Cores
+  primaryColor   String? @default("#2563EB") @map("primary_color")
+  secondaryColor String? @default("#059669") @map("secondary_color")
+  accentColor    String? @default("#F59E0B") @map("accent_color")
+
+  // Tema e Mensagens
+  theme          String? @default("modern")
+  welcomeMessage String? @map("welcome_message")
+  footerMessage  String? @map("footer_message")
+
+  // Avançado
+  customCSS String? @map("custom_css")
+
+  // Endereço do Rodapé
+  street  String?
+  city    String?
+  state   String?
+  zipCode String? @map("zip_code")
 
   @@map("store")
 }
 
-model cupom {
-  id        Int          @id @default(autoincrement())
-  codigo    String       @unique @db.VarChar(50)
-  valor     Decimal      @db.Decimal(10, 2)
-  status    CouponStatus @default(ATIVO)
-  createdAt DateTime     @default(now()) @map("created_at")
-  updatedAt DateTime     @updatedAt @map("updated_at")
-  pedidos   pedido[]
-
-  @@map("cupons")
-}
-
-model category {
-  id             Int       @id @default(autoincrement())
-  name           String    @unique
-  activeProducts Int       @default(0)
-  totalValue     Decimal   @default(0) @db.Decimal(10, 2)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  products       product[]
-
-  @@map("categoria")
-}
-
-model product {
-  id           Int                @id @default(autoincrement())
-  name         String
-  description  String
-  price        Decimal            @db.Decimal(10, 2)
-  categoryId   Int
-  available    Boolean            @default(true)
-  image        String?
-  discount     Decimal?           @db.Decimal(10, 2)
-  discountType DiscountType?
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
-  estoque      Int                @default(0)
-  carrinhos    carrinho_produto[]
-  pedidos      pedido_produto[]
-  category     category           @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-
-  @@map("produto")
-}
-
-model carrinho {
-  id        Int                @id @default(autoincrement())
-  usuarioId Int                @unique
-  createdAt DateTime           @default(now()) @map("created_at")
-  updatedAt DateTime           @updatedAt @map("updated_at")
-  itens     carrinho_produto[]
-  usuario   usuario            @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
-
-  @@map("carrinhos")
-}
-
-model carrinho_produto {
-  id         Int      @id @default(autoincrement())
-  carrinhoId Int
-  produtoId  Int
-  quantidade Int      @default(1)
-  carrinho   carrinho @relation(fields: [carrinhoId], references: [id], onDelete: Cascade)
-  produto    product  @relation(fields: [produtoId], references: [id])
-
-  @@unique([carrinhoId, produtoId])
-  @@map("carrinho_produto")
-}
-
-model pedido_status_historico {
-  id          Int          @id @default(autoincrement())
-  pedidoId    Int
-  status      OrderStatus
-  observacao  String?
-  criadoPor   Int?
-  createdAt   DateTime     @default(now()) @map("created_at")
-  funcionario funcionario? @relation(fields: [criadoPor], references: [id])
-  pedido      pedido       @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
-
-  @@map("pedido_status_historico")
-}
-
+// Enum for discount type
 enum DiscountType {
   PERCENTAGE
   FIXED_VALUE
 }
 
+// Enum for order status
 enum OrderStatus {
-  RECEBIDO
-  AGUARDANDO_PAGAMENTO
-  PAGAMENTO_APROVADO
-  PREPARO
-  ENVIADO_PARA_ENTREGA
-  ENTREGUE
-  CANCELADO
-  TENTATIVA_ENTREGA_FALHADA
+  RECEBIDO // Pedido recebido
+  AGUARDANDO_PAGAMENTO // Aguardando pagamento
+  PAGAMENTO_APROVADO // Pagamento aprovado
+  PREPARO // Em preparo
+  ENVIADO_PARA_ENTREGA // Enviado para entrega
+  ENTREGUE // Entregue
+  CANCELADO // Cancelado
+  TENTATIVA_ENTREGA_FALHADA // Tentativa de entrega não realizada
 }
 
+// Enum for coupon status
 enum CouponStatus {
   ATIVO
   INATIVO
+}
+
+// Coupon model
+model cupom {
+  id        Int          @id @default(autoincrement())
+  codigo    String       @unique @db.VarChar(50) // Código único do cupom
+  valor     Decimal      @db.Decimal(10, 2) // Valor do desconto
+  status    CouponStatus @default(ATIVO) // Status do cupom
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+
+  // Relations
+  pedidos pedido[] // UM cupom pode ser usado em VÁRIOS pedidos
+
+  @@map("cupons")
+}
+
+// Product category model
+model category {
+  id             Int      @id @default(autoincrement())
+  name           String   @unique
+  activeProducts Int      @default(0) // Active products counter
+  totalValue     Decimal  @default(0) @db.Decimal(10, 2) // Total value of products in stock
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  products product[] // One category can have MANY products
+
+  @@map("categoria")
+}
+
+// Product model
+model product {
+  id           Int           @id @default(autoincrement())
+  name         String
+  description  String
+  price        Decimal       @db.Decimal(10, 2) // Unit price
+  categoryId   Int
+  available    Boolean       @default(true) // Flag if product is available
+  estoque      Int           @default(0) // Quantidade em estoque
+  image        String? // Image URL or path
+  discount     Decimal?      @db.Decimal(10, 2) // Discount value
+  discountType DiscountType? // Applied discount type
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  category  category           @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  pedidos   pedido_produto[] // UM produto pode estar em VÁRIOS pedidos
+  carrinhos carrinho_produto[] // UM produto pode estar em VÁRIOS carrinhos
+
+  @@map("produto")
+}
+
+// Cart model - Carrinho de compras por usuário
+model carrinho {
+  id        Int      @id @default(autoincrement())
+  usuarioId Int      @unique // Cada usuário pode ter apenas um carrinho ativo
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  usuario usuario            @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  itens   carrinho_produto[]
+
+  @@map("carrinhos")
+}
+
+// Junction table for cart-product relationship
+model carrinho_produto {
+  id         Int @id @default(autoincrement())
+  carrinhoId Int
+  produtoId  Int
+  quantidade Int @default(1)
+
+  // Relations
+  carrinho carrinho @relation(fields: [carrinhoId], references: [id], onDelete: Cascade)
+  produto  product  @relation(fields: [produtoId], references: [id])
+
+  @@unique([carrinhoId, produtoId]) // Um produto pode aparecer apenas uma vez por carrinho
+  @@map("carrinho_produto")
+}
+
+// Order Status History - Histórico de mudanças de status dos pedidos
+model pedido_status_historico {
+  id         Int         @id @default(autoincrement())
+  pedidoId   Int // ID do pedido
+  status     OrderStatus // Status que foi definido
+  observacao String? // Observação opcional sobre a mudança
+  criadoPor  Int? // ID do funcionário/admin que fez a mudança (opcional)
+  createdAt  DateTime    @default(now()) @map("created_at")
+
+  // Relations
+  pedido      pedido       @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  funcionario funcionario? @relation(fields: [criadoPor], references: [id])
+
+  @@map("pedido_status_historico")
 }
