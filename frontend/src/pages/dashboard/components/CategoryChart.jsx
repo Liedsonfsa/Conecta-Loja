@@ -29,7 +29,7 @@ const CategoryChart = ({ data }) => {
         <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
           <p className="text-sm font-medium mb-1">{payload[0].name}</p>
           <p className="text-sm text-muted-foreground">
-            {payload[0].value}% das vendas
+            {payload[0].value} produto(s)
 
           </p>
           <p className="text-sm font-medium text-green-600">
@@ -115,7 +115,7 @@ const CategoryChart = ({ data }) => {
               <p className="text-sm font-medium text-green-600">
                 {formatCurrency(category.sales)}
               </p>
-              <p className="text-xs text-muted-foreground">{category.value}%</p>
+              <p className="text-xs text-muted-foreground">{category.value} produto(s)</p>
             </div>
           </div>
         ))}

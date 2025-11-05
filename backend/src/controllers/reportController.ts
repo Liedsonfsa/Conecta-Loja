@@ -12,7 +12,6 @@ export class ReportsController {
       );
       res.json(data);
     } catch (err: any) {
-    //   console.error("Erro no relatório:", err);
       res.status(500).json({ error: err.message || "Erro ao gerar relatório" });
     }
   }

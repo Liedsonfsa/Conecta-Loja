@@ -104,4 +104,10 @@ export class ReportsRepository {
       revenue: Number(r.total_revenue),
     }));
   }
+
+  static async getActiveCustomers(start: Date, end: Date) {
+    const activeCustomers = await prisma.usuario.count();
+
+    return activeCustomers;
+  }
 }

@@ -31,6 +31,7 @@ export class ReportsService {
     const topProducts = await ReportsRepository.getTopProducts(start, end);
     const categoryDistribution = await ReportsRepository.getCategoryDistribution(start, end);
     const peakHours = await ReportsRepository.getPeakHours(start, end);
+    const activeCustomers = await ReportsRepository.getActiveCustomers(start, end);
 
     return {
       summary: {
@@ -43,6 +44,9 @@ export class ReportsService {
       topProducts,
       categoryDistribution,
       peakHours,
+      operational: {
+        activeCustomers,
+      },
     };
   }
 }
