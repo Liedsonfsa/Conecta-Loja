@@ -26,7 +26,8 @@ export class OrderRepository {
                     select: {
                         id: true,
                         name: true,
-                        email: true
+                        email: true,
+                        contact: true
                     }
                 }, // Inclui dados básicos do usuário
                 statusHistorico: {
@@ -164,7 +165,8 @@ export class OrderRepository {
                     select: {
                         id: true,
                         name: true,
-                        email: true
+                        email: true,
+                        contact: true
                     }
                 }, // Inclui dados básicos do usuário
                 statusHistorico: {
