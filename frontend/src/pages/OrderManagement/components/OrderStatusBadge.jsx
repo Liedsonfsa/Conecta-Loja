@@ -14,12 +14,15 @@ import React from 'react';
  * - Fallback para status desconhecidos
  *
  * Mapeamento de status e cores:
- * - pending (Pendente): Amarelo - Aguardando confirmação
- * - preparing (Preparando): Azul - Em produção
+ * - received (Recebido): Azul - Pedido recém recebido
+ * - pending (Aguardando Pagamento): Amarelo - Aguardando confirmação de pagamento
+ * - payment_approved (Pagamento Aprovado): Esmeralda - Pagamento confirmado
+ * - preparing (Em Preparo): Ciano - Em produção na cozinha
  * - ready (Pronto): Roxo - Pronto para entrega/retirada
- * - en_route (A Caminho): Laranja - Em trânsito
+ * - en_route (A Caminho): Laranja - Em trânsito com entregador
  * - delivered (Entregue): Verde - Concluído com sucesso
- * - cancelled (Cancelado): Vermelho - Cancelado
+ * - cancelled (Cancelado): Vermelho - Pedido cancelado
+ * - delivery_failed (Entrega Falhada): Vermelho escuro - Tentativa de entrega não realizada
  * - default (Desconhecido): Cinza - Status não identificado
  *
  * @component
@@ -46,15 +49,25 @@ const OrderStatusBadge = ({ status, className = '' }) => {
      */
     const getStatusConfig = (status) => {
         switch (status) {
+            case 'received':
+                return {
+                    label: 'Recebido',
+                    className: 'bg-blue-100 text-blue-800 border-blue-200'
+                };
             case 'pending':
                 return {
-                    label: 'Pendente',
+                    label: 'Aguardando Pagamento',
                     className: 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                };
+            case 'payment_approved':
+                return {
+                    label: 'Pagamento Aprovado',
+                    className: 'bg-emerald-100 text-emerald-800 border-emerald-200'
                 };
             case 'preparing':
                 return {
-                    label: 'Preparando',
-                    className: 'bg-blue-100 text-blue-800 border-blue-200'
+                    label: 'Em Preparo',
+                    className: 'bg-cyan-100 text-cyan-800 border-cyan-200'
                 };
             case 'ready':
                 return {
@@ -75,6 +88,11 @@ const OrderStatusBadge = ({ status, className = '' }) => {
                 return {
                     label: 'Cancelado',
                     className: 'bg-red-100 text-red-800 border-red-200'
+                };
+            case 'delivery_failed':
+                return {
+                    label: 'Entrega Falhada',
+                    className: 'bg-red-100 text-red-700 border-red-300'
                 };
             default:
                 return {

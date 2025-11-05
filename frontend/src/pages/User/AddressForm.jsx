@@ -14,16 +14,59 @@ import {
 } from "lucide-react";
 
 /**
- * AddressForm - Formulário para adicionar ou editar endereços de entrega
+ * AddressForm - Formulário completo para cadastro e edição de endereços de entrega
  *
- * Formulário completo com validação e busca automática de CEP via API,
- * interface moderna e intuitiva para gerenciamento de endereços.
+ * Componente versátil que pode ser usado tanto como página independente quanto
+ * como modal integrado. Oferece busca automática de CEP via API externa,
+ * validação completa de campos e interface moderna com feedback visual.
+ *
+ * @component
+ *
+ * Funcionalidades principais:
+ * - Busca automática de endereço por CEP (ViaCEP API)
+ * - Validação obrigatória de todos os campos principais
+ * - Suporte a modo de edição e criação
+ * - Interface responsiva com cards organizados
+ * - Feedback visual de loading e estados de erro
+ * - Navegação integrada com breadcrumbs
+ * - Tratamento robusto de erros com notificações toast
+ *
+ * Estados gerenciados:
+ * - Dados do formulário com validação em tempo real
+ * - Estados de loading (busca CEP, salvamento)
+ * - Detecção automática de modo (criação vs edição)
+ * - Preenchimento automático de campos via CEP
+ *
+ * Integrações principais:
+ * - addressService: Para operações CRUD de endereços
+ * - ViaCEP API: Para busca automática de endereços
+ * - useToast: Para notificações de sucesso/erro
+ * - React Router: Para navegação e parâmetros de URL
+ *
+ * Funcionalidades especiais:
+ * - Busca de CEP em tempo real com preenchimento automático
+ * - Validação de formato de CEP brasileiro
+ * - Detecção automática de modo baseado em parâmetros/parâmetros
+ * - Suporte a callbacks customizados para integração
+ * - Reset automático do formulário após operações
  *
  * @param {Object} props - Propriedades do componente
- * @param {Object} [props.address] - Endereço para editar (opcional)
- * @param {Function} [props.onSave] - Callback chamado após salvar
- * @param {Function} [props.onCancel] - Callback chamado ao cancelar
+ * @param {Object} [props.address] - Endereço para editar (modo integrado)
+ * @param {Function} [props.onSave] - Callback executado após salvar (modo integrado)
+ * @param {Function} [props.onCancel] - Callback executado ao cancelar (modo integrado)
  *
+ * @example
+ * // Modo página independente (rota)
+ * <Route path="/profile/address/new" element={<AddressForm />} />
+ * <Route path="/profile/address/:id" element={<AddressForm />} />
+ *
+ * @example
+ * // Modo integrado (modal)
+ * <AddressForm
+ *   address={enderecoExistente}
+ *   onSave={(endereco) => console.log('Salvo:', endereco)}
+ *   onCancel={() => setModalAberto(false)}
+ * />
  */
 const AddressForm = ({ address, onSave, onCancel }) => {
   const navigate = useNavigate();
@@ -78,6 +121,22 @@ const AddressForm = ({ address, onSave, onCancel }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  /**
+   * Manipula mudanças nos campos do formulário
+   *
+   * Atualiza o estado do formulário quando qualquer campo é alterado.
+   * Usado pelos inputs controlados do formulário.
+   *
+   * @function handleInputChange
+   * @param {string} field - Nome do campo que foi alterado
+   * @param {string} value - Novo valor do campo
+   *
+   * @example
+   * <Input
+   *   value={formData.cep}
+   *   onChange={(e) => handleInputChange('cep', e.target.value)}
+   * />
+   */
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
@@ -85,6 +144,25 @@ const AddressForm = ({ address, onSave, onCancel }) => {
     }));
   };
 
+  /**
+   * Busca endereço automaticamente via CEP usando a API ViaCEP
+   *
+   * Faz uma requisição para a API externa ViaCEP para buscar os dados
+   * do endereço baseado no CEP informado. Preenche automaticamente
+   * os campos de logradouro, bairro, cidade e estado.
+   *
+   * @async
+   * @function handleCepSearch
+   * @returns {Promise<void>} Promise que resolve quando a busca é concluída
+   *
+   * @throws {Error} Quando há erro na comunicação com a API ViaCEP
+   *
+   * @example
+   * // Chamado quando usuário clica no botão de busca de CEP
+   * <Button onClick={handleCepSearch}>
+   *   Buscar CEP
+   * </Button>
+   */
   const handleCepSearch = async () => {
     if (!formData.cep || formData.cep.length !== 8) {
       toast({
@@ -132,6 +210,31 @@ const AddressForm = ({ address, onSave, onCancel }) => {
     }
   };
 
+  /**
+   * Salva o endereço (criação ou edição)
+   *
+   * Valida os dados obrigatórios e salva o endereço através da API.
+   * Detecta automaticamente se é criação ou edição baseado no estado.
+   * Mostra notificações de sucesso e redireciona ou chama callbacks.
+   *
+   * @async
+   * @function handleSave
+   * @returns {Promise<void>} Promise que resolve quando o endereço é salvo
+   *
+   * @throws {Error} Quando há erro na validação ou comunicação com a API
+   *
+   * Campos obrigatórios validados:
+   * - CEP
+   * - Logradouro
+   * - Número
+   * - Cidade
+   *
+   * @example
+   * // Chamado quando usuário clica em "Salvar"
+   * <Button onClick={handleSave}>
+   *   {isEditing ? 'Atualizar' : 'Salvar'} Endereço
+   * </Button>
+   */
   const handleSave = async () => {
     // Validação básica
     if (!formData.cep || !formData.logradouro || !formData.numero || !formData.cidade) {
@@ -197,6 +300,23 @@ const AddressForm = ({ address, onSave, onCancel }) => {
     }
   };
 
+  /**
+   * Cancela a operação e volta para a página anterior
+   *
+   * Se um callback onCancel foi fornecido (modo integrado),
+   * executa o callback. Caso contrário, navega para a página anterior.
+   *
+   * @function handleCancel
+   * @returns {void}
+   *
+   * @example
+   * // Modo página independente - volta para página anterior
+   * <Button onClick={handleCancel}>Cancelar</Button>
+   *
+   * @example
+   * // Modo integrado - executa callback customizado
+   * <AddressForm onCancel={() => setModalOpen(false)} />
+   */
   const handleCancel = () => {
     if (onCancel) {
       onCancel();
@@ -371,4 +491,14 @@ const AddressForm = ({ address, onSave, onCancel }) => {
   );
 };
 
+/**
+ * Exporta o componente AddressForm como padrão
+ *
+ * O componente AddressForm é uma solução completa para gerenciamento
+ * de endereços de entrega, suportando tanto modo página independente
+ * quanto integração modal em outros componentes.
+ *
+ * @exports default
+ * @type {React.Component}
+ */
 export default AddressForm;

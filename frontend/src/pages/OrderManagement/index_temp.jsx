@@ -8,7 +8,6 @@ import OrderFilters from './components/OrderFilters';
 import OrderTable from './components/OrderTable';
 import OrderDetailsModal from './components/OrderDetailsModal';
 import StatusUpdateModal from './components/StatusUpdateModal';
-import Pagination from '../../components/ui/Pagination';
 import { formatCurrency, debounce, exportToCSV } from 'src/utils';
 import { orderService } from '../../api/orders';
 
@@ -98,18 +97,6 @@ const OrderManagement = () => {
     const [notification, setNotification] = useState(null);
 
     /**
-     * Estado de paginação
-     * @type {[number, function]} currentPage - Página atual (baseado em 1)
-     */
-    const [currentPage, setCurrentPage] = useState(1);
-
-    /**
-     * Estado de itens por página
-     * @type {[number, function]} itemsPerPage - Quantidade de itens por página
-     */
-    const [itemsPerPage, setItemsPerPage] = useState(20);
-
-    /**
      * Lista de pedidos com dados completos da API
      * Cada pedido contém informações do cliente, itens, timeline e status
      * @type {[Array, function]} orders
@@ -125,55 +112,35 @@ const OrderManagement = () => {
             const response = await orderService.getAllOrders();
             if (response.success) {
                 // Transforma os dados da API para o formato esperado pelo componente
-                const transformedOrders = response.orders.map(order => {
-                    // Mapeia os status do enum para os valores esperados pelo frontend
-                    const statusMapping = {
-                        'RECEBIDO': 'received',
-                        'AGUARDANDO_PAGAMENTO': 'pending',
-                        'PAGAMENTO_APROVADO': 'payment_approved',
-                        'PREPARO': 'preparing',
-                        'ENVIADO_PARA_ENTREGA': 'en_route',
-                        'ENTREGUE': 'delivered',
-                        'CANCELADO': 'cancelled',
-                        'TENTATIVA_ENTREGA_FALHADA': 'delivery_failed'
-                    };
-
-                    // Calcula o total dos produtos
-                    const itemsTotal = order.produtos?.reduce((sum, p) =>
-                        sum + (Number(p.precoUnitario || 0) * Number(p.quantidade || 1)), 0
-                    ) || 0;
-
-                    const mappedStatus = statusMapping[order.status] || 'received';
-
-                    return {
-                        id: order.numeroPedido || order.id,
-                        customerName: order.usuario?.name || 'Cliente',
-                        customerPhone: order.usuario?.contact || '',
-                        customerAddress: order.endereco ? `${order.endereco.logradouro}, ${order.endereco.numero} - ${order.endereco.bairro}, ${order.endereco.cidade} - ${order.endereco.estado}` : '',
-                        items: order.produtos?.map(p => ({
-                            name: p.produto?.name || 'Produto',
-                            description: p.produto?.description || '',
-                            price: Number(p.precoUnitario || 0),
-                            quantity: Number(p.quantidade || 1),
-                            image: p.produto?.image || '',
-                            customizations: []
-                        })) || [],
-                        subtotal: itemsTotal,
-                        discount: 0,
-                        total: Number(order.precoTotal || itemsTotal),
-                        status: mappedStatus,
-                        createdAt: order.createdAt,
-                        specialInstructions: order.observacoes || '',
-                        paymentMethod: 'Cartão', // Valor padrão, pode vir da API
-                        isNew: order.status === 'RECEBIDO',
-                        itemCount: order.produtos?.length || 0,
-                        timeline: order.statusHistorico?.map(h => ({
-                            status: h.status,
-                            timestamp: h.createdAt,
-                            note: h.observacao || ''
-                        })) || []
-                    };
-                });
+                const transformedOrders = response.orders.map(order => ({
+                    id: order.numeroPedido || order.id,
+                    customerName: order.usuario?.name || 'Cliente',
+                    customerPhone: order.endereco?.telefone || '',
+                    customerAddress: order.endereco ? `${order.endereco.rua}, ${order.endereco.numero} - ${order.endereco.bairro}, ${order.endereco.cidade} - ${order.endereco.estado}` : '',
+                    items: order.produtos?.map(p => ({
+                        name: p.produto?.nome || 'Produto',
+                        description: p.produto?.descricao || '',
+                        price: p.precoUnitario || 0,
+                        quantity: p.quantidade || 1,
+                        image: p.produto?.imagem || '',
+                        customizations: []
+                    })) || [],
+                    subtotal: order.precoTotal || 0,
+                    deliveryFee: 5.00, // Valor padrão, pode vir da API
+                    discount: 0,
+                    total: order.precoTotal || 0,
+                    status: order.status?.toLowerCase() || 'received',
+                    createdAt: order.createdAt,
+                    specialInstructions: order.observacoes || '',
+                    paymentMethod: 'Cartão', // Valor padrão, pode vir da API
+                    isNew: order.status === 'RECEBIDO',
+                    itemCount: order.produtos?.length || 0,
+                    timeline: order.statusHistorico?.map(h => ({
+                        status: h.status,
+                        timestamp: h.createdAt,
+                        note: h.observacao || ''
+                    })) || []
+                }));
                 setOrders(transformedOrders);
             } else {
                 showNotification('Erro ao buscar pedidos', 'error');
@@ -209,47 +176,23 @@ const OrderManagement = () => {
     });
 
     /**
-     * Dados de estatísticas dos pedidos calculados dinamicamente
-     * Baseado nos pedidos carregados da API
+     * Dados de estatísticas dos pedidos para exibição nos cards
      * @type {Object} stats
-     * @property {number} todayOrders - Número de pedidos criados hoje
-     * @property {number} todayOrdersChange - Variação percentual (placeholder)
-     * @property {number} pendingOrders - Pedidos aguardando pagamento
+     * @property {number} todayOrders - Número de pedidos hoje
+     * @property {number} todayOrdersChange - Variação percentual nos pedidos
+     * @property {number} pendingOrders - Pedidos pendentes
      * @property {number} preparingOrders - Pedidos em preparação
-     * @property {number} todayRevenue - Receita de pedidos entregues hoje
-     * @property {number} todayRevenueChange - Variação percentual (placeholder)
+     * @property {number} todayRevenue - Receita total do dia
+     * @property {number} todayRevenueChange - Variação percentual na receita
      */
-    const stats = React.useMemo(() => {
-        const today = new Date();
-        const todayString = today.toISOString().split('T')[0]; // YYYY-MM-DD format
-
-        // Filtrar pedidos de hoje
-        const todayOrders = orders.filter(order => {
-            const orderDate = new Date(order.createdAt).toISOString().split('T')[0];
-            return orderDate === todayString;
-        });
-
-        // Contar pedidos por status
-        const pendingOrders = orders.filter(order => order.status === 'pending').length;
-        const preparingOrders = orders.filter(order => order.status === 'preparing').length;
-
-        // Calcular receita de hoje (pedidos entregues hoje)
-        const todayRevenue = orders
-            .filter(order => {
-                const orderDate = new Date(order.createdAt).toISOString().split('T')[0];
-                return orderDate === todayString && order.status === 'delivered';
-            })
-            .reduce((total, order) => total + (order.total || 0), 0);
-
-        return {
-            todayOrders: todayOrders.length,
-            todayOrdersChange: 0, // Placeholder - seria calculado comparando com dia anterior
-            pendingOrders,
-            preparingOrders,
-            todayRevenue,
-            todayRevenueChange: 0 // Placeholder - seria calculado comparando com dia anterior
-        };
-    }, [orders]);
+    const stats = {
+        todayOrders: 12,
+        todayOrdersChange: 15,
+        pendingOrders: 2,
+        preparingOrders: 1,
+        todayRevenue: 485.60,
+        todayRevenueChange: 8
+    };
 
     /**
      * Lista de pedidos filtrada e ordenada baseada nos filtros aplicados
@@ -304,17 +247,6 @@ const OrderManagement = () => {
     }, [orders, filters]);
 
     /**
-     * Lista de pedidos paginada baseada nos filtros aplicados
-     * Utiliza useMemo para otimizar performance evitando recálculos desnecessários
-     * @type {Array} paginatedOrders - Array de pedidos da página atual
-     */
-    const paginatedOrders = React.useMemo(() => {
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        return filteredOrders.slice(startIndex, endIndex);
-    }, [filteredOrders, currentPage, itemsPerPage]);
-
-    /**
      * Função debounced para mudanças no filtro de busca
      * Aplica debounce de 300ms para evitar múltiplas execuções durante digitação
      * @type {Function} debouncedFilterChange
@@ -338,10 +270,6 @@ const OrderManagement = () => {
         } else {
             setFilters(prev => ({ ...prev, [key]: value }));
         }
-        // Reset to first page when filters change (except search which is debounced)
-        if (key !== 'search') {
-            setCurrentPage(1);
-        }
     };
 
     /**
@@ -355,7 +283,6 @@ const OrderManagement = () => {
             dateTo: '',
             sort: 'newest'
         });
-        setCurrentPage(1); // Reset to first page when clearing filters
     };
 
     /**
@@ -556,30 +483,22 @@ const OrderManagement = () => {
                         onFilterChange={handleFilterChange}
                         onClearFilters={handleClearFilters}
                         onExport={handleExport}
-                        itemsPerPage={itemsPerPage}
-                        onItemsPerPageChange={(value) => {
-                            setItemsPerPage(value);
-                            setCurrentPage(1); // Reset to first page when changing items per page
-                        }}
                     />
 
                     {/* Orders Table */}
                     <OrderTable
-                        orders={paginatedOrders}
+                        orders={filteredOrders}
                         onStatusUpdate={handleStatusUpdate}
                         onViewDetails={handleViewDetails}
                         onContactCustomer={handleContactCustomer}
                         loading={loading}
                     />
 
-                    {/* Pagination */}
+                    {/* Results Summary */}
                     {filteredOrders?.length > 0 && (
-                        <Pagination
-                            currentPage={currentPage}
-                            totalItems={filteredOrders.length}
-                            itemsPerPage={itemsPerPage}
-                            onPageChange={(page) => setCurrentPage(page)}
-                        />
+                        <div className="mt-4 text-center text-sm text-muted-foreground">
+                            Mostrando {filteredOrders?.length} de {orders?.length} pedidos
+                        </div>
                     )}
                 </div>
             </main>

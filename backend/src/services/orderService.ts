@@ -50,6 +50,26 @@ async function registrarHistoricoStatus(
  */
 export class OrderService {
     /**
+     * Busca todos os pedidos da loja (para funcionários/administradores)
+     *
+     * @returns Promise<object[]> - Lista de todos os pedidos encontrados com números formatados
+     * @throws Error - Caso ocorra um problema no repositório
+     */
+    static async getAllOrders() {
+        try {
+            const orders = await OrderRepository.getAllOrders();
+
+            // Adiciona o número do pedido formatado a cada pedido
+            return orders.map(order => ({
+                ...order,
+                numeroPedido: generateOrderNumber(order.id)
+            }));
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    /**
      * Busca todos os pedidos de um usuário
      *
      * @param usuarioId - ID do usuário cujos pedidos serão buscados

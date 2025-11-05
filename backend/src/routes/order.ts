@@ -5,12 +5,14 @@
  * com pedidos, como CRUD completo de pedidos.
  *
  * Rotas disponíveis:
+ * - GET /api/order/all - Buscar todos os pedidos da loja (funcionários/admins)
  * - GET /api/order - Buscar todos os pedidos de um usuário
  * - POST /api/order/cadastrar - Criar novo pedido
  * - DELETE /api/order/:id - Excluir um pedido
  */
 import { Router } from 'express';
 import {
+  getAllOrders,
   getUserOrders,
   createOrder,
   deleteOrder,
@@ -19,6 +21,13 @@ import {
 } from '../controllers/orderController';
 
 const router = Router();
+
+/**
+ * @route GET /api/order/all
+ * @desc Rota para buscar todos os pedidos da loja
+ * @access Privado (funcionários/admins)
+ */
+router.get('/all', getAllOrders);
 
 /**
  * @route GET /api/order

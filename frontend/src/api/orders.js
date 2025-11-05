@@ -7,6 +7,15 @@ import api from "./config";
  */
 export const orderService = {
   /**
+   * Busca todos os pedidos da loja (para funcionários/administradores)
+   * @returns {Promise} Lista de todos os pedidos da loja
+   */
+  async getAllOrders() {
+    const response = await api.get('/order/all');
+    return response.data;
+  },
+
+  /**
    * Busca todos os pedidos de um usuário
    * @param {number} usuarioId - ID do usuário
    * @returns {Promise} Lista de pedidos do usuário

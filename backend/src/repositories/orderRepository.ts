@@ -9,6 +9,48 @@ const prisma = new PrismaClient();
  */
 export class OrderRepository {
     /**
+     * Busca todos os pedidos da loja (para funcionários/administradores)
+     *
+     * @returns Promise<object[]> - Lista de todos os pedidos encontrados
+     */
+    static async getAllOrders() {
+        return await prisma.pedido.findMany({
+            include: {
+                produtos: {
+                    include: {
+                        produto: true // Inclui os dados do produto relacionado
+                    }
+                },
+                endereco: true, // Inclui os dados do endereço de entrega
+                usuario: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        contact: true
+                    }
+                }, // Inclui dados básicos do usuário
+                statusHistorico: {
+                    include: {
+                        funcionario: {
+                            select: {
+                                id: true,
+                                name: true
+                            }
+                        }
+                    },
+                    orderBy: {
+                        createdAt: 'asc' // Ordena por data de criação (mais antigo primeiro)
+                    }
+                } // Inclui histórico completo de status
+            },
+            orderBy: {
+                createdAt: 'desc' // Ordena por data de criação, mais recentes primeiro
+            }
+        })
+    }
+
+    /**
      * Busca os pedidos vinculados a um usuário específico
      *
      * @param usuarioId - ID do usuário cujos pedidos devem ser retornados
@@ -123,7 +165,8 @@ export class OrderRepository {
                     select: {
                         id: true,
                         name: true,
-                        email: true
+                        email: true,
+                        contact: true
                     }
                 }, // Inclui dados básicos do usuário
                 statusHistorico: {

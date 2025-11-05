@@ -22,17 +22,42 @@ import { useAuth } from "@/hooks/use-auth.js";
 import { userService } from "@/api/userService";
 
 /**
- * UserProfile - Página de perfil do usuário da aplicação Conecta-Loja
+ * UserProfile - Página completa de perfil do usuário da aplicação Conecta-Loja
  *
- * Página moderna e profissional dedicada à visualização das informações pessoais do usuário,
- * com opções organizadas para gerenciar dados de contato, endereços e configurações da conta.
- * Interface limpa e intuitiva similar aos principais e-commerces, com botões de ação para edição.
+ * Página moderna e profissional dedicada à visualização e edição das informações pessoais do usuário.
+ * Suporta diferentes tipos de usuários (clientes e funcionários) com interfaces adaptadas.
+ * Oferece gerenciamento completo de dados pessoais, contato, endereços e avatar.
+ *
+ * @component
  *
  * Funcionalidades principais:
- * - Visualização organizada das informações pessoais
- * - Botões de ação para editar dados pessoais e contato
- * - Gerenciamento de endereços de entrega
- * - Design responsivo e profissional
+ * - Visualização organizada das informações pessoais com avatar
+ * - Edição de dados pessoais (nome, email, telefone para clientes)
+ * - Gerenciamento de endereços de entrega (apenas para clientes)
+ * - Upload e gerenciamento de avatar com preview
+ * - Interface adaptada para funcionários (cargo, loja, informações profissionais)
+ * - Design responsivo e profissional com cards organizados
+ * - Tratamento robusto de erros com notificações toast
+ *
+ * Estados gerenciados:
+ * - Dados do perfil do usuário carregados da API
+ * - Estados de loading para diferentes operações
+ * - Modais de edição (informações pessoais, contato)
+ * - Estados de upload de avatar e exclusão
+ * - Formulários de edição com validação
+ *
+ * Integrações principais:
+ * - useAuth: Para detectar tipo de usuário (cliente/funcionário)
+ * - userService: Para operações de perfil (busca, atualização, avatar)
+ * - useToast: Para notificações de sucesso/erro
+ * - useNavigate: Para navegação entre páginas
+ *
+ * Funcionalidades especiais:
+ * - Suporte a diferentes tipos de usuário com interfaces adaptadas
+ * - Upload de avatar com validação de tamanho e tipo
+ * - Preview de avatar com fallback para iniciais
+ * - Confirmação de exclusão de avatar
+ * - Navegação integrada para gerenciamento de endereços
  *
  * @example
  * // Rota configurada em Routes.jsx
@@ -42,6 +67,9 @@ import { userService } from "@/api/userService";
  * // Navegação via dropdown de usuário
  * <UserProfileDropdown user={currentUser} onLogout={handleLogout} />
  *
+ * @example
+ * // Uso direto do componente
+ * <UserProfile />
  */
 
 const UserProfile = () => {
@@ -67,34 +95,80 @@ const UserProfile = () => {
     // Estado para upload de avatar
     const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
+    /**
+     * Busca os dados do perfil do usuário autenticado da API
+     *
+     * Carrega todas as informações do perfil (pessoal, contato, endereços, avatar)
+     * e atualiza o estado local. Trata erros de carregamento com notificações.
+     *
+     * @async
+     * @function fetchUserProfile
+     * @returns {Promise<void>} Promise que resolve quando os dados são carregados
+     *
+     * @throws {Error} Quando há erro na comunicação com a API
+     */
+    const fetchUserProfile = async () => {
+        try {
+            const userData = await userService.getProfile();
+            setProfile(userData);
+        } catch (error) {
+            toast({
+                title: "Erro ao carregar perfil",
+                description: error.message || "Não foi possível buscar seus dados.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchUserProfile = async () => {
-            try {
-                const userData = await userService.getProfile();
-                setProfile(userData);
-            } catch (error) {
-                toast({
-                    title: "Erro ao carregar perfil",
-                    description: error.message || "Não foi possível buscar seus dados.",
-                    variant: "destructive",
-                });
-            } finally {
-                setIsLoading(false);
-            }
-        };
         fetchUserProfile();
     }, [toast]);
 
+    /**
+     * Gera iniciais do nome para o avatar fallback
+     *
+     * Extrai as primeiras letras de cada palavra do nome e cria uma string
+     * de até 2 caracteres em maiúsculo para usar como fallback do avatar.
+     *
+     * @function getInitials
+     * @param {string} [name=""] - Nome completo do usuário
+     * @returns {string} Iniciais em maiúsculo (máximo 2 caracteres)
+     *
+     * @example
+     * getInitials("João Silva"); // "JS"
+     * getInitials("Maria"); // "MA"
+     * getInitials(""); // ""
+     */
     const getInitials = (name = "") => {
         return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
     };
 
+    /**
+     * Abre o modal de edição de informações pessoais
+     *
+     * Preenche o formulário com os dados atuais do perfil e abre
+     * o modal de edição de informações pessoais (nome).
+     *
+     * @function handleEditPersonalInfo
+     * @returns {void}
+     */
     const handleEditPersonalInfo = () => {
         // Preencher o formulário com os dados atuais
         setPersonalForm({ name: profile.name });
         setIsPersonalInfoModalOpen(true);
     };
 
+    /**
+     * Abre o modal de edição de contato (apenas para clientes)
+     *
+     * Verifica se o usuário é cliente antes de abrir o modal.
+     * Preenche o formulário com dados atuais de email e telefone.
+     *
+     * @function handleEditContact
+     * @returns {void}
+     */
     const handleEditContact = () => {
         // Só permite edição de contato para clientes
         if (userType === 'cliente') {
@@ -107,6 +181,16 @@ const UserProfile = () => {
         }
     };
 
+    /**
+     * Salva as alterações das informações pessoais
+     *
+     * Valida e salva o nome atualizado através da API.
+     * Fecha o modal e mostra notificações de sucesso/erro.
+     *
+     * @async
+     * @function handleSavePersonalInfo
+     * @returns {Promise<void>} Promise que resolve quando os dados são salvos
+     */
     const handleSavePersonalInfo = async () => {
         if (!personalForm.name.trim()) {
             toast({
@@ -139,6 +223,16 @@ const UserProfile = () => {
         }
     };
 
+    /**
+     * Salva as alterações de contato (email/telefone)
+     *
+     * Compara dados atuais com novos, valida e salva apenas mudanças.
+     * Fecha o modal e mostra notificações apropriadas.
+     *
+     * @async
+     * @function handleSaveContact
+     * @returns {Promise<void>} Promise que resolve quando os dados são salvos
+     */
     const handleSaveContact = async () => {
         if (!contactForm.email.trim()) {
             toast({
@@ -183,6 +277,17 @@ const UserProfile = () => {
         }
     };
 
+    /**
+     * Processa o upload de avatar do usuário
+     *
+     * Valida tipo e tamanho do arquivo, converte para base64
+     * e salva através da API. Atualiza o estado do perfil.
+     *
+     * @async
+     * @function handleAvatarUpload
+     * @param {Event} event - Evento de mudança do input file
+     * @returns {Promise<void>} Promise que resolve quando o avatar é salvo
+     */
     const handleAvatarUpload = async (event) => {
         const file = event.target.files[0];
         if (!file) return;
@@ -247,10 +352,25 @@ const UserProfile = () => {
         reader.readAsDataURL(file);
     };
 
+    /**
+     * Abre o modal de confirmação de exclusão de avatar
+     *
+     * @function handleAvatarDelete
+     * @returns {void}
+     */
     const handleAvatarDelete = () => {
         setIsDeleteAvatarModalOpen(true);
     };
 
+    /**
+     * Confirma e executa a exclusão do avatar
+     *
+     * Remove o avatar através da API e atualiza o estado do perfil.
+     *
+     * @async
+     * @function confirmDeleteAvatar
+     * @returns {Promise<void>} Promise que resolve quando o avatar é removido
+     */
     const confirmDeleteAvatar = async () => {
         setIsDeletingAvatar(true);
         try {
@@ -275,10 +395,22 @@ const UserProfile = () => {
         }
     };
 
+    /**
+     * Navega para a página de gerenciamento de endereços
+     *
+     * @function handleManageAddresses
+     * @returns {void}
+     */
     const handleManageAddresses = () => {
         navigate("/profile/addresses");
     };
 
+    /**
+     * Navega para a página de criação de novo endereço
+     *
+     * @function handleAddAddress
+     * @returns {void}
+     */
     const handleAddAddress = () => {
         navigate("/profile/address/new");
     };
@@ -688,4 +820,14 @@ const UserProfile = () => {
     );
 };
 
+/**
+ * Exporta o componente UserProfile como padrão
+ *
+ * O componente UserProfile é a página principal de gerenciamento de perfil
+ * da aplicação Conecta-Loja, oferecendo interface completa para usuários
+ * e funcionários gerenciarem suas informações pessoais.
+ *
+ * @exports default
+ * @type {React.Component}
+ */
 export default UserProfile;
