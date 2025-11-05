@@ -48,64 +48,64 @@ const AppRoutes = () => {
         <ScrollToTop />
         <CartProvider>
           <RouterRoutes>
-          <Route path="/" element={<HomePage />} />
-          <Route
-            path="/dashboard"
-            element={
-              <EmployeeRoute>
-                <Dashboard />
-              </EmployeeRoute>
-            }
-          />
-          <Route
-            path="/relatorios"
-            element={
-              <EmployeeRoute>
-                <Reports />
-              </EmployeeRoute>
-            }
-          />
-          <Route
-            path="/pedidos"
-            element={
-              <EmployeeRoute>
-                <OrderManagement />
-              </EmployeeRoute>
-            }
-          />
-          <Route
-            path="/produtos"
-            element={
-              <EmployeeRoute>
-                <ProductManagement />
-              </EmployeeRoute>
-            }
-          />
-          <Route path="/profile" element={<UserProfile />} />
-          <Route path="/profile/addresses" element={<AddressManagement />} />
-          <Route path="/profile/address/new" element={<AddressForm />} />
-          <Route path="/profile/address/:id/edit" element={<AddressForm />} />
-          <Route
-            path="/store-settings"
-            element={
-              <AdminRoute>
-                <StoreSettings />
-              </AdminRoute>
-            }
-          />
-          <Route path="/history" element={<OrderHistory />} />
-          <Route
-            path="/checkout"
-            element={
-              <ClientRoute>
-                <Checkout />
-              </ClientRoute>
-            }
-          />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
-          <Route path="*" element={<NotFoundPage />} />
+            <Route path="/" element={<HomePage />} />
+            <Route
+              path="/dashboard"
+              element={
+                <EmployeeRoute>
+                  <Dashboard />
+                </EmployeeRoute>
+              }
+            />
+            <Route
+              path="/relatorios"
+              element={
+                <EmployeeRoute>
+                  <Reports />
+                </EmployeeRoute>
+              }
+            />
+            <Route
+              path="/pedidos"
+              element={
+                <EmployeeRoute>
+                  <OrderManagement />
+                </EmployeeRoute>
+              }
+            />
+            <Route
+              path="/produtos"
+              element={
+                <EmployeeRoute>
+                  <ProductManagement />
+                </EmployeeRoute>
+              }
+            />
+            <Route path="/profile" element={<UserProfile />} />
+            <Route path="/profile/addresses" element={<AddressManagement />} />
+            <Route path="/profile/address/new" element={<AddressForm />} />
+            <Route path="/profile/address/:id/edit" element={<AddressForm />} />
+            <Route
+              path="/store-settings"
+              element={
+                <AdminRoute>
+                  <StoreSettings />
+                </AdminRoute>
+              }
+            />
+            <Route path="/history" element={<OrderHistory />} />
+            <Route
+              path="/checkout"
+              element={
+                <ClientRoute>
+                  <Checkout />
+                </ClientRoute>
+              }
+            />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="*" element={<NotFoundPage />} />
           </RouterRoutes>
           <Toaster />
         </CartProvider>

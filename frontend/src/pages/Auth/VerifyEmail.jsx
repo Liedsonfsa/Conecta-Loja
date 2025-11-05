@@ -1,30 +1,30 @@
 /**
  * VerifyEmail - Página de verificação de email
- * 
+ *
  * Permite que usuários verifiquem seu email através do link recebido.
  * Valida token de verificação e ativa a conta do usuário.
- * 
+ *
  * Funcionalidades:
  * - Validação automática de token
  * - Feedback visual de sucesso/erro
  * - Reenvio de email de verificação
  * - Redirecionamento após verificação
- * 
+ *
  * @returns {JSX.Element} Página de verificação de email
  */
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import Button from '../../components/ui/ButtonDash';
-import { Card, CardContent } from '../../components/ui/card';
-import Icon from '../../components/AppIcon';
-import { useToast } from '../../hooks/use-toast';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import Button from "../../components/ui/ButtonDash";
+import { Card, CardContent } from "../../components/ui/card";
+import Icon from "../../components/AppIcon";
+import { useToast } from "../../hooks/use-toast";
 
 const VerifyEmail = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  
-  const [token, setToken] = useState('');
+
+  const [token, setToken] = useState("");
   const [verifying, setVerifying] = useState(true);
   const [verified, setVerified] = useState(false);
   const [error, setError] = useState(null);
@@ -34,11 +34,11 @@ const VerifyEmail = () => {
    * Verifica email ao carregar página
    */
   useEffect(() => {
-    const tokenParam = searchParams.get('token');
-    const email = searchParams.get('email');
-    
+    const tokenParam = searchParams.get("token");
+    const email = searchParams.get("email");
+
     if (!tokenParam) {
-      setError('Token de verificação não encontrado');
+      setError("Token de verificação não encontrado");
       setVerifying(false);
       return;
     }
@@ -59,32 +59,31 @@ const VerifyEmail = () => {
     try {
       // TODO: Integrar com API real
       // await authService.verifyEmail({ token, email });
-      
+
       // Simulação de API
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       // Simular erro aleatório para teste (remover em produção)
       // if (Math.random() > 0.7) throw new Error('Token inválido ou expirado');
-      
+
       setVerified(true);
       toast({
-        title: 'Email verificado!',
-        description: 'Sua conta foi ativada com sucesso.',
-        variant: 'success'
+        title: "Email verificado!",
+        description: "Sua conta foi ativada com sucesso.",
+        variant: "success",
       });
 
       // Redirecionar após 3 segundos
       setTimeout(() => {
-        navigate('/');
+        navigate("/");
       }, 3000);
-
     } catch (error) {
-      console.error('Erro ao verificar email:', error);
-      setError(error.message || 'Não foi possível verificar o email');
+      console.error("Erro ao verificar email:", error);
+      setError(error.message || "Não foi possível verificar o email");
       toast({
-        title: 'Erro na verificação',
-        description: error.message || 'Token inválido ou expirado',
-        variant: 'destructive'
+        title: "Erro na verificação",
+        description: error.message || "Token inválido ou expirado",
+        variant: "destructive",
       });
     } finally {
       setVerifying(false);
@@ -95,13 +94,13 @@ const VerifyEmail = () => {
    * Reenvia email de verificação
    */
   const handleResendEmail = async () => {
-    const email = searchParams.get('email');
-    
+    const email = searchParams.get("email");
+
     if (!email) {
       toast({
-        title: 'Erro',
-        description: 'Email não encontrado. Por favor, faça login novamente.',
-        variant: 'destructive'
+        title: "Erro",
+        description: "Email não encontrado. Por favor, faça login novamente.",
+        variant: "destructive",
       });
       return;
     }
@@ -111,22 +110,21 @@ const VerifyEmail = () => {
     try {
       // TODO: Integrar com API real
       // await authService.resendVerificationEmail(email);
-      
-      // Simulação de API
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      toast({
-        title: 'Email reenviado!',
-        description: 'Verifique sua caixa de entrada.',
-        variant: 'success'
-      });
 
-    } catch (error) {
-      console.error('Erro ao reenviar email:', error);
+      // Simulação de API
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       toast({
-        title: 'Erro',
-        description: 'Não foi possível reenviar o email. Tente novamente.',
-        variant: 'destructive'
+        title: "Email reenviado!",
+        description: "Verifique sua caixa de entrada.",
+        variant: "success",
+      });
+    } catch (error) {
+      console.error("Erro ao reenviar email:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível reenviar o email. Tente novamente.",
+        variant: "destructive",
       });
     } finally {
       setResending(false);
@@ -140,7 +138,11 @@ const VerifyEmail = () => {
         <Card className="w-full max-w-md">
           <CardContent className="text-center py-12">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 dark:bg-blue-950 rounded-full mb-4">
-              <Icon name="Mail" size={32} className="text-blue-600 animate-pulse" />
+              <Icon
+                name="Mail"
+                size={32}
+                className="text-blue-600 animate-pulse"
+              />
             </div>
             <h3 className="text-lg font-semibold text-foreground mb-2">
               Verificando seu email...
@@ -178,7 +180,7 @@ const VerifyEmail = () => {
             <CardContent className="text-center py-8">
               <div className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  Parabéns! Seu email foi verificado e sua conta está ativa. 
+                  Parabéns! Seu email foi verificado e sua conta está ativa.
                   Você será redirecionado para o login em alguns segundos...
                 </p>
 
@@ -188,7 +190,7 @@ const VerifyEmail = () => {
                 </div>
 
                 <Button
-                  onClick={() => navigate('/')}
+                  onClick={() => navigate("/")}
                   className="w-full mt-6"
                   iconName="LogIn"
                   iconPosition="left"
@@ -226,7 +228,11 @@ const VerifyEmail = () => {
                 {/* Error Message */}
                 <div className="bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg p-4">
                   <div className="flex gap-3">
-                    <Icon name="AlertCircle" size={20} className="text-red-600 flex-shrink-0 mt-0.5" />
+                    <Icon
+                      name="AlertCircle"
+                      size={20}
+                      className="text-red-600 flex-shrink-0 mt-0.5"
+                    />
                     <div>
                       <p className="text-sm font-medium text-red-900 dark:text-red-100 mb-1">
                         Erro na Verificação
@@ -245,15 +251,29 @@ const VerifyEmail = () => {
                   </p>
                   <ul className="text-sm text-muted-foreground space-y-2">
                     <li className="flex items-start gap-2">
-                      <Icon name="Circle" size={8} className="mt-1.5 flex-shrink-0" />
-                      <span>O link de verificação expirou (válido por 24 horas)</span>
+                      <Icon
+                        name="Circle"
+                        size={8}
+                        className="mt-1.5 flex-shrink-0"
+                      />
+                      <span>
+                        O link de verificação expirou (válido por 24 horas)
+                      </span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <Icon name="Circle" size={8} className="mt-1.5 flex-shrink-0" />
+                      <Icon
+                        name="Circle"
+                        size={8}
+                        className="mt-1.5 flex-shrink-0"
+                      />
                       <span>O link já foi usado anteriormente</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <Icon name="Circle" size={8} className="mt-1.5 flex-shrink-0" />
+                      <Icon
+                        name="Circle"
+                        size={8}
+                        className="mt-1.5 flex-shrink-0"
+                      />
                       <span>Link inválido ou corrompido</span>
                     </li>
                   </ul>
@@ -265,14 +285,16 @@ const VerifyEmail = () => {
                     onClick={handleResendEmail}
                     disabled={resending}
                     className="w-full"
-                    iconName={resending ? 'Loader2' : 'Mail'}
+                    iconName={resending ? "Loader2" : "Mail"}
                     iconPosition="left"
                   >
-                    {resending ? 'Enviando...' : 'Reenviar Email de Verificação'}
+                    {resending
+                      ? "Enviando..."
+                      : "Reenviar Email de Verificação"}
                   </Button>
 
                   <Button
-                    onClick={() => navigate('/')}
+                    onClick={() => navigate("/")}
                     variant="outline"
                     className="w-full"
                     iconName="ArrowLeft"
@@ -285,9 +307,9 @@ const VerifyEmail = () => {
                 {/* Help Text */}
                 <div className="text-center pt-4 border-t border-border">
                   <p className="text-xs text-muted-foreground">
-                    Ainda com problemas?{' '}
+                    Ainda com problemas?{" "}
                     <button
-                      onClick={() => navigate('/contact')}
+                      onClick={() => navigate("/contact")}
                       className="text-primary hover:underline"
                     >
                       Entre em contato com o suporte

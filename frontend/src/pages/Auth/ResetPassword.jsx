@@ -1,34 +1,40 @@
 /**
  * ResetPassword - Página de redefinição de senha
- * 
+ *
  * Permite que usuários redefinam sua senha através do link recebido por email.
  * Valida token de recuperação e solicita nova senha com confirmação.
- * 
+ *
  * Funcionalidades:
  * - Validação de token
  * - Campos de senha e confirmação
  * - Validação de força da senha
  * - Feedback visual de sucesso/erro
  * - Redirecionamento após sucesso
- * 
+ *
  * @returns {JSX.Element} Página de redefinição de senha
  */
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import Button from '../../components/ui/ButtonDash';
-import { Input } from '../../components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
-import Icon from '../../components/AppIcon';
-import { useToast } from '../../hooks/use-toast';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import Button from "../../components/ui/ButtonDash";
+import { Input } from "../../components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "../../components/ui/card";
+import Icon from "../../components/AppIcon";
+import { useToast } from "../../hooks/use-toast";
 
 const ResetPassword = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  
-  const [token, setToken] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const [token, setToken] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -39,14 +45,14 @@ const ResetPassword = () => {
    * Valida token ao carregar página
    */
   useEffect(() => {
-    const tokenParam = searchParams.get('token');
-    
+    const tokenParam = searchParams.get("token");
+
     if (!tokenParam) {
       setTokenValid(false);
       toast({
-        title: 'Link inválido',
-        description: 'Token de recuperação não encontrado.',
-        variant: 'destructive'
+        title: "Link inválido",
+        description: "Token de recuperação não encontrado.",
+        variant: "destructive",
       });
       return;
     }
@@ -63,16 +69,16 @@ const ResetPassword = () => {
     try {
       // TODO: Validar token com API
       // await authService.validateResetToken(token);
-      
+
       // Simulação
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
       setTokenValid(true);
     } catch (error) {
       setTokenValid(false);
       toast({
-        title: 'Token inválido',
-        description: 'Este link de recuperação é inválido ou expirou.',
-        variant: 'destructive'
+        title: "Token inválido",
+        description: "Este link de recuperação é inválido ou expirou.",
+        variant: "destructive",
       });
     }
   };
@@ -84,7 +90,7 @@ const ResetPassword = () => {
    */
   const getPasswordStrength = (password) => {
     let strength = 0;
-    
+
     if (password.length >= 8) strength++;
     if (password.length >= 12) strength++;
     if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
@@ -92,12 +98,12 @@ const ResetPassword = () => {
     if (/[^a-zA-Z0-9]/.test(password)) strength++;
 
     const levels = [
-      { score: 0, text: 'Muito fraca', color: 'text-red-600' },
-      { score: 1, text: 'Fraca', color: 'text-orange-600' },
-      { score: 2, text: 'Regular', color: 'text-yellow-600' },
-      { score: 3, text: 'Boa', color: 'text-blue-600' },
-      { score: 4, text: 'Forte', color: 'text-green-600' },
-      { score: 5, text: 'Muito forte', color: 'text-green-700' }
+      { score: 0, text: "Muito fraca", color: "text-red-600" },
+      { score: 1, text: "Fraca", color: "text-orange-600" },
+      { score: 2, text: "Regular", color: "text-yellow-600" },
+      { score: 3, text: "Boa", color: "text-blue-600" },
+      { score: 4, text: "Forte", color: "text-green-600" },
+      { score: 5, text: "Muito forte", color: "text-green-700" },
     ];
 
     return levels[strength];
@@ -110,27 +116,27 @@ const ResetPassword = () => {
   const validatePassword = () => {
     if (!password) {
       toast({
-        title: 'Erro',
-        description: 'Por favor, insira uma senha.',
-        variant: 'destructive'
+        title: "Erro",
+        description: "Por favor, insira uma senha.",
+        variant: "destructive",
       });
       return false;
     }
 
     if (password.length < 8) {
       toast({
-        title: 'Senha muito curta',
-        description: 'A senha deve ter pelo menos 8 caracteres.',
-        variant: 'destructive'
+        title: "Senha muito curta",
+        description: "A senha deve ter pelo menos 8 caracteres.",
+        variant: "destructive",
       });
       return false;
     }
 
     if (password !== confirmPassword) {
       toast({
-        title: 'Senhas não conferem',
-        description: 'As senhas digitadas são diferentes.',
-        variant: 'destructive'
+        title: "Senhas não conferem",
+        description: "As senhas digitadas são diferentes.",
+        variant: "destructive",
       });
       return false;
     }
@@ -152,28 +158,29 @@ const ResetPassword = () => {
     try {
       // TODO: Integrar com API real
       // await authService.resetPassword({ token, password });
-      
+
       // Simulação de API
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       setResetSuccess(true);
       toast({
-        title: 'Senha redefinida!',
-        description: 'Sua senha foi alterada com sucesso.',
-        variant: 'success'
+        title: "Senha redefinida!",
+        description: "Sua senha foi alterada com sucesso.",
+        variant: "success",
       });
 
       // Redirecionar após 3 segundos
       setTimeout(() => {
-        navigate('/');
+        navigate("/");
       }, 3000);
-
     } catch (error) {
-      console.error('Erro ao redefinir senha:', error);
+      console.error("Erro ao redefinir senha:", error);
       toast({
-        title: 'Erro',
-        description: error.message || 'Não foi possível redefinir a senha. Tente novamente.',
-        variant: 'destructive'
+        title: "Erro",
+        description:
+          error.message ||
+          "Não foi possível redefinir a senha. Tente novamente.",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -195,10 +202,11 @@ const ResetPassword = () => {
               Link Inválido
             </h3>
             <p className="text-sm text-muted-foreground mb-6">
-              Este link de recuperação é inválido ou já expirou. Por favor, solicite um novo link.
+              Este link de recuperação é inválido ou já expirou. Por favor,
+              solicite um novo link.
             </p>
             <Button
-              onClick={() => navigate('/forgot-password')}
+              onClick={() => navigate("/forgot-password")}
               iconName="Mail"
               iconPosition="left"
             >
@@ -223,10 +231,11 @@ const ResetPassword = () => {
               Senha Redefinida!
             </h3>
             <p className="text-sm text-muted-foreground mb-6">
-              Sua senha foi alterada com sucesso. Você será redirecionado para o login...
+              Sua senha foi alterada com sucesso. Você será redirecionado para o
+              login...
             </p>
             <Button
-              onClick={() => navigate('/')}
+              onClick={() => navigate("/")}
               iconName="ArrowLeft"
               iconPosition="left"
             >
@@ -244,22 +253,22 @@ const ResetPassword = () => {
         {/* Logo/Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary rounded-full mb-4">
-            <Icon name="KeyRound" size={32} className="text-primary-foreground" />
+            <Icon
+              name="KeyRound"
+              size={32}
+              className="text-primary-foreground"
+            />
           </div>
           <h1 className="text-3xl font-bold text-foreground mb-2">
             Redefinir Senha
           </h1>
-          <p className="text-muted-foreground">
-            Digite sua nova senha abaixo
-          </p>
+          <p className="text-muted-foreground">Digite sua nova senha abaixo</p>
         </div>
 
         <Card>
           <CardHeader>
             <CardTitle>Nova Senha</CardTitle>
-            <CardDescription>
-              Escolha uma senha forte e segura
-            </CardDescription>
+            <CardDescription>Escolha uma senha forte e segura</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -267,7 +276,7 @@ const ResetPassword = () => {
               <div>
                 <div className="relative">
                   <Input
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     label="Nova Senha"
                     placeholder="Mínimo 8 caracteres"
                     value={password}
@@ -280,28 +289,37 @@ const ResetPassword = () => {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-9 text-muted-foreground hover:text-foreground"
                   >
-                    <Icon name={showPassword ? 'EyeOff' : 'Eye'} size={20} />
+                    <Icon name={showPassword ? "EyeOff" : "Eye"} size={20} />
                   </button>
                 </div>
-                
+
                 {/* Password Strength */}
                 {password && passwordStrength && (
                   <div className="mt-2">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-muted-foreground">Força da senha:</span>
-                      <span className={`text-xs font-medium ${passwordStrength.color}`}>
+                      <span className="text-xs text-muted-foreground">
+                        Força da senha:
+                      </span>
+                      <span
+                        className={`text-xs font-medium ${passwordStrength.color}`}
+                      >
                         {passwordStrength.text}
                       </span>
                     </div>
                     <div className="h-1 bg-muted rounded-full overflow-hidden">
-                      <div 
+                      <div
                         className={`h-full transition-all ${
-                          passwordStrength.score <= 1 ? 'bg-red-600' :
-                          passwordStrength.score <= 2 ? 'bg-yellow-600' :
-                          passwordStrength.score <= 3 ? 'bg-blue-600' :
-                          'bg-green-600'
+                          passwordStrength.score <= 1
+                            ? "bg-red-600"
+                            : passwordStrength.score <= 2
+                            ? "bg-yellow-600"
+                            : passwordStrength.score <= 3
+                            ? "bg-blue-600"
+                            : "bg-green-600"
                         }`}
-                        style={{ width: `${(passwordStrength.score / 5) * 100}%` }}
+                        style={{
+                          width: `${(passwordStrength.score / 5) * 100}%`,
+                        }}
                       />
                     </div>
                   </div>
@@ -312,21 +330,28 @@ const ResetPassword = () => {
               <div>
                 <div className="relative">
                   <Input
-                    type={showConfirmPassword ? 'text' : 'password'}
+                    type={showConfirmPassword ? "text" : "password"}
                     label="Confirmar Senha"
                     placeholder="Digite a senha novamente"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
                     disabled={loading}
-                    error={confirmPassword && password !== confirmPassword ? 'As senhas não conferem' : ''}
+                    error={
+                      confirmPassword && password !== confirmPassword
+                        ? "As senhas não conferem"
+                        : ""
+                    }
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3 top-9 text-muted-foreground hover:text-foreground"
                   >
-                    <Icon name={showConfirmPassword ? 'EyeOff' : 'Eye'} size={20} />
+                    <Icon
+                      name={showConfirmPassword ? "EyeOff" : "Eye"}
+                      size={20}
+                    />
                   </button>
                 </div>
               </div>
@@ -338,34 +363,46 @@ const ResetPassword = () => {
                 </p>
                 <ul className="text-xs text-muted-foreground space-y-1">
                   <li className="flex items-center gap-2">
-                    <Icon 
-                      name={password.length >= 8 ? 'CheckCircle' : 'Circle'} 
-                      size={14} 
-                      className={password.length >= 8 ? 'text-green-600' : ''} 
+                    <Icon
+                      name={password.length >= 8 ? "CheckCircle" : "Circle"}
+                      size={14}
+                      className={password.length >= 8 ? "text-green-600" : ""}
                     />
                     Mínimo de 8 caracteres
                   </li>
                   <li className="flex items-center gap-2">
-                    <Icon 
-                      name={/[A-Z]/.test(password) && /[a-z]/.test(password) ? 'CheckCircle' : 'Circle'} 
+                    <Icon
+                      name={
+                        /[A-Z]/.test(password) && /[a-z]/.test(password)
+                          ? "CheckCircle"
+                          : "Circle"
+                      }
                       size={14}
-                      className={/[A-Z]/.test(password) && /[a-z]/.test(password) ? 'text-green-600' : ''}
+                      className={
+                        /[A-Z]/.test(password) && /[a-z]/.test(password)
+                          ? "text-green-600"
+                          : ""
+                      }
                     />
                     Letras maiúsculas e minúsculas
                   </li>
                   <li className="flex items-center gap-2">
-                    <Icon 
-                      name={/\d/.test(password) ? 'CheckCircle' : 'Circle'} 
+                    <Icon
+                      name={/\d/.test(password) ? "CheckCircle" : "Circle"}
                       size={14}
-                      className={/\d/.test(password) ? 'text-green-600' : ''}
+                      className={/\d/.test(password) ? "text-green-600" : ""}
                     />
                     Pelo menos um número
                   </li>
                   <li className="flex items-center gap-2">
-                    <Icon 
-                      name={/[^a-zA-Z0-9]/.test(password) ? 'CheckCircle' : 'Circle'} 
+                    <Icon
+                      name={
+                        /[^a-zA-Z0-9]/.test(password) ? "CheckCircle" : "Circle"
+                      }
                       size={14}
-                      className={/[^a-zA-Z0-9]/.test(password) ? 'text-green-600' : ''}
+                      className={
+                        /[^a-zA-Z0-9]/.test(password) ? "text-green-600" : ""
+                      }
                     />
                     Caractere especial (@, #, $, etc.)
                   </li>
@@ -377,17 +414,17 @@ const ResetPassword = () => {
                 type="submit"
                 className="w-full"
                 disabled={loading || !password || password !== confirmPassword}
-                iconName={loading ? 'Loader2' : 'Check'}
+                iconName={loading ? "Loader2" : "Check"}
                 iconPosition="left"
               >
-                {loading ? 'Redefinindo...' : 'Redefinir Senha'}
+                {loading ? "Redefinindo..." : "Redefinir Senha"}
               </Button>
 
               {/* Back to Login */}
               <div className="text-center">
                 <button
                   type="button"
-                  onClick={() => navigate('/')}
+                  onClick={() => navigate("/")}
                   className="text-sm text-primary hover:underline flex items-center justify-center gap-2 mx-auto"
                 >
                   <Icon name="ArrowLeft" size={16} />
