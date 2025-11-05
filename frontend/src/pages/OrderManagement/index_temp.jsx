@@ -8,7 +8,6 @@ import OrderFilters from './components/OrderFilters';
 import OrderTable from './components/OrderTable';
 import OrderDetailsModal from './components/OrderDetailsModal';
 import StatusUpdateModal from './components/StatusUpdateModal';
-import Pagination from '../../components/ui/Pagination';
 import { formatCurrency, debounce, exportToCSV } from 'src/utils';
 import { orderService } from '../../api/orders';
 
@@ -98,35 +97,11 @@ const OrderManagement = () => {
     const [notification, setNotification] = useState(null);
 
     /**
-     * Estado de paginação
-     * @type {[number, function]} currentPage - Página atual (baseado em 1)
-     */
-    const [currentPage, setCurrentPage] = useState(1);
-
-    /**
-     * Estado de itens por página
-     * @type {[number, function]} itemsPerPage - Quantidade de itens por página
-     */
-    const [itemsPerPage, setItemsPerPage] = useState(20);
-
-    /**
      * Lista de pedidos com dados completos da API
      * Cada pedido contém informações do cliente, itens, timeline e status
      * @type {[Array, function]} orders
      */
     const [orders, setOrders] = useState([]);
-
-    // Mapeamento reverso: do frontend para o backend
-    const statusMappingReverse = {
-        'received': 'RECEBIDO',
-        'pending': 'AGUARDANDO_PAGAMENTO',
-        'payment_approved': 'PAGAMENTO_APROVADO',
-        'preparing': 'PREPARO',
-        'en_route': 'ENVIADO_PARA_ENTREGA',
-        'delivered': 'ENTREGUE',
-        'cancelled': 'CANCELADO',
-        'delivery_failed': 'TENTATIVA_ENTREGA_FALHADA'
-    };
 
     /**
      * Busca todos os pedidos da loja através da API
@@ -137,57 +112,35 @@ const OrderManagement = () => {
             const response = await orderService.getAllOrders();
             if (response.success) {
                 // Transforma os dados da API para o formato esperado pelo componente
-                // Mapeia os status do enum para os valores esperados pelo frontend
-                const statusMapping = {
-                    'RECEBIDO': 'received',
-                    'AGUARDANDO_PAGAMENTO': 'pending',
-                    'PAGAMENTO_APROVADO': 'payment_approved',
-                    'PREPARO': 'preparing',
-                    'ENVIADO_PARA_ENTREGA': 'en_route',
-                    'ENTREGUE': 'delivered',
-                    'CANCELADO': 'cancelled',
-                    'TENTATIVA_ENTREGA_FALHADA': 'delivery_failed'
-                };
-
-                const transformedOrders = response.orders.map(order => {
-
-                    // Calcula o total dos produtos
-                    const itemsTotal = order.produtos?.reduce((sum, p) =>
-                        sum + (Number(p.precoUnitario || 0) * Number(p.quantidade || 1)), 0
-                    ) || 0;
-
-                    const mappedStatus = statusMapping[order.status] || 'received';
-
-                    return {
-                        id: order.numeroPedido || order.id, // Para exibição (formatado)
-                        databaseId: order.id, // ID real do banco para operações
-                        customerName: order.usuario?.name || 'Cliente',
-                        customerPhone: order.usuario?.contact || '',
-                        customerAddress: order.endereco ? `${order.endereco.logradouro}, ${order.endereco.numero} - ${order.endereco.bairro}, ${order.endereco.cidade} - ${order.endereco.estado}` : '',
-                        items: order.produtos?.map(p => ({
-                            name: p.produto?.name || 'Produto',
-                            description: p.produto?.description || '',
-                            price: Number(p.precoUnitario || 0),
-                            quantity: Number(p.quantidade || 1),
-                            image: p.produto?.image || '',
-                            customizations: []
-                        })) || [],
-                        subtotal: itemsTotal,
-                        discount: 0,
-                        total: Number(order.precoTotal || itemsTotal),
-                        status: mappedStatus,
-                        createdAt: order.createdAt,
-                        specialInstructions: order.observacoes || '',
-                        paymentMethod: 'Cartão', // Valor padrão, pode vir da API
-                        isNew: order.status === 'RECEBIDO',
-                        itemCount: order.produtos?.length || 0,
-                        timeline: order.statusHistorico?.map(h => ({
-                            status: h.status,
-                            timestamp: h.createdAt,
-                            note: h.observacao || ''
-                        })) || []
-                    };
-                });
+                const transformedOrders = response.orders.map(order => ({
+                    id: order.numeroPedido || order.id,
+                    customerName: order.usuario?.name || 'Cliente',
+                    customerPhone: order.endereco?.telefone || '',
+                    customerAddress: order.endereco ? `${order.endereco.rua}, ${order.endereco.numero} - ${order.endereco.bairro}, ${order.endereco.cidade} - ${order.endereco.estado}` : '',
+                    items: order.produtos?.map(p => ({
+                        name: p.produto?.nome || 'Produto',
+                        description: p.produto?.descricao || '',
+                        price: p.precoUnitario || 0,
+                        quantity: p.quantidade || 1,
+                        image: p.produto?.imagem || '',
+                        customizations: []
+                    })) || [],
+                    subtotal: order.precoTotal || 0,
+                    deliveryFee: 5.00, // Valor padrão, pode vir da API
+                    discount: 0,
+                    total: order.precoTotal || 0,
+                    status: order.status?.toLowerCase() || 'received',
+                    createdAt: order.createdAt,
+                    specialInstructions: order.observacoes || '',
+                    paymentMethod: 'Cartão', // Valor padrão, pode vir da API
+                    isNew: order.status === 'RECEBIDO',
+                    itemCount: order.produtos?.length || 0,
+                    timeline: order.statusHistorico?.map(h => ({
+                        status: h.status,
+                        timestamp: h.createdAt,
+                        note: h.observacao || ''
+                    })) || []
+                }));
                 setOrders(transformedOrders);
             } else {
                 showNotification('Erro ao buscar pedidos', 'error');
@@ -223,47 +176,23 @@ const OrderManagement = () => {
     });
 
     /**
-     * Dados de estatísticas dos pedidos calculados dinamicamente
-     * Baseado nos pedidos carregados da API
+     * Dados de estatísticas dos pedidos para exibição nos cards
      * @type {Object} stats
-     * @property {number} todayOrders - Número de pedidos criados hoje
-     * @property {number} todayOrdersChange - Variação percentual (placeholder)
-     * @property {number} pendingOrders - Pedidos aguardando processamento (recebidos + aguardando pagamento)
+     * @property {number} todayOrders - Número de pedidos hoje
+     * @property {number} todayOrdersChange - Variação percentual nos pedidos
+     * @property {number} pendingOrders - Pedidos pendentes
      * @property {number} preparingOrders - Pedidos em preparação
-     * @property {number} todayRevenue - Receita de pedidos entregues hoje
-     * @property {number} todayRevenueChange - Variação percentual (placeholder)
+     * @property {number} todayRevenue - Receita total do dia
+     * @property {number} todayRevenueChange - Variação percentual na receita
      */
-    const stats = React.useMemo(() => {
-        const today = new Date();
-        const todayString = today.toISOString().split('T')[0]; // YYYY-MM-DD format
-
-        // Filtrar pedidos de hoje
-        const todayOrders = orders.filter(order => {
-            const orderDate = new Date(order.createdAt).toISOString().split('T')[0];
-            return orderDate === todayString;
-        });
-
-        // Contar pedidos por status (pendentes = aguardando pagamento + recém recebidos)
-        const pendingOrders = orders.filter(order => order.status === 'pending' || order.status === 'received').length;
-        const preparingOrders = orders.filter(order => order.status === 'preparing').length;
-
-        // Calcular receita de hoje (pedidos entregues hoje)
-        const todayRevenue = orders
-            .filter(order => {
-                const orderDate = new Date(order.createdAt).toISOString().split('T')[0];
-                return orderDate === todayString && order.status === 'delivered';
-            })
-            .reduce((total, order) => total + (order.total || 0), 0);
-
-        return {
-            todayOrders: todayOrders.length,
-            todayOrdersChange: 0, // Placeholder - seria calculado comparando com dia anterior
-            pendingOrders,
-            preparingOrders,
-            todayRevenue,
-            todayRevenueChange: 0 // Placeholder - seria calculado comparando com dia anterior
-        };
-    }, [orders]);
+    const stats = {
+        todayOrders: 12,
+        todayOrdersChange: 15,
+        pendingOrders: 2,
+        preparingOrders: 1,
+        todayRevenue: 485.60,
+        todayRevenueChange: 8
+    };
 
     /**
      * Lista de pedidos filtrada e ordenada baseada nos filtros aplicados
@@ -318,17 +247,6 @@ const OrderManagement = () => {
     }, [orders, filters]);
 
     /**
-     * Lista de pedidos paginada baseada nos filtros aplicados
-     * Utiliza useMemo para otimizar performance evitando recálculos desnecessários
-     * @type {Array} paginatedOrders - Array de pedidos da página atual
-     */
-    const paginatedOrders = React.useMemo(() => {
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        return filteredOrders.slice(startIndex, endIndex);
-    }, [filteredOrders, currentPage, itemsPerPage]);
-
-    /**
      * Função debounced para mudanças no filtro de busca
      * Aplica debounce de 300ms para evitar múltiplas execuções durante digitação
      * @type {Function} debouncedFilterChange
@@ -352,10 +270,6 @@ const OrderManagement = () => {
         } else {
             setFilters(prev => ({ ...prev, [key]: value }));
         }
-        // Reset to first page when filters change (except search which is debounced)
-        if (key !== 'search') {
-            setCurrentPage(1);
-        }
     };
 
     /**
@@ -369,7 +283,6 @@ const OrderManagement = () => {
             dateTo: '',
             sort: 'newest'
         });
-        setCurrentPage(1); // Reset to first page when clearing filters
     };
 
     /**
@@ -431,74 +344,50 @@ const OrderManagement = () => {
      * @param {string} [updateData.note] - Nota opcional da atualização
      * @param {boolean} [updateData.notifyCustomer] - Se deve notificar o cliente
      */
-    const handleUpdateOrderStatus = async (order, updateData) => {
-        // Usar o databaseId se disponível, senão extrair do ID formatado
-        let numericOrderId = order.databaseId;
-        if (!numericOrderId && typeof order.id === 'string') {
-            // Remover caracteres não numéricos do final da string
-            const numericMatch = order.id.match(/(\d+)$/);
-            if (numericMatch) {
-                numericOrderId = numericMatch[1];
-            }
-        }
-
+    const handleUpdateOrderStatus = async (orderId, updateData) => {
         setLoading(true);
 
         try {
-            // Preparar dados para a API
-            const apiData = {
-                status: statusMappingReverse[updateData?.status] || updateData?.status,
-                criadoPor: null, // Campo opcional - pode ser null se não houver funcionário logado
-                observacao: updateData?.note || ''
-            };
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 1000));
 
-            // Chamar API real
-            const response = await orderService.updateOrderStatus(numericOrderId, apiData);
+            setOrders(prev => prev?.map(order => {
+                if (order?.id === orderId) {
+                    const updatedOrder = {
+                        ...order,
+                        status: updateData?.status,
+                        timeline: [
+                            ...order?.timeline,
+                            {
+                                status: getStatusLabel(updateData?.status),
+                                timestamp: updateData?.timestamp,
+                                note: updateData?.note
+                            }
+                        ]
+                    };
 
-            if (response.success) {
-                // Atualizar pedido na lista local
-                setOrders(prev => prev?.map(orderItem => {
-                    if (orderItem?.id === order.id) {
-                        const updatedOrder = {
-                            ...order,
-                            status: updateData?.status,
-                            timeline: [
-                                ...order?.timeline,
-                                {
-                                    status: getStatusLabel(updateData?.status),
-                                    timestamp: updateData?.timestamp,
-                                    note: updateData?.note
-                                }
-                            ]
-                        };
-
-                        // Mark as not new after status update
-                        if (updatedOrder?.isNew) {
-                            updatedOrder.isNew = false;
-                        }
-
-                        return updatedOrder;
+                    // Mark as not new after status update
+                    if (updatedOrder?.isNew) {
+                        updatedOrder.isNew = false;
                     }
-                    return order;
-                }));
 
-                showNotification('Status atualizado com sucesso!', 'success');
-
-                // Abrir WhatsApp com mensagem pré-programada se foi solicitado
-                if (updateData?.notifyCustomer) {
-                    const statusMessage = getStatusWhatsAppMessage(order.customerName, order.id, updateData?.status);
-                    const whatsappUrl = `https://wa.me/55${order.customerPhone?.replace(/\D/g, '')}?text=${encodeURIComponent(statusMessage)}`;
-
-                    // Abrir WhatsApp em nova aba
-                    window.open(whatsappUrl, '_blank');
-
-                    showNotification('WhatsApp aberto com mensagem pronta para envio', 'info');
+                    return updatedOrder;
                 }
-            } else {
-                showNotification('Erro ao atualizar status', 'error');
+                return order;
+            }));
+
+            showNotification('Status atualizado com sucesso!', 'success');
+
+            // Simulate WhatsApp notification if enabled
+            if (updateData?.notifyCustomer) {
+                const order = orders?.find(o => o?.id === orderId);
+                if (order) {
+                    setTimeout(() => {
+                        showNotification(`Cliente ${order?.customerName} notificado via WhatsApp`, 'info');
+                    }, 1500);
+                }
             }
         } catch (error) {
-            console.error('Erro ao atualizar status:', error);
             showNotification('Erro ao atualizar status', 'error');
         } finally {
             setLoading(false);
@@ -517,33 +406,9 @@ const OrderManagement = () => {
             ready: 'Pronto',
             en_route: 'A caminho',
             delivered: 'Entregue',
-            cancelled: 'Cancelado',
-            payment_approved: 'Pagamento Aprovado',
-            delivery_failed: 'Tentativa de Entrega Falhada'
+            cancelled: 'Cancelado'
         };
         return labels?.[status] || status;
-    };
-
-    /**
-     * Gera mensagem apropriada para WhatsApp baseada no status do pedido
-     * @param {string} customerName - Nome do cliente
-     * @param {string} orderId - ID do pedido
-     * @param {string} status - Status do pedido
-     * @returns {string} Mensagem formatada para WhatsApp
-     */
-    const getStatusWhatsAppMessage = (customerName, orderId, status) => {
-        const messages = {
-            received: `Olá ${customerName}! ✅ Recebemos seu pedido #${orderId} e já estamos processando. Em breve iniciaremos o preparo!`,
-            pending: `Olá ${customerName}! 💳 Seu pedido #${orderId} está aguardando confirmação do pagamento. Assim que aprovado, começaremos a preparar!`,
-            payment_approved: `Olá ${customerName}! 💰 Pagamento do pedido #${orderId} aprovado! Agora vamos começar a preparar seu pedido.`,
-            preparing: `Olá ${customerName}! 👨‍🍳 Começamos a preparar seu pedido #${orderId}! Em breve estará pronto para entrega.`,
-            ready: `Olá ${customerName}! 📦 Seu pedido #${orderId} está pronto! Aguarde o entregador ou venha buscar.`,
-            en_route: `Olá ${customerName}! 🚚 Seu pedido #${orderId} saiu para entrega! O entregador chegará em breve.`,
-            delivered: `Olá ${customerName}! 🎉 Seu pedido #${orderId} foi entregue com sucesso! Obrigado pela preferência!`,
-            cancelled: `Olá ${customerName}. 😔 Infelizmente seu pedido #${orderId} foi cancelado. Entre em contato conosco para mais informações.`,
-            delivery_failed: `Olá ${customerName}. 📍 Não conseguimos entregar seu pedido #${orderId} no endereço informado. Vamos tentar novamente ou entrar em contato para reagendar.`
-        };
-        return messages[status] || `Olá ${customerName}! 📋 Status do seu pedido #${orderId} foi atualizado para: ${getStatusLabel(status)}`;
     };
 
     /**
@@ -618,30 +483,22 @@ const OrderManagement = () => {
                         onFilterChange={handleFilterChange}
                         onClearFilters={handleClearFilters}
                         onExport={handleExport}
-                        itemsPerPage={itemsPerPage}
-                        onItemsPerPageChange={(value) => {
-                            setItemsPerPage(value);
-                            setCurrentPage(1); // Reset to first page when changing items per page
-                        }}
                     />
 
                     {/* Orders Table */}
                     <OrderTable
-                        orders={paginatedOrders}
+                        orders={filteredOrders}
                         onStatusUpdate={handleStatusUpdate}
                         onViewDetails={handleViewDetails}
                         onContactCustomer={handleContactCustomer}
                         loading={loading}
                     />
 
-                    {/* Pagination */}
+                    {/* Results Summary */}
                     {filteredOrders?.length > 0 && (
-                        <Pagination
-                            currentPage={currentPage}
-                            totalItems={filteredOrders.length}
-                            itemsPerPage={itemsPerPage}
-                            onPageChange={(page) => setCurrentPage(page)}
-                        />
+                        <div className="mt-4 text-center text-sm text-muted-foreground">
+                            Mostrando {filteredOrders?.length} de {orders?.length} pedidos
+                        </div>
                     )}
                 </div>
             </main>

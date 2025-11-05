@@ -76,16 +76,20 @@ model pedido_produto {
 }
 
 model funcionario {
-  id              Int                       @id @default(autoincrement())
-  name            String
-  email           String                    @unique
-  password        String
-  lojaId          Int
-  cargoId         Int?
-  avatar          String?
-  cargo           cargo?                    @relation(fields: [cargoId], references: [id])
-  loja            store                     @relation(fields: [lojaId], references: [id])
-  statusHistorico pedido_status_historico[]
+  id       Int     @id @default(autoincrement())
+  name     String
+  email    String  @unique
+  password String
+  avatar   String? @db.Text // Foto do funcionário em base64 (opcional)
+
+  cargoId Int? // Temporariamente opcional
+  cargo   cargo? @relation(fields: [cargoId], references: [id])
+
+  lojaId Int
+  loja   store @relation(fields: [lojaId], references: [id])
+
+  // Relations
+  statusHistorico pedido_status_historico[] // UM funcionário pode criar VÁRIOS registros de status
 }
 
 model cargo {

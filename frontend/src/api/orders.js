@@ -7,6 +7,30 @@ import api from "./config";
  */
 export const orderService = {
   /**
+   * Busca todos os pedidos da loja (para funcionários/administradores)
+   * @returns {Promise} Lista de todos os pedidos da loja
+   */
+  async getAllOrders() {
+    const response = await api.get("/order/all");
+    return response.data;
+  },
+
+  /**
+   * Atualiza o status de um pedido
+   * @param {number} orderId - ID do pedido
+   * @param {object} updateData - Dados da atualização
+   * @param {string} updateData.status - Novo status do pedido
+   * @param {number} updateData.criadoPor - ID do funcionário que fez a atualização
+   * @param {string} updateData.observacao - Observação da atualização
+   * @param {boolean} updateData.notifyCustomer - Se deve notificar o cliente via WhatsApp
+   * @returns {Promise} Pedido atualizado
+   */
+  async updateOrderStatus(orderId, updateData) {
+    const response = await api.put(`/order/${orderId}/status`, updateData);
+    return response.data;
+  },
+
+  /**
    * Busca todos os pedidos de um usuário
    * @param {number} usuarioId - ID do usuário
    * @returns {Promise} Lista de pedidos do usuário

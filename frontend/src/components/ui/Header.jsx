@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom'; // <-- 1. IMPORTADO
 import Icon from '../AppIcon';
 import Button from './ButtonDash';
+import { useAuth } from '../../hooks/use-auth';
 
 const Header = ({ onMenuToggle, isSidebarCollapsed = false }) => {
   // 1. Adiciona estado para controlar o dropdown do perfil
@@ -9,9 +10,12 @@ const Header = ({ onMenuToggle, isSidebarCollapsed = false }) => {
 
   // 2. Adiciona uma referência para o menu para detectar cliques fora
   const profileMenuRef = useRef(null);
-  
+
   // 3. INICIALIZA O HOOK DE NAVEGAÇÃO
   const navigate = useNavigate(); // <-- ADICIONADO
+
+  // 4. OBTEM OS DADOS DO USUÁRIO LOGADO
+  const { user } = useAuth();
 
   // 4. FUNÇÃO PARA LIDAR COM O LOGOUT/SAIR
   const handleLogout = () => {
@@ -80,7 +84,7 @@ const Header = ({ onMenuToggle, isSidebarCollapsed = false }) => {
               {/* Um cabeçalho opcional para o dropdown */}
               <div className="px-4 py-3 border-b border-border">
                 <p className="text-sm font-medium text-foreground truncate">
-                  Olá, Usuário!
+                  Olá, {user?.name || user?.nome || user?.firstName || 'Usuário'}!
                 </p>
               </div>
 
