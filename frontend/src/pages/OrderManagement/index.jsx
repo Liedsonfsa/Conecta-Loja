@@ -116,6 +116,18 @@ const OrderManagement = () => {
      */
     const [orders, setOrders] = useState([]);
 
+    // Mapeamento reverso: do frontend para o backend
+    const statusMappingReverse = {
+        'received': 'RECEBIDO',
+        'pending': 'AGUARDANDO_PAGAMENTO',
+        'payment_approved': 'PAGAMENTO_APROVADO',
+        'preparing': 'PREPARO',
+        'en_route': 'ENVIADO_PARA_ENTREGA',
+        'delivered': 'ENTREGUE',
+        'cancelled': 'CANCELADO',
+        'delivery_failed': 'TENTATIVA_ENTREGA_FALHADA'
+    };
+
     /**
      * Busca todos os pedidos da loja através da API
      */
@@ -125,18 +137,19 @@ const OrderManagement = () => {
             const response = await orderService.getAllOrders();
             if (response.success) {
                 // Transforma os dados da API para o formato esperado pelo componente
+                // Mapeia os status do enum para os valores esperados pelo frontend
+                const statusMapping = {
+                    'RECEBIDO': 'received',
+                    'AGUARDANDO_PAGAMENTO': 'pending',
+                    'PAGAMENTO_APROVADO': 'payment_approved',
+                    'PREPARO': 'preparing',
+                    'ENVIADO_PARA_ENTREGA': 'en_route',
+                    'ENTREGUE': 'delivered',
+                    'CANCELADO': 'cancelled',
+                    'TENTATIVA_ENTREGA_FALHADA': 'delivery_failed'
+                };
+
                 const transformedOrders = response.orders.map(order => {
-                    // Mapeia os status do enum para os valores esperados pelo frontend
-                    const statusMapping = {
-                        'RECEBIDO': 'received',
-                        'AGUARDANDO_PAGAMENTO': 'pending',
-                        'PAGAMENTO_APROVADO': 'payment_approved',
-                        'PREPARO': 'preparing',
-                        'ENVIADO_PARA_ENTREGA': 'en_route',
-                        'ENTREGUE': 'delivered',
-                        'CANCELADO': 'cancelled',
-                        'TENTATIVA_ENTREGA_FALHADA': 'delivery_failed'
-                    };
 
                     // Calcula o total dos produtos
                     const itemsTotal = order.produtos?.reduce((sum, p) =>
@@ -146,7 +159,8 @@ const OrderManagement = () => {
                     const mappedStatus = statusMapping[order.status] || 'received';
 
                     return {
-                        id: order.numeroPedido || order.id,
+                        id: order.numeroPedido || order.id, // Para exibição (formatado)
+                        databaseId: order.id, // ID real do banco para operações
                         customerName: order.usuario?.name || 'Cliente',
                         customerPhone: order.usuario?.contact || '',
                         customerAddress: order.endereco ? `${order.endereco.logradouro}, ${order.endereco.numero} - ${order.endereco.bairro}, ${order.endereco.cidade} - ${order.endereco.estado}` : '',
@@ -214,7 +228,7 @@ const OrderManagement = () => {
      * @type {Object} stats
      * @property {number} todayOrders - Número de pedidos criados hoje
      * @property {number} todayOrdersChange - Variação percentual (placeholder)
-     * @property {number} pendingOrders - Pedidos aguardando pagamento
+     * @property {number} pendingOrders - Pedidos aguardando processamento (recebidos + aguardando pagamento)
      * @property {number} preparingOrders - Pedidos em preparação
      * @property {number} todayRevenue - Receita de pedidos entregues hoje
      * @property {number} todayRevenueChange - Variação percentual (placeholder)
@@ -229,8 +243,8 @@ const OrderManagement = () => {
             return orderDate === todayString;
         });
 
-        // Contar pedidos por status
-        const pendingOrders = orders.filter(order => order.status === 'pending').length;
+        // Contar pedidos por status (pendentes = aguardando pagamento + recém recebidos)
+        const pendingOrders = orders.filter(order => order.status === 'pending' || order.status === 'received').length;
         const preparingOrders = orders.filter(order => order.status === 'preparing').length;
 
         // Calcular receita de hoje (pedidos entregues hoje)
@@ -417,50 +431,74 @@ const OrderManagement = () => {
      * @param {string} [updateData.note] - Nota opcional da atualização
      * @param {boolean} [updateData.notifyCustomer] - Se deve notificar o cliente
      */
-    const handleUpdateOrderStatus = async (orderId, updateData) => {
+    const handleUpdateOrderStatus = async (order, updateData) => {
+        // Usar o databaseId se disponível, senão extrair do ID formatado
+        let numericOrderId = order.databaseId;
+        if (!numericOrderId && typeof order.id === 'string') {
+            // Remover caracteres não numéricos do final da string
+            const numericMatch = order.id.match(/(\d+)$/);
+            if (numericMatch) {
+                numericOrderId = numericMatch[1];
+            }
+        }
+
         setLoading(true);
 
         try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Preparar dados para a API
+            const apiData = {
+                status: statusMappingReverse[updateData?.status] || updateData?.status,
+                criadoPor: null, // Campo opcional - pode ser null se não houver funcionário logado
+                observacao: updateData?.note || ''
+            };
 
-            setOrders(prev => prev?.map(order => {
-                if (order?.id === orderId) {
-                    const updatedOrder = {
-                        ...order,
-                        status: updateData?.status,
-                        timeline: [
-                            ...order?.timeline,
-                            {
-                                status: getStatusLabel(updateData?.status),
-                                timestamp: updateData?.timestamp,
-                                note: updateData?.note
-                            }
-                        ]
-                    };
+            // Chamar API real
+            const response = await orderService.updateOrderStatus(numericOrderId, apiData);
 
-                    // Mark as not new after status update
-                    if (updatedOrder?.isNew) {
-                        updatedOrder.isNew = false;
+            if (response.success) {
+                // Atualizar pedido na lista local
+                setOrders(prev => prev?.map(orderItem => {
+                    if (orderItem?.id === order.id) {
+                        const updatedOrder = {
+                            ...order,
+                            status: updateData?.status,
+                            timeline: [
+                                ...order?.timeline,
+                                {
+                                    status: getStatusLabel(updateData?.status),
+                                    timestamp: updateData?.timestamp,
+                                    note: updateData?.note
+                                }
+                            ]
+                        };
+
+                        // Mark as not new after status update
+                        if (updatedOrder?.isNew) {
+                            updatedOrder.isNew = false;
+                        }
+
+                        return updatedOrder;
                     }
+                    return order;
+                }));
 
-                    return updatedOrder;
+                showNotification('Status atualizado com sucesso!', 'success');
+
+                // Abrir WhatsApp com mensagem pré-programada se foi solicitado
+                if (updateData?.notifyCustomer) {
+                    const statusMessage = getStatusWhatsAppMessage(order.customerName, order.id, updateData?.status);
+                    const whatsappUrl = `https://wa.me/55${order.customerPhone?.replace(/\D/g, '')}?text=${encodeURIComponent(statusMessage)}`;
+
+                    // Abrir WhatsApp em nova aba
+                    window.open(whatsappUrl, '_blank');
+
+                    showNotification('WhatsApp aberto com mensagem pronta para envio', 'info');
                 }
-                return order;
-            }));
-
-            showNotification('Status atualizado com sucesso!', 'success');
-
-            // Simulate WhatsApp notification if enabled
-            if (updateData?.notifyCustomer) {
-                const order = orders?.find(o => o?.id === orderId);
-                if (order) {
-                    setTimeout(() => {
-                        showNotification(`Cliente ${order?.customerName} notificado via WhatsApp`, 'info');
-                    }, 1500);
-                }
+            } else {
+                showNotification('Erro ao atualizar status', 'error');
             }
         } catch (error) {
+            console.error('Erro ao atualizar status:', error);
             showNotification('Erro ao atualizar status', 'error');
         } finally {
             setLoading(false);
@@ -479,9 +517,33 @@ const OrderManagement = () => {
             ready: 'Pronto',
             en_route: 'A caminho',
             delivered: 'Entregue',
-            cancelled: 'Cancelado'
+            cancelled: 'Cancelado',
+            payment_approved: 'Pagamento Aprovado',
+            delivery_failed: 'Tentativa de Entrega Falhada'
         };
         return labels?.[status] || status;
+    };
+
+    /**
+     * Gera mensagem apropriada para WhatsApp baseada no status do pedido
+     * @param {string} customerName - Nome do cliente
+     * @param {string} orderId - ID do pedido
+     * @param {string} status - Status do pedido
+     * @returns {string} Mensagem formatada para WhatsApp
+     */
+    const getStatusWhatsAppMessage = (customerName, orderId, status) => {
+        const messages = {
+            received: `Olá ${customerName}! ✅ Recebemos seu pedido #${orderId} e já estamos processando. Em breve iniciaremos o preparo!`,
+            pending: `Olá ${customerName}! 💳 Seu pedido #${orderId} está aguardando confirmação do pagamento. Assim que aprovado, começaremos a preparar!`,
+            payment_approved: `Olá ${customerName}! 💰 Pagamento do pedido #${orderId} aprovado! Agora vamos começar a preparar seu pedido.`,
+            preparing: `Olá ${customerName}! 👨‍🍳 Começamos a preparar seu pedido #${orderId}! Em breve estará pronto para entrega.`,
+            ready: `Olá ${customerName}! 📦 Seu pedido #${orderId} está pronto! Aguarde o entregador ou venha buscar.`,
+            en_route: `Olá ${customerName}! 🚚 Seu pedido #${orderId} saiu para entrega! O entregador chegará em breve.`,
+            delivered: `Olá ${customerName}! 🎉 Seu pedido #${orderId} foi entregue com sucesso! Obrigado pela preferência!`,
+            cancelled: `Olá ${customerName}. 😔 Infelizmente seu pedido #${orderId} foi cancelado. Entre em contato conosco para mais informações.`,
+            delivery_failed: `Olá ${customerName}. 📍 Não conseguimos entregar seu pedido #${orderId} no endereço informado. Vamos tentar novamente ou entrar em contato para reagendar.`
+        };
+        return messages[status] || `Olá ${customerName}! 📋 Status do seu pedido #${orderId} foi atualizado para: ${getStatusLabel(status)}`;
     };
 
     /**
