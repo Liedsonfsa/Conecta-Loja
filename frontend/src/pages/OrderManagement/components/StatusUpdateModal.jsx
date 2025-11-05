@@ -84,12 +84,15 @@ const StatusUpdateModal = ({ order, isOpen, onClose, onUpdateStatus }) => {
      * @type {Array<Object>} statusOptions
      */
     const statusOptions = [
-        { value: 'pending', label: 'Pendente' },
-        { value: 'preparing', label: 'Preparando' },
+        { value: 'received', label: 'Recebido' },
+        { value: 'pending', label: 'Aguardando Pagamento' },
+        { value: 'payment_approved', label: 'Pagamento Aprovado' },
+        { value: 'preparing', label: 'Em Preparo' },
         { value: 'ready', label: 'Pronto' },
-        { value: 'en_route', label: 'A Caminho' },
+        { value: 'en_route', label: 'Enviado para Entrega' },
         { value: 'delivered', label: 'Entregue' },
-        { value: 'cancelled', label: 'Cancelado' }
+        { value: 'cancelled', label: 'Cancelado' },
+        { value: 'delivery_failed', label: 'Tentativa de Entrega Falhada' }
     ];
 
     /**
@@ -103,7 +106,7 @@ const StatusUpdateModal = ({ order, isOpen, onClose, onUpdateStatus }) => {
         setLoading(true);
 
         try {
-            await onUpdateStatus(order?.id, {
+            await onUpdateStatus(order, {
                 status: selectedStatus,
                 note: note?.trim(),
                 notifyCustomer,
@@ -125,12 +128,15 @@ const StatusUpdateModal = ({ order, isOpen, onClose, onUpdateStatus }) => {
      */
     const getStatusMessage = (status) => {
         const messages = {
-            pending: 'Pedido recebido e aguardando confirmação',
-            preparing: 'Seu pedido está sendo preparado com carinho',
+            received: 'Pedido recém recebido na loja',
+            pending: 'Pedido aguardando confirmação do pagamento',
+            payment_approved: 'Pagamento confirmado, pronto para produção',
+            preparing: 'Pedido está sendo preparado com carinho',
             ready: 'Pedido pronto para retirada/entrega',
             en_route: 'Pedido saiu para entrega',
             delivered: 'Pedido entregue com sucesso',
-            cancelled: 'Pedido cancelado'
+            cancelled: 'Pedido foi cancelado',
+            delivery_failed: 'Tentativa de entrega não foi bem-sucedida'
         };
         return messages?.[status] || '';
     };

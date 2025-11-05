@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { OrderService } from '../services/orderService';
 import { OrderStatus } from '../generated/prisma';
 
+
 /**
  * @route GET /api/order/all
  * @desc Retorna todos os pedidos da loja (para funcionários/administradores)
