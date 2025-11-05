@@ -14,8 +14,9 @@ import React from 'react';
  * - Fallback para status desconhecidos
  *
  * Mapeamento de status e cores:
+ * - received (Recebido): Azul - Pedido recém recebido
  * - pending (Pendente): Amarelo - Aguardando confirmação
- * - preparing (Preparando): Azul - Em produção
+ * - preparing (Preparando): Ciano - Em produção
  * - ready (Pronto): Roxo - Pronto para entrega/retirada
  * - en_route (A Caminho): Laranja - Em trânsito
  * - delivered (Entregue): Verde - Concluído com sucesso
@@ -46,6 +47,11 @@ const OrderStatusBadge = ({ status, className = '' }) => {
      */
     const getStatusConfig = (status) => {
         switch (status) {
+            case 'received':
+                return {
+                    label: 'Recebido',
+                    className: 'bg-blue-100 text-blue-800 border-blue-200'
+                };
             case 'pending':
                 return {
                     label: 'Pendente',
@@ -54,7 +60,7 @@ const OrderStatusBadge = ({ status, className = '' }) => {
             case 'preparing':
                 return {
                     label: 'Preparando',
-                    className: 'bg-blue-100 text-blue-800 border-blue-200'
+                    className: 'bg-cyan-100 text-cyan-800 border-cyan-200'
                 };
             case 'ready':
                 return {

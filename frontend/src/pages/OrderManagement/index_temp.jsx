@@ -112,61 +112,35 @@ const OrderManagement = () => {
             const response = await orderService.getAllOrders();
             if (response.success) {
                 // Transforma os dados da API para o formato esperado pelo componente
-                const transformedOrders = response.orders.map(order => {
-                    // Mapeia os status do enum para os valores esperados pelo frontend
-                    const statusMapping = {
-                        'RECEBIDO': 'received',
-                        'AGUARDANDO_PAGAMENTO': 'pending',
-                        'PAGAMENTO_APROVADO': 'preparing',
-                        'PREPARO': 'preparing',
-                        'ENVIADO_PARA_ENTREGA': 'en_route',
-                        'ENTREGUE': 'delivered',
-                        'CANCELADO': 'cancelled',
-                        'TENTATIVA_ENTREGA_FALHADA': 'en_route'
-                    };
-
-                    // Calcula o total dos produtos
-                    const itemsTotal = order.produtos?.reduce((sum, p) =>
-                        sum + (Number(p.precoUnitario || 0) * Number(p.quantidade || 1)), 0
-                    ) || 0;
-
-                    const mappedStatus = statusMapping[order.status] || 'received';
-                    console.log('Order status mapping:', {
-                        originalStatus: order.status,
-                        mappedStatus: mappedStatus,
-                        orderId: order.numeroPedido || order.id
-                    });
-
-                    return {
-                        id: order.numeroPedido || order.id,
-                        customerName: order.usuario?.name || 'Cliente',
-                        customerPhone: order.endereco?.telefone || '',
-                        customerAddress: order.endereco ? `${order.endereco.rua}, ${order.endereco.numero} - ${order.endereco.bairro}, ${order.endereco.cidade} - ${order.endereco.estado}` : '',
-                        items: order.produtos?.map(p => ({
-                            name: p.produto?.nome || 'Produto',
-                            description: p.produto?.descricao || '',
-                            price: Number(p.precoUnitario || 0),
-                            quantity: Number(p.quantidade || 1),
-                            image: p.produto?.imagem || '',
-                            customizations: []
-                        })) || [],
-                        subtotal: itemsTotal,
-                        deliveryFee: 5.00, // Valor padrão, pode vir da API
-                        discount: 0,
-                        total: Number(order.precoTotal || itemsTotal),
-                        status: mappedStatus,
-                        createdAt: order.createdAt,
-                        specialInstructions: order.observacoes || '',
-                        paymentMethod: 'Cartão', // Valor padrão, pode vir da API
-                        isNew: order.status === 'RECEBIDO',
-                        itemCount: order.produtos?.length || 0,
-                        timeline: order.statusHistorico?.map(h => ({
-                            status: h.status,
-                            timestamp: h.createdAt,
-                            note: h.observacao || ''
-                        })) || []
-                    };
-                });
+                const transformedOrders = response.orders.map(order => ({
+                    id: order.numeroPedido || order.id,
+                    customerName: order.usuario?.name || 'Cliente',
+                    customerPhone: order.endereco?.telefone || '',
+                    customerAddress: order.endereco ? `${order.endereco.rua}, ${order.endereco.numero} - ${order.endereco.bairro}, ${order.endereco.cidade} - ${order.endereco.estado}` : '',
+                    items: order.produtos?.map(p => ({
+                        name: p.produto?.nome || 'Produto',
+                        description: p.produto?.descricao || '',
+                        price: p.precoUnitario || 0,
+                        quantity: p.quantidade || 1,
+                        image: p.produto?.imagem || '',
+                        customizations: []
+                    })) || [],
+                    subtotal: order.precoTotal || 0,
+                    deliveryFee: 5.00, // Valor padrão, pode vir da API
+                    discount: 0,
+                    total: order.precoTotal || 0,
+                    status: order.status?.toLowerCase() || 'received',
+                    createdAt: order.createdAt,
+                    specialInstructions: order.observacoes || '',
+                    paymentMethod: 'Cartão', // Valor padrão, pode vir da API
+                    isNew: order.status === 'RECEBIDO',
+                    itemCount: order.produtos?.length || 0,
+                    timeline: order.statusHistorico?.map(h => ({
+                        status: h.status,
+                        timestamp: h.createdAt,
+                        note: h.observacao || ''
+                    })) || []
+                }));
                 setOrders(transformedOrders);
             } else {
                 showNotification('Erro ao buscar pedidos', 'error');

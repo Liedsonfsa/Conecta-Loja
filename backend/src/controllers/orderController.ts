@@ -3,6 +3,28 @@ import { OrderService } from '../services/orderService';
 import { OrderStatus } from '../generated/prisma';
 
 /**
+ * @route GET /api/order/all
+ * @desc Retorna todos os pedidos da loja (para funcionários/administradores)
+ * @access Privado (funcionários/admins)
+ * @returns {success: boolean, orders: object[]} - Lista de todos os pedidos
+ */
+export const getAllOrders = async (req: Request, res: Response) => {
+    try {
+        const orders = await OrderService.getAllOrders();
+
+        res.status(200).json({
+            success: true,
+            orders
+        })
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Erro ao buscar pedidos"
+        });
+    }
+};
+
+/**
  * @route GET /api/order
  * @desc Retorna todos os pedidos de um usuário
  * @access Público (ou ajuste conforme regras de autenticação)
