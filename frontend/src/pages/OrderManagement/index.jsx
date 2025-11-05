@@ -135,18 +135,17 @@ const OrderManagement = () => {
                     return {
                         id: order.numeroPedido || order.id,
                         customerName: order.usuario?.name || 'Cliente',
-                        customerPhone: order.endereco?.telefone || '',
-                        customerAddress: order.endereco ? `${order.endereco.rua}, ${order.endereco.numero} - ${order.endereco.bairro}, ${order.endereco.cidade} - ${order.endereco.estado}` : '',
+                        customerPhone: order.usuario?.contact || '',
+                        customerAddress: order.endereco ? `${order.endereco.logradouro}, ${order.endereco.numero} - ${order.endereco.bairro}, ${order.endereco.cidade} - ${order.endereco.estado}` : '',
                         items: order.produtos?.map(p => ({
-                            name: p.produto?.nome || 'Produto',
-                            description: p.produto?.descricao || '',
+                            name: p.produto?.name || 'Produto',
+                            description: p.produto?.description || '',
                             price: Number(p.precoUnitario || 0),
                             quantity: Number(p.quantidade || 1),
-                            image: p.produto?.imagem || '',
+                            image: p.produto?.image || '',
                             customizations: []
                         })) || [],
                         subtotal: itemsTotal,
-                        deliveryFee: 5.00, // Valor padrão, pode vir da API
                         discount: 0,
                         total: Number(order.precoTotal || itemsTotal),
                         status: mappedStatus,

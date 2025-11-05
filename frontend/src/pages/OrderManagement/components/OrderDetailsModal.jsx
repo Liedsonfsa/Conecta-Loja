@@ -181,10 +181,6 @@ const OrderDetailsModal = ({ order, isOpen, onClose, onStatusUpdate, onContactCu
                                                 <span className="text-green-600">-{formatCurrency(order?.discount)}</span>
                                             </div>
                                         )}
-                                        <div className="flex justify-between">
-                                            <span className="text-muted-foreground">Taxa de Entrega</span>
-                                            <span className="text-foreground">{formatCurrency(order?.deliveryFee)}</span>
-                                        </div>
                                         <div className="border-t border-border pt-2">
                                             <div className="flex justify-between">
                                                 <span className="font-medium text-foreground">Total</span>
