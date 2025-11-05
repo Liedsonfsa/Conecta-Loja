@@ -43,82 +43,24 @@ const Reports = () => {
   const [loading, setLoading] = useState(false);
   const [reportData, setReportData] = useState(null);
 
-  /**
-   * Busca dados de relatórios do backend
-   */
+  
   const fetchReportData = async () => {
     setLoading(true);
     try {
-      // TODO: Implementar chamada real ao backend
-      // const response = await api.get('/api/reports', { params: { period: selectedPeriod } });
+      const url = new URL("http://localhost:8000/api/report");
+      url.searchParams.set("period", selectedPeriod);
+      if (selectedPeriod === "custom") {
+        url.searchParams.set("startDate", customDateRange.startDate);
+        url.searchParams.set("endDate", customDateRange.endDate);
+      }
 
-      // Mock data por enquanto
-      const mockData = {
-        summary: {
-          totalSales: 45678.9,
-          totalOrders: 324,
-          averageTicket: 140.99,
-          topProduct: "Pizza Margherita",
-          growthRate: 12.5,
-        },
-        salesByDay: [
-          { date: "01/10", sales: 1234.5, orders: 12 },
-          { date: "02/10", sales: 2345.6, orders: 18 },
-          { date: "03/10", sales: 1890.3, orders: 15 },
-          { date: "04/10", sales: 3456.7, orders: 25 },
-          { date: "05/10", sales: 2789.9, orders: 20 },
-          { date: "06/10", sales: 4123.4, orders: 28 },
-          { date: "07/10", sales: 3567.8, orders: 24 },
-        ],
-        topProducts: [
-          { id: 1, name: "Pizza Margherita", quantity: 85, revenue: 2975.0 },
-          {
-            id: 2,
-            name: "Hambúrguer Artesanal",
-            quantity: 72,
-            revenue: 2520.0,
-          },
-          { id: 3, name: "Refrigerante 2L", quantity: 120, revenue: 1200.0 },
-          { id: 4, name: "Batata Frita Grande", quantity: 65, revenue: 975.0 },
-          { id: 5, name: "Salada Caesar", quantity: 45, revenue: 1282.5 },
-        ],
-        categoryDistribution: [
-          { name: "Pizzas", value: 35, sales: 15987.0 },
-          { name: "Lanches", value: 28, sales: 12789.0 },
-          { name: "Bebidas", value: 20, sales: 9123.0 },
-          { name: "Sobremesas", value: 10, sales: 4567.0 },
-          { name: "Saladas", value: 7, sales: 3212.9 },
-        ],
-        peakHours: [
-          { hour: "08h", orders: 5, revenue: 234.5 },
-          { hour: "09h", orders: 8, revenue: 456.8 },
-          { hour: "10h", orders: 12, revenue: 678.9 },
-          { hour: "11h", orders: 25, revenue: 1234.5 },
-          { hour: "12h", orders: 42, revenue: 2345.6 },
-          { hour: "13h", orders: 38, revenue: 2156.3 },
-          { hour: "14h", orders: 18, revenue: 987.4 },
-          { hour: "15h", orders: 10, revenue: 567.2 },
-          { hour: "16h", orders: 8, revenue: 445.8 },
-          { hour: "17h", orders: 15, revenue: 789.5 },
-          { hour: "18h", orders: 35, revenue: 1890.3 },
-          { hour: "19h", orders: 45, revenue: 2567.8 },
-          { hour: "20h", orders: 38, revenue: 2234.6 },
-          { hour: "21h", orders: 22, revenue: 1345.9 },
-          { hour: "22h", orders: 12, revenue: 678.5 },
-          { hour: "23h", orders: 5, revenue: 289.4 },
-        ],
-        operational: {
-          activeCustomers: 1847,
-          averagePreparationTime: 18,
-          averageDeliveryTime: 32,
-          averageRating: 4.7,
-        },
-      };
-
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setReportData(mockData);
-    } catch (error) {
-      console.error("Erro ao buscar dados do relatório:", error);
+      const res = await fetch(url.toString());
+      const data = await res.json();
+      setReportData(data);
+      // alert(data);
+      // console.log(data);
+    } catch (err) {
+      console.error("Erro ao buscar relatórios:", err);
     } finally {
       setLoading(false);
     }
