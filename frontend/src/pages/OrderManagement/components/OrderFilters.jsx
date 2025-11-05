@@ -66,16 +66,19 @@ const OrderFilters = ({
                       }) => {
     /**
      * Opções disponíveis para filtro de status dos pedidos
+     * Baseado no enum OrderStatus do backend (schema.prisma)
      * @type {Array<Object>} statusOptions
      */
     const statusOptions = [
         { value: '', label: 'Todos os Status' },
-        { value: 'pending', label: 'Pendente' },
-        { value: 'preparing', label: 'Preparando' },
-        { value: 'ready', label: 'Pronto' },
-        { value: 'en_route', label: 'A Caminho' },
+        { value: 'received', label: 'Recebido' },
+        { value: 'pending', label: 'Aguardando Pagamento' },
+        { value: 'payment_approved', label: 'Pagamento Aprovado' },
+        { value: 'preparing', label: 'Em Preparo' },
+        { value: 'en_route', label: 'Enviado para Entrega' },
         { value: 'delivered', label: 'Entregue' },
-        { value: 'cancelled', label: 'Cancelado' }
+        { value: 'cancelled', label: 'Cancelado' },
+        { value: 'delivery_failed', label: 'Tentativa de Entrega Falhada' }
     ];
 
     /**

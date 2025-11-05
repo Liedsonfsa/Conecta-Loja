@@ -15,12 +15,14 @@ import React from 'react';
  *
  * Mapeamento de status e cores:
  * - received (Recebido): Azul - Pedido recém recebido
- * - pending (Pendente): Amarelo - Aguardando confirmação
- * - preparing (Preparando): Ciano - Em produção
+ * - pending (Aguardando Pagamento): Amarelo - Aguardando confirmação de pagamento
+ * - payment_approved (Pagamento Aprovado): Esmeralda - Pagamento confirmado
+ * - preparing (Em Preparo): Ciano - Em produção na cozinha
  * - ready (Pronto): Roxo - Pronto para entrega/retirada
- * - en_route (A Caminho): Laranja - Em trânsito
+ * - en_route (A Caminho): Laranja - Em trânsito com entregador
  * - delivered (Entregue): Verde - Concluído com sucesso
- * - cancelled (Cancelado): Vermelho - Cancelado
+ * - cancelled (Cancelado): Vermelho - Pedido cancelado
+ * - delivery_failed (Entrega Falhada): Vermelho escuro - Tentativa de entrega não realizada
  * - default (Desconhecido): Cinza - Status não identificado
  *
  * @component
@@ -54,12 +56,17 @@ const OrderStatusBadge = ({ status, className = '' }) => {
                 };
             case 'pending':
                 return {
-                    label: 'Pendente',
+                    label: 'Aguardando Pagamento',
                     className: 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                };
+            case 'payment_approved':
+                return {
+                    label: 'Pagamento Aprovado',
+                    className: 'bg-emerald-100 text-emerald-800 border-emerald-200'
                 };
             case 'preparing':
                 return {
-                    label: 'Preparando',
+                    label: 'Em Preparo',
                     className: 'bg-cyan-100 text-cyan-800 border-cyan-200'
                 };
             case 'ready':
@@ -81,6 +88,11 @@ const OrderStatusBadge = ({ status, className = '' }) => {
                 return {
                     label: 'Cancelado',
                     className: 'bg-red-100 text-red-800 border-red-200'
+                };
+            case 'delivery_failed':
+                return {
+                    label: 'Entrega Falhada',
+                    className: 'bg-red-100 text-red-700 border-red-300'
                 };
             default:
                 return {

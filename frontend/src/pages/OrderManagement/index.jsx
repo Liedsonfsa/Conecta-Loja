@@ -117,12 +117,12 @@ const OrderManagement = () => {
                     const statusMapping = {
                         'RECEBIDO': 'received',
                         'AGUARDANDO_PAGAMENTO': 'pending',
-                        'PAGAMENTO_APROVADO': 'preparing',
+                        'PAGAMENTO_APROVADO': 'payment_approved',
                         'PREPARO': 'preparing',
                         'ENVIADO_PARA_ENTREGA': 'en_route',
                         'ENTREGUE': 'delivered',
                         'CANCELADO': 'cancelled',
-                        'TENTATIVA_ENTREGA_FALHADA': 'en_route'
+                        'TENTATIVA_ENTREGA_FALHADA': 'delivery_failed'
                     };
 
                     // Calcula o total dos produtos
@@ -131,11 +131,6 @@ const OrderManagement = () => {
                     ) || 0;
 
                     const mappedStatus = statusMapping[order.status] || 'received';
-                    console.log('Order status mapping:', {
-                        originalStatus: order.status,
-                        mappedStatus: mappedStatus,
-                        orderId: order.numeroPedido || order.id
-                    });
 
                     return {
                         id: order.numeroPedido || order.id,
