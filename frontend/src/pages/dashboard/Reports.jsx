@@ -4,16 +4,9 @@
  * Tela dedicada para visualização de relatórios detalhados, gráficos
  * analíticos e estatísticas de gestão da loja.
  *
- * Funcionalidades:
- * - Filtros por período (hoje, semana, mês, ano, personalizado)
- * - Gráficos de vendas, produtos e categorias
- * - Estatísticas de performance
- * - Exportação de relatórios
- * - Consultas ao backend com dados reais
- *
  * @returns {JSX.Element} Página completa de relatórios
  */
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Header from "../../components/ui/Header";
 import Sidebar from "../../components/ui/Sidebar";
 import Button from "../../components/ui/ButtonDash";
@@ -33,6 +26,23 @@ import CategoryChart from "./components/CategoryChart";
 import PeakHoursChart from "./components/PeakHoursChart";
 import OperationalMetrics from "./components/OperationalMetrics";
 
+// Helper para carregar scripts dinamicamente (versão UMD)
+const loadScript = (src) => {
+  return new Promise((resolve, reject) => {
+    // Evita carregar o mesmo script várias vezes
+    if (document.querySelector(`script[src="${src}"]`)) {
+      return resolve();
+    }
+    const script = document.createElement("script");
+    script.src = src;
+    script.async = true;
+    script.onload = resolve;
+    script.onerror = (err) =>
+      reject(new Error(`Falha ao carregar o script: ${src}`));
+    document.body.appendChild(script);
+  });
+};
+
 const Reports = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState("today");
@@ -42,6 +52,8 @@ const Reports = () => {
   });
   const [loading, setLoading] = useState(false);
   const [reportData, setReportData] = useState(null);
+  const [isExporting, setIsExporting] = useState(false);
+  const reportContentRef = useRef(null);
 
   /**
    * Busca dados de relatórios do backend
@@ -136,15 +148,94 @@ const Reports = () => {
   };
 
   /**
-   * Exporta relatório
+   * Exporta relatório em PDF de forma estilizada (Versão UMD)
    */
-  const handleExportReport = () => {
-    // TODO: Implementar exportação de relatório (PDF ou CSV)
-    console.log("Exportando relatório...", {
-      period: selectedPeriod,
-      data: reportData,
-    });
-    alert("Funcionalidade de exportação será implementada em breve!");
+  const handleExportReport = async () => {
+    // 1. Verifica se o conteúdo de referência existe
+    if (!reportContentRef.current || !reportData) {
+      console.error("Referência do conteúdo ou dados não encontrados.");
+      return;
+    }
+
+    setIsExporting(true);
+
+    try {
+      // --- CORREÇÃO: Carregamento Dinâmico (via <script> UMD) ---
+      // Carrega as versões UMD que criam globais no 'window'
+      await Promise.all([
+        loadScript(
+          "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+        ),
+        loadScript(
+          "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
+        ),
+      ]);
+
+      // 2. Pega as bibliotecas a partir do 'window'
+      const { jsPDF } = window.jspdf;
+      const html2canvas = window.html2canvas;
+      // --- Fim da Correção ---
+
+      // 3. Usa html2canvas para capturar o elemento
+      const element = reportContentRef.current;
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+
+      // 4. Configura o jsPDF (A4, retrato, milímetros)
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      // 5. Pega as dimensões da página A4 e da imagem
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+
+      // Calcula a proporção para caber na página
+      const maxWidth = pdfWidth - 20; // 190mm
+      const maxHeight = pdfHeight - 40; // 257mm
+      const ratio = Math.min(maxWidth / imgWidth, maxHeight / imgHeight);
+      const imgFinalWidth = imgWidth * ratio;
+      const imgFinalHeight = imgHeight * ratio;
+
+      // Centraliza a imagem
+      const imgX = (pdfWidth - imgFinalWidth) / 2;
+      const imgY = 30; // Margem superior para o título
+
+      // 6. Adiciona o Título e Subtítulo
+      pdf.setFontSize(18);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("Relatório de Vendas e Estatísticas", pdfWidth / 2, 15, {
+        align: "center",
+      });
+
+      const periodLabel =
+        periodOptions.find((p) => p.value === selectedPeriod)?.label ||
+        "Período Personalizado";
+      pdf.setFontSize(12);
+      pdf.setFont("helvetica", "normal");
+      pdf.text(`Período: ${periodLabel}`, pdfWidth / 2, 22, {
+        align: "center",
+      });
+
+      // 7. Adiciona a imagem capturada ao PDF
+      pdf.addImage(imgData, "PNG", imgX, imgY, imgFinalWidth, imgFinalHeight);
+
+      // 8. Salva o arquivo
+      pdf.save(`relatorio_vendas_${selectedPeriod}.pdf`);
+    } catch (error) {
+      console.error("Erro ao exportar o PDF:", error);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const periodOptions = [
@@ -175,7 +266,7 @@ const Reports = () => {
           isSidebarCollapsed ? "lg:ml-16" : "lg:ml-60"
         }`}
       >
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6" ref={reportContentRef}>
           {/* Header Section */}
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
             <div>
@@ -202,8 +293,9 @@ const Reports = () => {
                 iconName="Download"
                 iconPosition="left"
                 onClick={handleExportReport}
+                disabled={isExporting || loading}
               >
-                Exportar Relatório
+                {isExporting ? "Exportando..." : "Exportar Relatório"}
               </Button>
             </div>
           </div>
