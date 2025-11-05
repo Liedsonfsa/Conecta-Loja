@@ -209,23 +209,47 @@ const OrderManagement = () => {
     });
 
     /**
-     * Dados de estatísticas dos pedidos para exibição nos cards
+     * Dados de estatísticas dos pedidos calculados dinamicamente
+     * Baseado nos pedidos carregados da API
      * @type {Object} stats
-     * @property {number} todayOrders - Número de pedidos hoje
-     * @property {number} todayOrdersChange - Variação percentual nos pedidos
-     * @property {number} pendingOrders - Pedidos pendentes
+     * @property {number} todayOrders - Número de pedidos criados hoje
+     * @property {number} todayOrdersChange - Variação percentual (placeholder)
+     * @property {number} pendingOrders - Pedidos aguardando pagamento
      * @property {number} preparingOrders - Pedidos em preparação
-     * @property {number} todayRevenue - Receita total do dia
-     * @property {number} todayRevenueChange - Variação percentual na receita
+     * @property {number} todayRevenue - Receita de pedidos entregues hoje
+     * @property {number} todayRevenueChange - Variação percentual (placeholder)
      */
-    const stats = {
-        todayOrders: 12,
-        todayOrdersChange: 15,
-        pendingOrders: 2,
-        preparingOrders: 1,
-        todayRevenue: 485.60,
-        todayRevenueChange: 8
-    };
+    const stats = React.useMemo(() => {
+        const today = new Date();
+        const todayString = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+
+        // Filtrar pedidos de hoje
+        const todayOrders = orders.filter(order => {
+            const orderDate = new Date(order.createdAt).toISOString().split('T')[0];
+            return orderDate === todayString;
+        });
+
+        // Contar pedidos por status
+        const pendingOrders = orders.filter(order => order.status === 'pending').length;
+        const preparingOrders = orders.filter(order => order.status === 'preparing').length;
+
+        // Calcular receita de hoje (pedidos entregues hoje)
+        const todayRevenue = orders
+            .filter(order => {
+                const orderDate = new Date(order.createdAt).toISOString().split('T')[0];
+                return orderDate === todayString && order.status === 'delivered';
+            })
+            .reduce((total, order) => total + (order.total || 0), 0);
+
+        return {
+            todayOrders: todayOrders.length,
+            todayOrdersChange: 0, // Placeholder - seria calculado comparando com dia anterior
+            pendingOrders,
+            preparingOrders,
+            todayRevenue,
+            todayRevenueChange: 0 // Placeholder - seria calculado comparando com dia anterior
+        };
+    }, [orders]);
 
     /**
      * Lista de pedidos filtrada e ordenada baseada nos filtros aplicados
