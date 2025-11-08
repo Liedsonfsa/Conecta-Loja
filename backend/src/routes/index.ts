@@ -25,6 +25,7 @@ import storeRoutes from './store';
 import profileRoutes from './profile';
 import cartRoutes from './cart';
 import orderRoutes from './order';
+import reportRoutes from './report';
 
 const router = Router();
 
@@ -39,5 +40,6 @@ router.use('/store', storeRoutes);
 router.use('/cart', cartRoutes);
 router.use('/profile', profileRoutes);
 router.use('/order', orderRoutes);
+router.use('/report', reportRoutes);
 
 export default router;
