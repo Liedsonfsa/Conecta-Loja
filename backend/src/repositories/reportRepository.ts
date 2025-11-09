@@ -109,6 +109,27 @@ export class ReportsRepository {
     }));
   }
 
+  static async getSalesByDay(start: Date, end: Date) {
+    const result = await prisma.$queryRawUnsafe<
+      { date: string; total_sales: number; total_orders: number }[]
+    >(`
+      SELECT
+        TO_CHAR(p."created_at", 'DD/MM') AS date,
+        SUM(p."precoTotal") AS total_sales,
+        COUNT(p.id) AS total_orders
+      FROM pedidos p
+      WHERE p."created_at" BETWEEN '${start.toISOString()}' AND '${end.toISOString()}'
+      AND p.status != 'CANCELADO'
+      GROUP BY 1
+      ORDER BY 1;
+    `);
+    return result.map((r) => ({
+      date: r.date,
+      sales: Number(r.total_sales),
+      orders: Number(r.total_orders),
+    }));
+  }
+
   static async getActiveCustomers(start: Date, end: Date) {
     const activeCustomers = await prisma.usuario.count();
 
