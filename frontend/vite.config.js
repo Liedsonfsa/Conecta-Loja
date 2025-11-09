@@ -1,35 +1,17 @@
-/**
- * Configuração do Vite para o projeto Conecta-Loja
- *
- * Esta configuração define:
- * - Plugins: React, TypeScript paths e component tagger
- * - Build: diretório de saída 'build' e limite de chunk
- * - Server: porta 4028, host 0.0.0.0, porta estrita
- */
-
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import tsconfigPaths from "vite-tsconfig-paths";
-import tagger from "@dhiwise/component-tagger";
-import { fileURLToPath, URL } from "node:url";
+import path from "path";
 
-// https://vitejs.dev/config/
 export default defineConfig({
-  // This changes the out put dir from dist to build
-  // comment this out if that isn't relevant for your project
-  build: {
-    outDir: "build",
-    chunkSizeWarningLimit: 2000,
-  },
-  plugins: [tsconfigPaths(), react(), tagger()],
+  plugins: [react()],
   resolve: {
     alias: {
-      "@": fileURLToPath(new URL("./src", import.meta.url)),
+      "@": path.resolve(__dirname, "./src"),
     },
   },
-  server: {
-    port: "4028",
-    host: "0.0.0.0",
-    strictPort: true,
+  test: {
+    globals: true,
+    environment: "jsdom",
+    setupFiles: ["./src/test/setup.js"],
   },
 });
