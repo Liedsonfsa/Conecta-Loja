@@ -251,11 +251,7 @@ export const clearCart = async (req: Request, res: Response) => {
 
     const result = await CartService.clearCart(usuarioId);
 
-    res.json({
-      success: true,
-      message: 'Carrinho limpo com sucesso',
-      ...result
-    });
+    res.json(result);
   } catch (error) {
     console.error('Erro ao limpar carrinho:', error);
 
@@ -296,11 +292,7 @@ export const deleteCart = async (req: Request, res: Response) => {
 
     const result = await CartService.deleteCart(usuarioId);
 
-    res.json({
-      success: true,
-      message: 'Carrinho removido com sucesso',
-      ...result
-    });
+    res.json(result);
   } catch (error) {
     console.error('Erro ao remover carrinho:', error);
 
