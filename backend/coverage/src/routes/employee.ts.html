@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/9</span>
+                <span class='fraction'>9/9</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/9</span>
+                <span class='fraction'>9/9</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -148,8 +148,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -157,16 +157,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -175,7 +166,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -184,7 +175,16 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -194,7 +194,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -203,9 +203,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
+<span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">/**
  * Definição das rotas relacionadas a funcionários
  *
  * Este arquivo configura as rotas específicas para operações
@@ -219,8 +219,8 @@
  * - PUT /api/employee/editar/:id - Atualiza funcionário existente
  * - DELETE /api/employee/:id - Remove funcionário
  */
-<span class="cstat-no" title="statement not covered" >import { Router } from 'express';</span>
-<span class="cstat-no" title="statement not covered" >import {</span>
+import { Router } from 'express';
+import {
     createEmployee,
     updateEmployee,
     getEmployeeById,
@@ -228,7 +228,7 @@
     deleteEmployee
 } from '../controllers/employeeController';
 &nbsp;
-const router = <span class="cstat-no" title="statement not covered" >Router();</span>
+const router = Router();
 &nbsp;
 /**
  * @route GET /api/employee
@@ -237,7 +237,7 @@ const router = <span class="cstat-no" title="statement not covered" >Router();</
  * @query {page?: number, limit?: number, search?: string}
  * @returns {employees: object[], pagination: object} - Lista de funcionários com metadados
  */
-<span class="cstat-no" title="statement not covered" >router.get('/', getAllEmployees);</span>
+router.get('/', getAllEmployees);
 &nbsp;
 /**
  * @route GET /api/employee/:id
@@ -246,7 +246,7 @@ const router = <span class="cstat-no" title="statement not covered" >Router();</
  * @param {id: number} - ID do funcionário
  * @returns {employee: object} - Dados do funcionário
  */
-<span class="cstat-no" title="statement not covered" >router.get('/:id', getEmployeeById);</span>
+router.get('/:id', getEmployeeById);
 &nbsp;
 /**
  * @route POST /api/employee/cadastrar
@@ -255,7 +255,7 @@ const router = <span class="cstat-no" title="statement not covered" >Router();</
  * @body {name: string, email: string, password: string, role: string, storeId: number}
  * @returns {employee: object} - Dados do funcionário criado (sem senha)
  */
-<span class="cstat-no" title="statement not covered" >router.post('/cadastrar', createEmployee);</span>
+router.post('/cadastrar', createEmployee);
 &nbsp;
 /**
  * @route PUT /api/employee/editar/:id
@@ -265,7 +265,7 @@ const router = <span class="cstat-no" title="statement not covered" >Router();</
  * @body {name?: string, email?: string, password?: string, role?: string, storeId?: number}
  * @returns {employee: object} - Dados do funcionário atualizado (sem senha)
  */
-<span class="cstat-no" title="statement not covered" >router.put('/editar/:id', updateEmployee);</span>
+router.put('/editar/:id', updateEmployee);
 &nbsp;
 /**
  * @route DELETE /api/employee/:id
@@ -274,16 +274,16 @@ const router = <span class="cstat-no" title="statement not covered" >Router();</
  * @param {id: number} - ID do funcionário a ser removido
  * @returns {success: boolean, message: string} - Confirmação de remoção
  */
-<span class="cstat-no" title="statement not covered" >router.delete('/:id', deleteEmployee);</span>
+router.delete('/:id', deleteEmployee);
 &nbsp;
-<span class="cstat-no" title="statement not covered" >export default router;</span></pre></td></tr></table></pre>
+export default router;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-11-09T11:50:44.208Z
+                at 2025-11-09T11:55:24.016Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

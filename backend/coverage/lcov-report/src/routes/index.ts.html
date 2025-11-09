@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/25</span>
+                <span class='fraction'>25/25</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/25</span>
+                <span class='fraction'>25/25</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -123,35 +123,35 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/**
+<span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">/**
  * Configuração das rotas principais da API
  *
  * Este arquivo agrupa e organiza todas as rotas da aplicação por domínio,
@@ -167,42 +167,42 @@
  * - /api/store/* - Operações relacionadas a loja
  * - /api/cart/* - Operações relacionadas ao carrinho de compras
  */
-<span class="cstat-no" title="statement not covered" >import { Router } from 'express';</span>
-<span class="cstat-no" title="statement not covered" >import userRoutes from './user';</span>
-<span class="cstat-no" title="statement not covered" >import employeeRoutes from './employee';</span>
-<span class="cstat-no" title="statement not covered" >import roleRoutes from './role';</span>
-<span class="cstat-no" title="statement not covered" >import authRoutes from './auth';</span>
-<span class="cstat-no" title="statement not covered" >import productRoutes from './product';</span>
-<span class="cstat-no" title="statement not covered" >import categoryRoutes from './category';</span>
-<span class="cstat-no" title="statement not covered" >import storeRoutes from './store';</span>
-<span class="cstat-no" title="statement not covered" >import profileRoutes from './profile';</span>
-<span class="cstat-no" title="statement not covered" >import cartRoutes from './cart';</span>
-<span class="cstat-no" title="statement not covered" >import orderRoutes from './order';</span>
-<span class="cstat-no" title="statement not covered" >import reportRoutes from './report';</span>
+import { Router } from 'express';
+import userRoutes from './user';
+import employeeRoutes from './employee';
+import roleRoutes from './role';
+import authRoutes from './auth';
+import productRoutes from './product';
+import categoryRoutes from './category';
+import storeRoutes from './store';
+import profileRoutes from './profile';
+import cartRoutes from './cart';
+import orderRoutes from './order';
+import reportRoutes from './report';
 &nbsp;
-const router = <span class="cstat-no" title="statement not covered" >Router();</span>
+const router = Router();
 &nbsp;
 // Montagem das rotas por domínio
-<span class="cstat-no" title="statement not covered" >router.use('/user', userRoutes);</span>
-<span class="cstat-no" title="statement not covered" >router.use('/employee', employeeRoutes);</span>
-<span class="cstat-no" title="statement not covered" >router.use('/role', roleRoutes);</span>
-<span class="cstat-no" title="statement not covered" >router.use('/auth', authRoutes);</span>
-<span class="cstat-no" title="statement not covered" >router.use('/product', productRoutes);</span>
-<span class="cstat-no" title="statement not covered" >router.use('/category', categoryRoutes);</span>
-<span class="cstat-no" title="statement not covered" >router.use('/store', storeRoutes);</span>
-<span class="cstat-no" title="statement not covered" >router.use('/cart', cartRoutes);</span>
-<span class="cstat-no" title="statement not covered" >router.use('/profile', profileRoutes);</span>
-<span class="cstat-no" title="statement not covered" >router.use('/order', orderRoutes);</span>
-<span class="cstat-no" title="statement not covered" >router.use('/report', reportRoutes);</span>
+router.use('/user', userRoutes);
+router.use('/employee', employeeRoutes);
+router.use('/role', roleRoutes);
+router.use('/auth', authRoutes);
+router.use('/product', productRoutes);
+router.use('/category', categoryRoutes);
+router.use('/store', storeRoutes);
+router.use('/cart', cartRoutes);
+router.use('/profile', profileRoutes);
+router.use('/order', orderRoutes);
+router.use('/report', reportRoutes);
 &nbsp;
-<span class="cstat-no" title="statement not covered" >export default router;</span></pre></td></tr></table></pre>
+export default router;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-11-09T11:50:44.043Z
+                at 2025-11-09T11:55:23.910Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

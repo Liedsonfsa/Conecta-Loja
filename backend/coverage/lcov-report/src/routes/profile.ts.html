@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/15</span>
+                <span class='fraction'>15/15</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/15</span>
+                <span class='fraction'>15/15</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -112,60 +112,60 @@
 <a name='L47'></a><a href='#L47'>47</a>
 <a name='L48'></a><a href='#L48'>48</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// Localização: backend/src/routes/profile.ts
+<span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">// Localização: backend/src/routes/profile.ts
 &nbsp;
-<span class="cstat-no" title="statement not covered" >import { Router } from 'express';</span>
+import { Router } from 'express';
 // Importa as funções do controller
-<span class="cstat-no" title="statement not covered" >import { getProfile, updateProfile, updatePersonalInfo } from '../controllers/userController';</span>
-<span class="cstat-no" title="statement not covered" >import { authenticateToken } from '../middlewares/authMiddleware';</span>
+import { getProfile, updateProfile, updatePersonalInfo } from '../controllers/userController';
+import { authenticateToken } from '../middlewares/authMiddleware';
 &nbsp;
 // Importações para endereços (vamos criar as funções do controller)
-<span class="cstat-no" title="statement not covered" >import {</span>
+import {
   getUserAddresses,
   getAddressById,
   createAddress,
@@ -174,44 +174,44 @@
   setAddressAsPrincipal
 } from '../controllers/addressController';
 &nbsp;
-const router = <span class="cstat-no" title="statement not covered" >Router();</span>
+const router = Router();
 &nbsp;
 // Define a rota GET /api/profile
-<span class="cstat-no" title="statement not covered" >router.get('/', authenticateToken, getProfile);</span>
+router.get('/', authenticateToken, getProfile);
 &nbsp;
 // Define a rota PUT /api/profile
-<span class="cstat-no" title="statement not covered" >router.put('/', authenticateToken, updateProfile);</span>
+router.put('/', authenticateToken, updateProfile);
 &nbsp;
 // Define a rota PUT /api/profile/personal-info
-<span class="cstat-no" title="statement not covered" >router.put('/personal-info', authenticateToken, updatePersonalInfo);</span>
+router.put('/personal-info', authenticateToken, updatePersonalInfo);
 &nbsp;
 // Rotas de endereços
 // GET /api/profile/addresses - Buscar todos os endereços do usuário
-<span class="cstat-no" title="statement not covered" >router.get('/addresses', authenticateToken, getUserAddresses);</span>
+router.get('/addresses', authenticateToken, getUserAddresses);
 &nbsp;
 // GET /api/profile/addresses/:id - Buscar endereço específico
-<span class="cstat-no" title="statement not covered" >router.get('/addresses/:id', authenticateToken, getAddressById);</span>
+router.get('/addresses/:id', authenticateToken, getAddressById);
 &nbsp;
 // POST /api/profile/addresses - Criar novo endereço
-<span class="cstat-no" title="statement not covered" >router.post('/addresses', authenticateToken, createAddress);</span>
+router.post('/addresses', authenticateToken, createAddress);
 &nbsp;
 // PUT /api/profile/addresses/:id - Atualizar endereço
-<span class="cstat-no" title="statement not covered" >router.put('/addresses/:id', authenticateToken, updateAddress);</span>
+router.put('/addresses/:id', authenticateToken, updateAddress);
 &nbsp;
 // DELETE /api/profile/addresses/:id - Remover endereço
-<span class="cstat-no" title="statement not covered" >router.delete('/addresses/:id', authenticateToken, deleteAddress);</span>
+router.delete('/addresses/:id', authenticateToken, deleteAddress);
 &nbsp;
 // PATCH /api/profile/addresses/:id/principal - Definir endereço como principal
-<span class="cstat-no" title="statement not covered" >router.patch('/addresses/:id/principal', authenticateToken, setAddressAsPrincipal);</span>
+router.patch('/addresses/:id/principal', authenticateToken, setAddressAsPrincipal);
 &nbsp;
-<span class="cstat-no" title="statement not covered" >export default router;</span></pre></td></tr></table></pre>
+export default router;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-11-09T11:50:44.043Z
+                at 2025-11-09T11:55:23.910Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
