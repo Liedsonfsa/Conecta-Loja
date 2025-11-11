@@ -3,7 +3,7 @@ import Button from '../../../components/ui/ButtonDash';
 import Icon from '../../../components/AppIcon';
 import Image from '../../../components/AppImage';
 import OrderStatusBadge from './OrderStatusBadge';
-import { formatCurrency, formatDateTime } from 'src/utils';
+import { formatCurrency, formatDateTime } from '@/utils';
 
 /**
  * OrderDetailsModal - Modal de detalhes completos do pedido

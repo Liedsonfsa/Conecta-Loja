@@ -1,6 +1,6 @@
 import React from 'react';
 //import Input from '../../../components/ui/Input';
-import { Input } from 'src/components/ui/input';
+import { Input } from '@/components/ui/input';
 import Select from '../../../components/ui/Select';
 import Button from '../../../components/ui/ButtonDash';
 

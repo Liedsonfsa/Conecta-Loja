@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Button from '../../../components/ui/ButtonDash';
 import Select from '../../../components/ui/Select';
-import {Input} from 'src/components/ui/input';
+import {Input} from '@/components/ui/input';
 import Icon from '../../../components/AppIcon';
 import OrderStatusBadge from './OrderStatusBadge';
 

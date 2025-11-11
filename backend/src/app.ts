@@ -29,9 +29,13 @@ app.use((req, res, next) => {
     next();
 });
 
-// Em produção, deve ser configurado para aceitar apenas origens específicas
+// Configuração CORS para desenvolvimento - aceita múltiplas origens
 app.use(cors({
-    origin: "http://localhost:4028",
+    origin: [
+        "http://localhost:4028",  // Porta anterior do frontend
+        "http://localhost:5173",  // Porta do Vite (desenvolvimento)
+        "http://172.20.0.3:5173"  // Rede interna do Docker
+    ],
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     allowedHeaders: "Content-Type, Authorization",
     credentials: true

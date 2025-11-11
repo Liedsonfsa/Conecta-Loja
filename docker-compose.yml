@@ -18,6 +18,54 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - conecta-loja-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: conecta-loja-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/prisma:/app/prisma
+      - ./backend/uploads:/app/uploads
+      - /app/node_modules
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres123@postgres:5432/conecta_loja
+      JWT_SECRET: your-jwt-secret-key-change-in-production
+      PORT: 8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - conecta-loja-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: conecta-loja-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/vite.config.js:/app/vite.config.js
+      - ./frontend/tailwind.config.js:/app/tailwind.config.js
+      - ./frontend/postcss.config.js:/app/postcss.config.js
+      - ./frontend/package.json:/app/package.json
+      - ./frontend/package-lock.json:/app/package-lock.json
+      - /app/node_modules
+    environment:
+      VITE_API_URL: http://localhost:8000
+    networks:
+      - conecta-loja-network
 
   prisma-studio:
     image: node:18-alpine
@@ -41,6 +89,12 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    networks:
+      - conecta-loja-network
+
+networks:
+  conecta-loja-network:
+    driver: bridge
 
 volumes:
   postgres_data:
