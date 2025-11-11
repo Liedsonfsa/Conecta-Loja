@@ -210,13 +210,13 @@ export class RoleService {
     try {
       const roles = await RoleRepository.findAllRoles({
         includeEmployees: true
-      });
+      }) as any[]; // Type assertion para incluir funcionarios
 
       const stats = {
         totalRoles: roles.length,
-        totalEmployees: roles.reduce((sum, role) => sum + role.funcionarios.length, 0),
-        rolesWithEmployees: roles.filter(role => role.funcionarios.length > 0).length,
-        rolesWithoutEmployees: roles.filter(role => role.funcionarios.length === 0).length,
+        totalEmployees: roles.reduce((sum, role) => sum + (role.funcionarios?.length || 0), 0),
+        rolesWithEmployees: roles.filter(role => (role.funcionarios?.length || 0) > 0).length,
+        rolesWithoutEmployees: roles.filter(role => (role.funcionarios?.length || 0) === 0).length,
       };
 
       return stats;

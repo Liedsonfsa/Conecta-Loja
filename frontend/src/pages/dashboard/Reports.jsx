@@ -345,21 +345,23 @@ const Reports = () => {
                 </CardContent>
               </Card>
 
-              {/* Peak Hours Chart */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Icon name="Clock" size={24} className="text-primary" />
-                    Horários de Pico
-                  </CardTitle>
-                  <CardDescription>
-                    Distribuição de pedidos ao longo do dia
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <PeakHoursChart data={reportData.peakHours} />
-                </CardContent>
-              </Card>
+              {/* Peak Hours Chart - Only show for today */}
+              {selectedPeriod === "today" && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Icon name="Clock" size={24} className="text-primary" />
+                      Horários de Pico
+                    </CardTitle>
+                    <CardDescription>
+                      Distribuição de pedidos ao longo do dia
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <PeakHoursChart data={reportData.peakHours} />
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Products and Categories Grid */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

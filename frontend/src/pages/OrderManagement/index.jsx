@@ -460,10 +460,10 @@ const OrderManagement = () => {
                 setOrders(prev => prev?.map(orderItem => {
                     if (orderItem?.id === order.id) {
                         const updatedOrder = {
-                            ...order,
+                            ...orderItem,
                             status: updateData?.status,
                             timeline: [
-                                ...order?.timeline,
+                                ...orderItem?.timeline,
                                 {
                                     status: getStatusLabel(updateData?.status),
                                     timestamp: updateData?.timestamp,
@@ -479,7 +479,7 @@ const OrderManagement = () => {
 
                         return updatedOrder;
                     }
-                    return order;
+                    return orderItem;
                 }));
 
                 showNotification('Status atualizado com sucesso!', 'success');

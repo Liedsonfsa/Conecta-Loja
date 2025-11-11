@@ -18,15 +18,16 @@ import {
 } from "recharts";
 import Button from "../../../components/ui/ButtonDash";
 
+// Função auxiliar para formatação de moeda (exportada para testes)
+export const formatCurrency = (value) => {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
+};
+
 const SalesChart = ({ data }) => {
   const [chartType, setChartType] = useState("bar");
-
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(value);
-  };
 
   const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {

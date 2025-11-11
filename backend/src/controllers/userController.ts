@@ -120,7 +120,7 @@ export const updatePersonalInfo = async (req: Request, res: Response) => {
                 id: updatedUser.id,
                 name: updatedUser.name,
                 email: updatedUser.email,
-                contact: updatedUser.contact || null // Funcionários podem não ter contact
+                contact: 'contact' in updatedUser ? updatedUser.contact : null // Funcionários podem não ter contact
             }
         });
     } catch (error) {

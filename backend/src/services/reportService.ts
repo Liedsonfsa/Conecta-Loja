@@ -31,6 +31,7 @@ export class ReportsService {
     const topProducts = await ReportsRepository.getTopProducts(start, end);
     const categoryDistribution = await ReportsRepository.getCategoryDistribution(start, end);
     const peakHours = await ReportsRepository.getPeakHours(start, end);
+    const salesByDay = await ReportsRepository.getSalesByDay(start, end);
     const activeCustomers = await ReportsRepository.getActiveCustomers(start, end);
 
     return {
@@ -41,6 +42,7 @@ export class ReportsService {
         growthRate: 0, // pode ser calculado futuramente
         topProduct: topProducts[0]?.name || "N/A",
       },
+      salesByDay,
       topProducts,
       categoryDistribution,
       peakHours,
