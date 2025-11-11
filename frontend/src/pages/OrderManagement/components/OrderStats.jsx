@@ -1,6 +1,6 @@
 import React from 'react';
 import Icon from '../../../components/AppIcon';
-import { formatCurrency } from 'src/utils';
+import { formatCurrency } from '@/utils';
 
 /**
  * OrderStats - Componente de exibição de estatísticas dos pedidos

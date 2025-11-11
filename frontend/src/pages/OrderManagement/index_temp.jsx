@@ -8,7 +8,7 @@ import OrderFilters from './components/OrderFilters';
 import OrderTable from './components/OrderTable';
 import OrderDetailsModal from './components/OrderDetailsModal';
 import StatusUpdateModal from './components/StatusUpdateModal';
-import { formatCurrency, debounce, exportToCSV } from 'src/utils';
+import { formatCurrency, debounce, exportToCSV } from '@/utils';
 import { orderService } from '../../api/orders';
 
 /**
