@@ -1,0 +1,25 @@
+app = "conecta-loja-frontend"
+primary_region = "gru"  # São Paulo, Brasil
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+
+[http_service]
+  internal_port = 80
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 256
+
+# URL da API do backend (será definida após deploy do backend)
+[env]
+  VITE_API_URL = "https://conecta-loja-backend.fly.dev"

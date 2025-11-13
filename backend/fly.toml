@@ -1,0 +1,30 @@
+app = "conecta-loja-backend"
+primary_region = "gru"  # São Paulo, Brasil
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "8080"
+  NODE_ENV = "production"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 512
+
+# Conexão com PostgreSQL (será criado separadamente)
+[env]
+  DATABASE_URL = "postgresql://conecta_loja_backend:<password>@conecta-loja-postgres.flycast:5432/conecta_loja_backend?sslmode=require"
+
+# JWT Secret (deve ser definido como secret no Fly.io)
+[secrets]
+  JWT_SECRET = "your-production-jwt-secret-here"
